@@ -27,8 +27,7 @@
 
     <script>
         const rssUrl = 'https://bwt.cbp.gov/api/bwtRss/CSV/-1/57,55/57,55,106';
-        const proxyUrl = 'https://api.allorigins.win/raw?url=';
-        const fetchUrl = proxyUrl + encodeURIComponent(rssUrl);
+        const fetchUrl = rssUrl;
 
         const dashboard = document.getElementById('dashboard');
         const loadingMessage = document.getElementById('loading');
