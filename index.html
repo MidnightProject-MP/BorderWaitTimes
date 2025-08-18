@@ -9,12 +9,12 @@
     <script>
         // The official CBP API URL is now used directly
         const apiUrl = 'https://bwt.cbp.gov/api/bwtRss/CSV/-1/57,55/57,55,106';
-        const fetchUrl = apiUrl; // We removed the proxy
+        const fetchUrl = apiUrl; // We are testing without a proxy
 
         const dashboard = document.getElementById('dashboard');
+        const loadingMessage = document.getElementById('loading');
 
         function getStatusColor(waitTime) {
-            // ... (rest of the function is the same)
             const minutes = parseInt(waitTime);
             if (isNaN(minutes)) return '';
             if (minutes <= 20) return 'status-green';
@@ -25,27 +25,45 @@
         fetch(fetchUrl)
             .then(response => response.ok ? response.text() : Promise.reject('Network response was not ok.'))
             .then(csvText => {
-                // ... (the entire data parsing and HTML building part is the same)
                 const data = {};
                 const rows = csvText.trim().split('\n');
+                
+                // Remove the first 4 rows of metadata from the CBP file
+                for (let i = 0; i < 4; i++) {
+                    rows.shift();
+                }
+                
                 const headers = rows.shift().split(',');
-                const portIndex = headers.indexOf('Port of Entry');
-                const laneIndex = headers.indexOf('Lane');
-                const waitTimeIndex = headers.indexOf('Average Wait Time');
-                const updatedIndex = headers.indexOf('Report Time');
+
+                // --- THIS IS THE CORRECTED PART ---
+                // Use the exact header names from the live data source
+                const portIndex = headers.indexOf('Port Name');
+                const laneIndex = headers.indexOf('Lane Name');
+                // Check for both passenger and commercial vehicle wait time headers
+                const passengerWaitIndex = headers.indexOf('Passenger Vehicle Lanes Wait Time');
+                const commercialWaitIndex = headers.indexOf('Commercial Vehicle Lanes Wait Time');
+                const updatedIndex = headers.indexOf('Date/Time');
+                // --- END OF CORRECTION ---
+
                 rows.forEach(rowText => {
                     const row = rowText.split(',');
                     const port = row[portIndex];
                     if (!data[port]) {
                         data[port] = [];
                     }
+
+                    // Determine which wait time column to use
+                    let waitTime = row[passengerWaitIndex] || row[commercialWaitIndex] || 'N/A';
+                    
                     data[port].push({
                         lane: row[laneIndex],
-                        waitTime: `${row[waitTimeIndex]} min`,
+                        waitTime: `${waitTime} min`,
                         lastUpdated: row[updatedIndex]
                     });
                 });
-                document.getElementById('loading').style.display = 'none';
+
+                if(loadingMessage) loadingMessage.style.display = 'none';
+
                 for (const portName in data) {
                     const lanes = data[portName];
                     let portHtml = `
@@ -66,8 +84,7 @@
                 }
             })
             .catch(error => {
-                // This .catch() block will now be triggered by the CORS error
-                document.getElementById('loading').textContent = 'Failed to load data. Check the console for errors.';
+                if(loadingMessage) loadingMessage.textContent = 'Failed to load data. This may be a CORS error. Check the console.';
                 console.error('Fetch Error:', error);
             });
     </script>
