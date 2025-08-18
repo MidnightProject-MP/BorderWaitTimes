@@ -3,60 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Sheet Data</title>
+    <title>Border Wait Times Dashboard</title>
     <style>
-        body { font-family: sans-serif; padding: 2em; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #dddddd; text-align: left; padding: 8px; }
-        thead { background-color: #f2f2f2; }
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background-color: #f0f2f5; margin: 0; }
+        .dashboard { max-width: 1200px; margin: auto; padding: 20px; }
+        .port-section { margin-bottom: 40px; }
+        .port-title { font-size: 2em; color: #1c2a38; margin-bottom: 20px; border-bottom: 3px solid #e0e0e0; padding-bottom: 10px; }
+        .card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .card { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 20px; border-left: 5px solid; }
+        .card h3 { margin-top: 0; font-size: 1.25em; color: #333; }
+        .card .wait-time { font-size: 3em; font-weight: 700; margin: 10px 0; }
+        .card .last-updated { font-size: 0.9em; color: #777; }
+        
+        /* Color Coding */
+        .status-green { border-left-color: #28a745; } /* Short Wait */
+        .status-yellow { border-left-color: #ffc107; } /* Moderate Wait */
+        .status-red { border-left-color: #dc3545; }   /* Long Wait */
     </style>
 </head>
 <body>
 
-    <h1>Data from My Google Sheet</h1>
-    <table id="data-table">
-        <thead></thead>
-        <tbody></tbody>
-    </table>
+    <div id="dashboard" class="dashboard">
+        <h1>Border Wait Times</h1>
+        </div>
 
     <script>
-        // 1. The URL of your published Google Sheet CSV
-        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQgwjy1utMHHfGJuV_y7dlp_vQvpXo7jvNZ2BPK65BR-KWTgnFNPIk73hiMmX42dJddm5g_QtuUJjRv/pub?gid=993792785&single=true&output=csv';
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQgwjy1utMHHfGJuV_y7dlp_vQvpXo7jvNZ2BPK65BR-KWTgnFNPIk73hiMmX42dJddm5g_QtuUJjRv/pub?gid=2146524467&single=true&output=csv';
+        const dashboard = document.getElementById('dashboard');
 
-        // 2. Reference to the HTML table elements
-        const table = document.getElementById('data-table');
-        const thead = table.querySelector('thead');
-        const tbody = table.querySelector('tbody');
+        function getStatusColor(waitTime) {
+            const minutes = parseInt(waitTime);
+            if (isNaN(minutes)) return ''; // No color if wait time is not a number
+            if (minutes <= 20) return 'status-green';
+            if (minutes <= 60) return 'status-yellow';
+            return 'status-red';
+        }
 
-        // 3. Fetch the data and build the table
         fetch(sheetUrl)
             .then(response => response.text())
             .then(csvText => {
-                // Split the CSV text into an array of rows
-                const rows = csvText.split('\n');
-                
-                // Extract the header row
+                const data = {};
+                const rows = csvText.trim().split('\n');
                 const headers = rows.shift().split(',');
 
-                // Build the table header
-                let headerHtml = '<tr>';
-                headers.forEach(header => {
-                    headerHtml += `<th>${header}</th>`;
-                });
-                headerHtml += '</tr>';
-                thead.innerHTML = headerHtml;
-
-                // Build the table body
-                let bodyHtml = '';
+                // Group data by Port
                 rows.forEach(rowText => {
-                    const cells = rowText.split(',');
-                    bodyHtml += '<tr>';
-                    cells.forEach(cell => {
-                        bodyHtml += `<td>${cell}</td>`;
+                    const row = rowText.split(',');
+                    const port = row[0];
+                    if (!data[port]) {
+                        data[port] = [];
+                    }
+                    data[port].push({
+                        lane: row[1],
+                        waitTime: row[2],
+                        lastUpdated: row[3]
                     });
-                    bodyHtml += '</tr>';
                 });
-                tbody.innerHTML = bodyHtml;
+
+                // Clear any "Loading..." text and build the HTML
+                dashboard.innerHTML = '<h1>Border Wait Times</h1>'; // Reset header
+
+                for (const portName in data) {
+                    const lanes = data[portName];
+                    let portHtml = `
+                        <section class="port-section">
+                            <h2 class="port-title">${portName}</h2>
+                            <div class="card-container">`;
+
+                    lanes.forEach(lane => {
+                        const colorClass = getStatusColor(lane.waitTime);
+                        portHtml += `
+                            <div class="card ${colorClass}">
+                                <h3>${lane.lane}</h3>
+                                <div class="wait-time">${lane.waitTime}</div>
+                                <div class="last-updated">Updated: ${lane.lastUpdated}</div>
+                            </div>`;
+                    });
+
+                    portHtml += `</div></section>`;
+                    dashboard.innerHTML += portHtml;
+                }
             });
     </script>
 
