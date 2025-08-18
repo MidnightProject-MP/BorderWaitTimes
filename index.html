@@ -10,12 +10,12 @@
         .port-section { margin-bottom: 40px; }
         .port-title { font-size: 2em; color: #1c2a38; margin-bottom: 20px; border-bottom: 3px solid #e0e0e0; padding-bottom: 10px; }
         .card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .card { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 20px; border-left: 5px solid #ccc; }
+        .card { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 20px; border-left: 5px solid #ccc; display: flex; flex-direction: column; }
         .card.status-closed { background-color: #f8f9fa; border-left-color: #6c757d; }
         .card.status-closed .wait-time { color: #6c757d; }
         .card h3 { margin-top: 0; font-size: 1.25em; color: #333; }
         .card .wait-time { font-size: 3em; font-weight: 700; margin: 10px 0; }
-        .card .lanes-open { font-size: 1em; color: #555; font-weight: 600; }
+        .card .lanes-open { font-size: 1em; color: #555; font-weight: 600; flex-grow: 1; }
         .card .last-updated { font-size: 0.9em; color: #777; margin-top: 15px; }
         .status-green { border-left-color: #28a745; }
         .status-yellow { border-left-color: #ffc107; }
@@ -35,6 +35,13 @@
         const dashboard = document.getElementById('dashboard');
         const loadingMessage = document.getElementById('loading');
 
+        /**
+         * Groups ports like "San Ysidro - PedWest" under the main "San Ysidro" name.
+         */
+        function normalizePortName(name) {
+            return name.split(' - ')[0];
+        }
+
         function getStatusColor(status, waitTime) {
             if (status !== 'Open') return 'status-closed';
             const minutes = parseInt(waitTime);
@@ -45,22 +52,51 @@
         }
 
         /**
-         * A more robust parser that extracts wait time, open lanes, and status
-         * for different categories (Passenger, Pedestrian) from the description text.
+         * A much smarter parser that extracts wait time, open lanes, status, and
+         * the specific update time for each individual lane.
          */
-        function parseDescription(description) {
+        function parseLanesFromDescription(description, originalPortName) {
             const allLanes = [];
             const categories = {
                 'Passenger Vehicles': ['General Lanes', 'Ready Lanes', 'SENTRI Lanes'],
-                'Pedestrian Lanes': ['General Lanes', 'Ready Lanes']
+                'Pedestrian Lanes': ['General Lanes', 'Ready Lanes'] 
             };
+            
+            // Handle the special case for PedWest
+            if (originalPortName.includes('PedWest')) {
+                const chunk = description.split('Pedestrian Lanes:')[1] || '';
+                const laneName = "Pedestrian West"; // Assign a unique name
+                
+                const waitRegex = /(\d+)\s+min delay/;
+                const lanesRegex = /(\d+)\s+lane\(s\)\s+open/;
+                const timeRegex = /At\s+([\d:]+\s*[ap]m\s*\w+)/;
 
+                let status = 'Pending', waitTime = 'N/A', lanesOpen = 'N/A', updateTime = '';
+
+                if (chunk.includes("Lanes Closed")) {
+                    status = 'Closed';
+                    lanesOpen = '0';
+                } else {
+                    const waitMatch = chunk.match(waitRegex);
+                    const lanesMatch = chunk.match(lanesRegex);
+                    const timeMatch = chunk.match(timeRegex);
+                    
+                    if (waitMatch) {
+                        status = 'Open';
+                        waitTime = waitMatch[1];
+                        lanesOpen = lanesMatch ? lanesMatch[1] : '?';
+                        updateTime = timeMatch ? timeMatch[0] : '';
+                    }
+                }
+                allLanes.push({ name: laneName, status, waitTime, lanesOpen, updateTime });
+                return allLanes;
+            }
+
+            // Standard parsing for all other ports
             for (const category in categories) {
                 if (!description.includes(category)) continue;
 
-                // Isolate the relevant part of the description text for this category
                 let chunk = description.split(category)[1] || '';
-                // Cut off the chunk at the start of the next category, if it exists
                 for (const nextCategory in categories) {
                     if (chunk.includes(nextCategory)) {
                         chunk = chunk.split(nextCategory)[0];
@@ -70,27 +106,31 @@
                 for (const laneType of categories[category]) {
                     if (!chunk.includes(laneType + ":")) continue;
 
-                    let status = 'Pending', waitTime = 'N/A', lanesOpen = 'N/A';
+                    let status = 'Pending', waitTime = 'N/A', lanesOpen = 'N/A', updateTime = '';
+                    const laneChunk = chunk.split(laneType + ":")[1] || '';
                     
-                    if (chunk.includes(laneType + ": Lanes Closed")) {
+                    const waitRegex = /(\d+)\s+min delay/;
+                    const lanesRegex = /(\d+)\s+lane\(s\)\s+open/;
+                    const timeRegex = /At\s+([\d:]+\s*[ap]m\s*\w+)/;
+
+                    if (laneChunk.includes("Lanes Closed")) {
                         status = 'Closed';
                         lanesOpen = '0';
                     } else {
-                        const waitRegex = new RegExp(laneType + ".*?(\\d+)\\s+min delay");
-                        const lanesRegex = new RegExp(laneType + ".*?(\\d+)\\s+lane\\(s\\)\\s+open");
-
-                        const waitMatch = chunk.match(waitRegex);
-                        const lanesMatch = chunk.match(lanesRegex);
+                        const waitMatch = laneChunk.match(waitRegex);
+                        const lanesMatch = laneChunk.match(lanesRegex);
+                        const timeMatch = laneChunk.match(timeRegex);
 
                         if (waitMatch) {
                             status = 'Open';
                             waitTime = waitMatch[1];
                             lanesOpen = lanesMatch ? lanesMatch[1] : '?';
+                            updateTime = timeMatch ? timeMatch[0] : '';
                         }
                     }
                     
                     const laneName = category.includes('Pedestrian') ? `Pedestrian ${laneType.replace(' Lanes', '')}` : laneType.replace(' Lanes', '');
-                    allLanes.push({ name: laneName, status, waitTime, lanesOpen });
+                    allLanes.push({ name: laneName, status, waitTime, lanesOpen, updateTime });
                 }
             }
             return allLanes;
@@ -105,16 +145,17 @@
                 const portData = {};
 
                 for (const item of items) {
-                    const portName = item.querySelector('title').textContent;
+                    const originalPortName = item.querySelector('title').textContent;
+                    const normalizedPortName = normalizePortName(originalPortName);
                     const description = item.querySelector('description').textContent;
-                    const pubDate = new Date(item.querySelector('pubDate').textContent).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-                    const parsedLanes = parseDescription(description);
+                    const parsedLanes = parseLanesFromDescription(description, originalPortName);
+                    
                     if (parsedLanes.length > 0) {
-                        portData[portName] = {
-                            lanes: parsedLanes,
-                            lastUpdated: pubDate
-                        };
+                        if (!portData[normalizedPortName]) {
+                            portData[normalizedPortName] = [];
+                        }
+                        portData[normalizedPortName].push(...parsedLanes);
                     }
                 }
                 
@@ -124,23 +165,24 @@
                 if (loadingMessage) loadingMessage.style.display = 'none';
 
                 for (const portName in portData) {
-                    const port = portData[portName];
+                    const lanes = portData[portName];
                     let portHtml = `
                         <section class="port-section">
                             <h2 class="port-title">${portName}</h2>
                             <div class="card-container">`;
 
-                    port.lanes.forEach(lane => {
+                    lanes.forEach(lane => {
                         const waitTimeDisplay = lane.status === 'Open' ? `${lane.waitTime} min` : lane.status;
                         const colorClass = getStatusColor(lane.status, lane.waitTime);
                         const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : `${lane.lanesOpen} lane(s) open`;
+                        const updatedDisplay = lane.updateTime ? `As of ${lane.updateTime}` : '';
 
                         portHtml += `
                             <div class="card ${colorClass}">
                                 <h3>${lane.name}</h3>
                                 <div class="wait-time">${waitTimeDisplay}</div>
                                 <div class="lanes-open">${lanesOpenDisplay}</div>
-                                <div class="last-updated">Updated: ${port.lastUpdated}</div>
+                                <div class="last-updated">${updatedDisplay}</div>
                             </div>`;
                     });
 
