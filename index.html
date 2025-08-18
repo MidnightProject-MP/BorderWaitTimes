@@ -1,23 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Border Wait Times</title>
+    <style>
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background-color: #f0f2f5; margin: 0; }
+        .dashboard { max-width: 1200px; margin: auto; padding: 20px; }
+        .port-section { margin-bottom: 40px; }
+        .port-title { font-size: 2em; color: #1c2a38; margin-bottom: 20px; border-bottom: 3px solid #e0e0e0; padding-bottom: 10px; }
+        .card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .card { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 20px; border-left: 5px solid #ccc; } /* Default border */
+        .card h3 { margin-top: 0; font-size: 1.25em; color: #333; }
+        .card .wait-time { font-size: 3em; font-weight: 700; margin: 10px 0; }
+        .card .last-updated { font-size: 0.9em; color: #777; }
+        .status-green { border-left-color: #28a745; }
+        .status-yellow { border-left-color: #ffc107; }
+        .status-red { border-left-color: #dc3545; }
+    </style>
+</head>
 <body>
     <div id="dashboard" class="dashboard">
         <h1>Live Border Wait Times</h1>
-        
-        <p id="loading">Loading data...</p>
-
+        <p id="loading">Loading live data from CBP...</p>
     </div>
-    
-    <script>
-        const apiUrl = 'https://bwt.cbp.gov/api/bwtRss/CSV/-1/57,55/57,55,106';
-        // Use the proxy for the live version, but you can comment it out for testing the CORS error
-        const proxyUrl = 'https://api.allorigins.win/raw?url='; 
-        //const fetchUrl = proxyUrl + encodeURIComponent(apiUrl);
-        const fetchUrl = apiUrl; // We removed the proxy
 
+    <script>
+        const rssUrl = 'https://bwt.cbp.gov/api/bwtRss/CSV/-1/57,55/57,55,106';
+        const proxyUrl = 'https://api.allorigins.win/raw?url=';
+        const fetchUrl = proxyUrl + encodeURIComponent(rssUrl);
 
         const dashboard = document.getElementById('dashboard');
         const loadingMessage = document.getElementById('loading');
 
-        // ... getStatusColor function remains the same ...
         function getStatusColor(waitTime) {
             const minutes = parseInt(waitTime);
             if (isNaN(minutes)) return '';
@@ -26,95 +41,90 @@
             return 'status-red';
         }
 
-        fetch(fetchUrl)
-            .then(response => response.ok ? response.text() : Promise.reject('Network response was not ok.'))
-            .then(csvText => {
-                // --- LOGGING STEP 1: See the raw data from the API ---
-                console.log("--- 1. Raw CSV Text Received ---");
-                console.log(csvText);
+        /**
+         * Parses a chunk of the description text for a specific category (e.g., "Passenger Vehicles").
+         * This is a JavaScript version of your Apps Script logic.
+         */
+        function parseCategoryChunk(dataChunk) {
+            const parsedLanes = [];
+            const laneTypes = ['General Lanes', 'Ready Lanes', 'SENTRI Lanes']; // Note: 'SENTRI' is all caps in the data
 
-                const data = {};
-                const rows = csvText.trim().split('\n');
-                
-                for (let i = 0; i < 4; i++) {
-                    rows.shift(); // Remove metadata
+            for (const laneType of laneTypes) {
+                if (!dataChunk.includes(laneType + ":")) continue;
+
+                let waitTime = 'N/A';
+                const waitRegex = new RegExp(laneType + ".*?(\\d+)\\s+minute delay");
+                const waitMatch = dataChunk.match(waitRegex);
+
+                if (dataChunk.includes(laneType + ": Lanes Closed")) {
+                    waitTime = 'Closed';
+                } else if (waitMatch) {
+                    waitTime = waitMatch[1];
                 }
                 
-                const headers = rows.shift().split(',');
+                parsedLanes.push({ lane: laneType.replace(' Lanes', ''), waitTime: waitTime });
+            }
+            return parsedLanes;
+        }
 
-                // --- LOGGING STEP 2: Check if the headers are what you expect ---
-                console.log("--- 2. Parsed Headers ---");
-                console.log(headers);
+        fetch(fetchUrl)
+            .then(response => response.ok ? response.text() : Promise.reject('Network response was not ok.'))
+            .then(xmlText => {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+                const items = xmlDoc.getElementsByTagName('item');
+                const portData = {};
 
-                const portIndex = headers.indexOf('Port Name');
-                const laneIndex = headers.indexOf('Lane Name');
-                const passengerWaitIndex = headers.indexOf('Passenger Vehicle Lanes Wait Time');
-                const commercialWaitIndex = headers.indexOf('Commercial Vehicle Lanes Wait Time');
-                const updatedIndex = headers.indexOf('Date/Time');
+                for (const item of items) {
+                    const portName = item.querySelector('title').textContent;
+                    const description = item.querySelector('description').textContent;
+                    const pubDate = new Date(item.querySelector('pubDate').textContent).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-                // --- LOGGING STEP 3: See which column indexes were found ---
-                // If any of these are -1, it means the header name is wrong.
-                console.log("--- 3. Found Header Indexes ---");
-                console.log({ portIndex, laneIndex, passengerWaitIndex, commercialWaitIndex, updatedIndex });
+                    if (!portData[portName]) {
+                        portData[portName] = [];
+                    }
 
-                rows.forEach((rowText, i) => {
-                    const row = rowText.split(',');
+                    // Extract data for different categories from the description
+                    const passengerChunk = description.split('Pedestrian Lanes:')[0];
+                    const allLanes = parseCategoryChunk(passengerChunk);
                     
-                    // --- LOGGING STEP 4: Look at the first row of data ---
-                    if (i === 0) {
-                        console.log("--- 4. First Data Row ---");
-                        console.log(row);
-                    }
+                    allLanes.forEach(laneInfo => {
+                        portData[portName].push({
+                            ...laneInfo,
+                            lastUpdated: pubDate
+                        });
+                    });
+                }
 
-                    const port = row[portIndex];
-                    if (!port) return; // Skip if port name is missing
+                // --- Build the HTML ---
+                if (loadingMessage) loadingMessage.style.display = 'none';
 
-                    if (!data[port]) {
-                        data[port] = [];
-                    }
-
-                    let waitTime = row[passengerWaitIndex] || row[commercialWaitIndex] || 'N/A';
-                    
-                    const laneData = {
-                        lane: row[laneIndex],
-                        waitTime: `${waitTime} min`,
-                        lastUpdated: row[updatedIndex]
-                    };
-
-                    // --- LOGGING STEP 5: See the final object before it's used ---
-                    if (i === 0) {
-                        console.log("--- 5. First Parsed Lane Object ---");
-                        console.log(laneData);
-                    }
-
-                    data[port].push(laneData);
-                });
-
-                if(loadingMessage) loadingMessage.style.display = 'none';
-
-                // ... The HTML-building part remains the same ...
-                for (const portName in data) {
-                    const lanes = data[portName];
+                for (const portName in portData) {
+                    const lanes = portData[portName];
                     let portHtml = `
                         <section class="port-section">
                             <h2 class="port-title">${portName}</h2>
                             <div class="card-container">`;
+
                     lanes.forEach(lane => {
+                        const waitTimeDisplay = isNaN(parseInt(lane.waitTime)) ? lane.waitTime : `${lane.waitTime} min`;
                         const colorClass = getStatusColor(lane.waitTime);
                         portHtml += `
                             <div class="card ${colorClass}">
                                 <h3>${lane.lane}</h3>
-                                <div class="wait-time">${lane.waitTime}</div>
+                                <div class="wait-time">${waitTimeDisplay}</div>
                                 <div class="last-updated">Updated: ${lane.lastUpdated}</div>
                             </div>`;
                     });
+
                     portHtml += `</div></section>`;
                     dashboard.innerHTML += portHtml;
                 }
             })
             .catch(error => {
-                if(loadingMessage) loadingMessage.textContent = 'Failed to load data. Check the console for errors.';
+                if(loadingMessage) loadingMessage.textContent = 'Failed to load data. The API or proxy may be down.';
                 console.error('Fetch Error:', error);
             });
     </script>
 </body>
+</html>
