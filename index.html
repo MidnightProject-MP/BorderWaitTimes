@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sheet Data</title>
+    <style>
+        body { font-family: sans-serif; padding: 2em; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #dddddd; text-align: left; padding: 8px; }
+        thead { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+    <h1>Data from My Google Sheet</h1>
+    <table id="data-table">
+        <thead></thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        // 1. The URL of your published Google Sheet CSV
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQgwjy1utMHHfGJuV_y7dlp_vQvpXo7jvNZ2BPK65BR-KWTgnFNPIk73hiMmX42dJddm5g_QtuUJjRv/pub?gid=993792785&single=true&output=csv';
+
+        // 2. Reference to the HTML table elements
+        const table = document.getElementById('data-table');
+        const thead = table.querySelector('thead');
+        const tbody = table.querySelector('tbody');
+
+        // 3. Fetch the data and build the table
+        fetch(sheetUrl)
+            .then(response => response.text())
+            .then(csvText => {
+                // Split the CSV text into an array of rows
+                const rows = csvText.split('\n');
+                
+                // Extract the header row
+                const headers = rows.shift().split(',');
+
+                // Build the table header
+                let headerHtml = '<tr>';
+                headers.forEach(header => {
+                    headerHtml += `<th>${header}</th>`;
+                });
+                headerHtml += '</tr>';
+                thead.innerHTML = headerHtml;
+
+                // Build the table body
+                let bodyHtml = '';
+                rows.forEach(rowText => {
+                    const cells = rowText.split(',');
+                    bodyHtml += '<tr>';
+                    cells.forEach(cell => {
+                        bodyHtml += `<td>${cell}</td>`;
+                    });
+                    bodyHtml += '</tr>';
+                });
+                tbody.innerHTML = bodyHtml;
+            });
+    </script>
+
+</body>
+</html>
