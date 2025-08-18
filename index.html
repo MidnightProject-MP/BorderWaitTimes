@@ -1,65 +1,74 @@
-<script>
-    // The official CBP API URL is now used directly
-    const apiUrl = 'https://bwt.cbp.gov/api/bwtRss/CSV/-1/57,55/57,55,106';
-    const fetchUrl = apiUrl; // We removed the proxy
+<body>
+    <div id="dashboard" class="dashboard">
+        <h1>Live Border Wait Times</h1>
+        
+        <p id="loading">Loading data...</p>
 
-    const dashboard = document.getElementById('dashboard');
+    </div>
+    
+    <script>
+        // The official CBP API URL is now used directly
+        const apiUrl = 'https://bwt.cbp.gov/api/bwtRss/CSV/-1/57,55/57,55,106';
+        const fetchUrl = apiUrl; // We removed the proxy
 
-    function getStatusColor(waitTime) {
-        // ... (rest of the function is the same)
-        const minutes = parseInt(waitTime);
-        if (isNaN(minutes)) return '';
-        if (minutes <= 20) return 'status-green';
-        if (minutes <= 60) return 'status-yellow';
-        return 'status-red';
-    }
+        const dashboard = document.getElementById('dashboard');
 
-    fetch(fetchUrl)
-        .then(response => response.ok ? response.text() : Promise.reject('Network response was not ok.'))
-        .then(csvText => {
-            // ... (the entire data parsing and HTML building part is the same)
-            const data = {};
-            const rows = csvText.trim().split('\n');
-            const headers = rows.shift().split(',');
-            const portIndex = headers.indexOf('Port of Entry');
-            const laneIndex = headers.indexOf('Lane');
-            const waitTimeIndex = headers.indexOf('Average Wait Time');
-            const updatedIndex = headers.indexOf('Report Time');
-            rows.forEach(rowText => {
-                const row = rowText.split(',');
-                const port = row[portIndex];
-                if (!data[port]) {
-                    data[port] = [];
+        function getStatusColor(waitTime) {
+            // ... (rest of the function is the same)
+            const minutes = parseInt(waitTime);
+            if (isNaN(minutes)) return '';
+            if (minutes <= 20) return 'status-green';
+            if (minutes <= 60) return 'status-yellow';
+            return 'status-red';
+        }
+
+        fetch(fetchUrl)
+            .then(response => response.ok ? response.text() : Promise.reject('Network response was not ok.'))
+            .then(csvText => {
+                // ... (the entire data parsing and HTML building part is the same)
+                const data = {};
+                const rows = csvText.trim().split('\n');
+                const headers = rows.shift().split(',');
+                const portIndex = headers.indexOf('Port of Entry');
+                const laneIndex = headers.indexOf('Lane');
+                const waitTimeIndex = headers.indexOf('Average Wait Time');
+                const updatedIndex = headers.indexOf('Report Time');
+                rows.forEach(rowText => {
+                    const row = rowText.split(',');
+                    const port = row[portIndex];
+                    if (!data[port]) {
+                        data[port] = [];
+                    }
+                    data[port].push({
+                        lane: row[laneIndex],
+                        waitTime: `${row[waitTimeIndex]} min`,
+                        lastUpdated: row[updatedIndex]
+                    });
+                });
+                document.getElementById('loading').style.display = 'none';
+                for (const portName in data) {
+                    const lanes = data[portName];
+                    let portHtml = `
+                        <section class="port-section">
+                            <h2 class="port-title">${portName}</h2>
+                            <div class="card-container">`;
+                    lanes.forEach(lane => {
+                        const colorClass = getStatusColor(lane.waitTime);
+                        portHtml += `
+                            <div class="card ${colorClass}">
+                                <h3>${lane.lane}</h3>
+                                <div class="wait-time">${lane.waitTime}</div>
+                                <div class="last-updated">Updated: ${lane.lastUpdated}</div>
+                            </div>`;
+                    });
+                    portHtml += `</div></section>`;
+                    dashboard.innerHTML += portHtml;
                 }
-                data[port].push({
-                    lane: row[laneIndex],
-                    waitTime: `${row[waitTimeIndex]} min`,
-                    lastUpdated: row[updatedIndex]
-                });
+            })
+            .catch(error => {
+                // This .catch() block will now be triggered by the CORS error
+                document.getElementById('loading').textContent = 'Failed to load data. Check the console for errors.';
+                console.error('Fetch Error:', error);
             });
-            document.getElementById('loading').style.display = 'none';
-            for (const portName in data) {
-                const lanes = data[portName];
-                let portHtml = `
-                    <section class="port-section">
-                        <h2 class="port-title">${portName}</h2>
-                        <div class="card-container">`;
-                lanes.forEach(lane => {
-                    const colorClass = getStatusColor(lane.waitTime);
-                    portHtml += `
-                        <div class="card ${colorClass}">
-                            <h3>${lane.lane}</h3>
-                            <div class="wait-time">${lane.waitTime}</div>
-                            <div class="last-updated">Updated: ${lane.lastUpdated}</div>
-                        </div>`;
-                });
-                portHtml += `</div></section>`;
-                dashboard.innerHTML += portHtml;
-            }
-        })
-        .catch(error => {
-            // This .catch() block will now be triggered by the CORS error
-            document.getElementById('loading').textContent = 'Failed to load data. Check the console for errors.';
-            console.error('Fetch Error:', error);
-        });
-</script>
+    </script>
+</body>
