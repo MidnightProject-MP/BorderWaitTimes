@@ -10,10 +10,13 @@
         .port-section { margin-bottom: 40px; }
         .port-title { font-size: 2em; color: #1c2a38; margin-bottom: 20px; border-bottom: 3px solid #e0e0e0; padding-bottom: 10px; }
         .card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .card { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 20px; border-left: 5px solid #ccc; } /* Default border */
+        .card { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 20px; border-left: 5px solid #ccc; }
+        .card.status-closed { background-color: #f8f9fa; border-left-color: #6c757d; }
+        .card.status-closed .wait-time { color: #6c757d; }
         .card h3 { margin-top: 0; font-size: 1.25em; color: #333; }
         .card .wait-time { font-size: 3em; font-weight: 700; margin: 10px 0; }
-        .card .last-updated { font-size: 0.9em; color: #777; }
+        .card .lanes-open { font-size: 1em; color: #555; font-weight: 600; }
+        .card .last-updated { font-size: 0.9em; color: #777; margin-top: 15px; }
         .status-green { border-left-color: #28a745; }
         .status-yellow { border-left-color: #ffc107; }
         .status-red { border-left-color: #dc3545; }
@@ -27,12 +30,13 @@
 
     <script>
         const rssUrl = 'https://bwt.cbp.gov/api/bwtRss/CSV/-1/57,55/57,55,106';
-        const fetchUrl = rssUrl;
+        const fetchUrl = rssUrl; // No proxy needed
 
         const dashboard = document.getElementById('dashboard');
         const loadingMessage = document.getElementById('loading');
 
-        function getStatusColor(waitTime) {
+        function getStatusColor(status, waitTime) {
+            if (status !== 'Open') return 'status-closed';
             const minutes = parseInt(waitTime);
             if (isNaN(minutes)) return '';
             if (minutes <= 20) return 'status-green';
@@ -41,29 +45,55 @@
         }
 
         /**
-         * Parses a chunk of the description text for a specific category (e.g., "Passenger Vehicles").
-         * This is a JavaScript version of your Apps Script logic.
+         * A more robust parser that extracts wait time, open lanes, and status
+         * for different categories (Passenger, Pedestrian) from the description text.
          */
-        function parseCategoryChunk(dataChunk) {
-            const parsedLanes = [];
-            const laneTypes = ['General Lanes', 'Ready Lanes', 'SENTRI Lanes']; // Note: 'SENTRI' is all caps in the data
+        function parseDescription(description) {
+            const allLanes = [];
+            const categories = {
+                'Passenger Vehicles': ['General Lanes', 'Ready Lanes', 'SENTRI Lanes'],
+                'Pedestrian Lanes': ['General Lanes', 'Ready Lanes']
+            };
 
-            for (const laneType of laneTypes) {
-                if (!dataChunk.includes(laneType + ":")) continue;
+            for (const category in categories) {
+                if (!description.includes(category)) continue;
 
-                let waitTime = 'N/A';
-                const waitRegex = new RegExp(laneType + ".*?(\\d+)\\s+minute delay");
-                const waitMatch = dataChunk.match(waitRegex);
-
-                if (dataChunk.includes(laneType + ": Lanes Closed")) {
-                    waitTime = 'Closed';
-                } else if (waitMatch) {
-                    waitTime = waitMatch[1];
+                // Isolate the relevant part of the description text for this category
+                let chunk = description.split(category)[1] || '';
+                // Cut off the chunk at the start of the next category, if it exists
+                for (const nextCategory in categories) {
+                    if (chunk.includes(nextCategory)) {
+                        chunk = chunk.split(nextCategory)[0];
+                    }
                 }
-                
-                parsedLanes.push({ lane: laneType.replace(' Lanes', ''), waitTime: waitTime });
+
+                for (const laneType of categories[category]) {
+                    if (!chunk.includes(laneType + ":")) continue;
+
+                    let status = 'Pending', waitTime = 'N/A', lanesOpen = 'N/A';
+                    
+                    if (chunk.includes(laneType + ": Lanes Closed")) {
+                        status = 'Closed';
+                        lanesOpen = '0';
+                    } else {
+                        const waitRegex = new RegExp(laneType + ".*?(\\d+)\\s+min delay");
+                        const lanesRegex = new RegExp(laneType + ".*?(\\d+)\\s+lane\\(s\\)\\s+open");
+
+                        const waitMatch = chunk.match(waitRegex);
+                        const lanesMatch = chunk.match(lanesRegex);
+
+                        if (waitMatch) {
+                            status = 'Open';
+                            waitTime = waitMatch[1];
+                            lanesOpen = lanesMatch ? lanesMatch[1] : '?';
+                        }
+                    }
+                    
+                    const laneName = category.includes('Pedestrian') ? `Pedestrian ${laneType.replace(' Lanes', '')}` : laneType.replace(' Lanes', '');
+                    allLanes.push({ name: laneName, status, waitTime, lanesOpen });
+                }
             }
-            return parsedLanes;
+            return allLanes;
         }
 
         fetch(fetchUrl)
@@ -79,40 +109,38 @@
                     const description = item.querySelector('description').textContent;
                     const pubDate = new Date(item.querySelector('pubDate').textContent).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-                    if (!portData[portName]) {
-                        portData[portName] = [];
-                    }
-
-                    // Extract data for different categories from the description
-                    const passengerChunk = description.split('Pedestrian Lanes:')[0];
-                    const allLanes = parseCategoryChunk(passengerChunk);
-                    
-                    allLanes.forEach(laneInfo => {
-                        portData[portName].push({
-                            ...laneInfo,
+                    const parsedLanes = parseDescription(description);
+                    if (parsedLanes.length > 0) {
+                        portData[portName] = {
+                            lanes: parsedLanes,
                             lastUpdated: pubDate
-                        });
-                    });
+                        };
+                    }
                 }
+                
+                console.log("--- Data Fetch Successful ---");
+                console.log("Final structured data object:", portData);
 
-                // --- Build the HTML ---
                 if (loadingMessage) loadingMessage.style.display = 'none';
 
                 for (const portName in portData) {
-                    const lanes = portData[portName];
+                    const port = portData[portName];
                     let portHtml = `
                         <section class="port-section">
                             <h2 class="port-title">${portName}</h2>
                             <div class="card-container">`;
 
-                    lanes.forEach(lane => {
-                        const waitTimeDisplay = isNaN(parseInt(lane.waitTime)) ? lane.waitTime : `${lane.waitTime} min`;
-                        const colorClass = getStatusColor(lane.waitTime);
+                    port.lanes.forEach(lane => {
+                        const waitTimeDisplay = lane.status === 'Open' ? `${lane.waitTime} min` : lane.status;
+                        const colorClass = getStatusColor(lane.status, lane.waitTime);
+                        const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : `${lane.lanesOpen} lane(s) open`;
+
                         portHtml += `
                             <div class="card ${colorClass}">
-                                <h3>${lane.lane}</h3>
+                                <h3>${lane.name}</h3>
                                 <div class="wait-time">${waitTimeDisplay}</div>
-                                <div class="last-updated">Updated: ${lane.lastUpdated}</div>
+                                <div class="lanes-open">${lanesOpenDisplay}</div>
+                                <div class="last-updated">Updated: ${port.lastUpdated}</div>
                             </div>`;
                     });
 
@@ -121,7 +149,7 @@
                 }
             })
             .catch(error => {
-                if(loadingMessage) loadingMessage.textContent = 'Failed to load data. The API or proxy may be down.';
+                if(loadingMessage) loadingMessage.textContent = 'Failed to load data. The API may be down.';
                 console.error('Fetch Error:', error);
             });
     </script>
