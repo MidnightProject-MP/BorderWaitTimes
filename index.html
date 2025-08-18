@@ -1,103 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Border Wait Times</title>
-    <style>
-        body { font-family: system-ui, sans-serif; background-color: #f0f2f5; margin: 0; }
-        .dashboard { max-width: 1200px; margin: auto; padding: 20px; }
-        .port-section { margin-bottom: 40px; }
-        .port-title { font-size: 2em; color: #1c2a38; margin-bottom: 20px; border-bottom: 3px solid #e0e0e0; padding-bottom: 10px; }
-        .card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .card { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 20px; border-left: 5px solid; }
-        .card h3 { margin-top: 0; font-size: 1.25em; color: #333; }
-        .card .wait-time { font-size: 3em; font-weight: 700; margin: 10px 0; }
-        .card .last-updated { font-size: 0.9em; color: #777; }
-        .status-green { border-left-color: #28a745; }
-        .status-yellow { border-left-color: #ffc107; }
-        .status-red { border-left-color: #dc3545; }
-    </style>
-</head>
-<body>
-    <div id="dashboard" class="dashboard">
-        <h1>Live Border Wait Times</h1>
-        <p id="loading">Loading data...</p>
-    </div>
+<script>
+    // The official CBP API URL is now used directly
+    const apiUrl = 'https://bwt.cbp.gov/api/bwtRss/CSV/-1/57,55/57,55,106';
+    const fetchUrl = apiUrl; // We removed the proxy
 
-    <script>
-        // The official CBP API URL
-        const apiUrl = 'https://bwt.cbp.gov/api/bwtRss/CSV/-1/57,55/57,55,106';
-        
-        // Prepend a free CORS proxy to avoid browser errors
-        const proxyUrl = 'https://cors-anywhere.herokuapp.com/'; // A popular free proxy
-        const fetchUrl = proxyUrl + apiUrl;
+    const dashboard = document.getElementById('dashboard');
 
-        const dashboard = document.getElementById('dashboard');
+    function getStatusColor(waitTime) {
+        // ... (rest of the function is the same)
+        const minutes = parseInt(waitTime);
+        if (isNaN(minutes)) return '';
+        if (minutes <= 20) return 'status-green';
+        if (minutes <= 60) return 'status-yellow';
+        return 'status-red';
+    }
 
-        function getStatusColor(waitTime) {
-            const minutes = parseInt(waitTime);
-            if (isNaN(minutes)) return '';
-            if (minutes <= 20) return 'status-green';
-            if (minutes <= 60) return 'status-yellow';
-            return 'status-red';
-        }
-
-        fetch(fetchUrl)
-            .then(response => response.ok ? response.text() : Promise.reject('Network response was not ok.'))
-            .then(csvText => {
-                const data = {};
-                const rows = csvText.trim().split('\n');
-                const headers = rows.shift().split(',');
-
-                // Find the index of the columns we need
-                const portIndex = headers.indexOf('Port of Entry');
-                const laneIndex = headers.indexOf('Lane');
-                const waitTimeIndex = headers.indexOf('Average Wait Time');
-                const updatedIndex = headers.indexOf('Report Time');
-
-                // Group data by Port
-                rows.forEach(rowText => {
-                    const row = rowText.split(',');
-                    const port = row[portIndex];
-                    if (!data[port]) {
-                        data[port] = [];
-                    }
-                    data[port].push({
-                        lane: row[laneIndex],
-                        waitTime: `${row[waitTimeIndex]} min`, // Add "min" for display
-                        lastUpdated: row[updatedIndex]
-                    });
-                });
-
-                // Clear loading text and build the HTML
-                document.getElementById('loading').style.display = 'none';
-
-                for (const portName in data) {
-                    const lanes = data[portName];
-                    let portHtml = `
-                        <section class="port-section">
-                            <h2 class="port-title">${portName}</h2>
-                            <div class="card-container">`;
-
-                    lanes.forEach(lane => {
-                        const colorClass = getStatusColor(lane.waitTime);
-                        portHtml += `
-                            <div class="card ${colorClass}">
-                                <h3>${lane.lane}</h3>
-                                <div class="wait-time">${lane.waitTime}</div>
-                                <div class="last-updated">Updated: ${lane.lastUpdated}</div>
-                            </div>`;
-                    });
-
-                    portHtml += `</div></section>`;
-                    dashboard.innerHTML += portHtml;
+    fetch(fetchUrl)
+        .then(response => response.ok ? response.text() : Promise.reject('Network response was not ok.'))
+        .then(csvText => {
+            // ... (the entire data parsing and HTML building part is the same)
+            const data = {};
+            const rows = csvText.trim().split('\n');
+            const headers = rows.shift().split(',');
+            const portIndex = headers.indexOf('Port of Entry');
+            const laneIndex = headers.indexOf('Lane');
+            const waitTimeIndex = headers.indexOf('Average Wait Time');
+            const updatedIndex = headers.indexOf('Report Time');
+            rows.forEach(rowText => {
+                const row = rowText.split(',');
+                const port = row[portIndex];
+                if (!data[port]) {
+                    data[port] = [];
                 }
-            })
-            .catch(error => {
-                document.getElementById('loading').textContent = 'Failed to load data. Please try again later.';
-                console.error('Fetch Error:', error);
+                data[port].push({
+                    lane: row[laneIndex],
+                    waitTime: `${row[waitTimeIndex]} min`,
+                    lastUpdated: row[updatedIndex]
+                });
             });
-    </script>
-</body>
-</html>
+            document.getElementById('loading').style.display = 'none';
+            for (const portName in data) {
+                const lanes = data[portName];
+                let portHtml = `
+                    <section class="port-section">
+                        <h2 class="port-title">${portName}</h2>
+                        <div class="card-container">`;
+                lanes.forEach(lane => {
+                    const colorClass = getStatusColor(lane.waitTime);
+                    portHtml += `
+                        <div class="card ${colorClass}">
+                            <h3>${lane.lane}</h3>
+                            <div class="wait-time">${lane.waitTime}</div>
+                            <div class="last-updated">Updated: ${lane.lastUpdated}</div>
+                        </div>`;
+                });
+                portHtml += `</div></section>`;
+                dashboard.innerHTML += portHtml;
+            }
+        })
+        .catch(error => {
+            // This .catch() block will now be triggered by the CORS error
+            document.getElementById('loading').textContent = 'Failed to load data. Check the console for errors.';
+            console.error('Fetch Error:', error);
+        });
+</script>
