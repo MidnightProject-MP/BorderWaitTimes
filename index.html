@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Border Wait Times Dashboard</title>
+    <title>Live Border Wait Times</title>
     <style>
-        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background-color: #f0f2f5; margin: 0; }
+        body { font-family: system-ui, sans-serif; background-color: #f0f2f5; margin: 0; }
         .dashboard { max-width: 1200px; margin: auto; padding: 20px; }
         .port-section { margin-bottom: 40px; }
         .port-title { font-size: 2em; color: #1c2a38; margin-bottom: 20px; border-bottom: 3px solid #e0e0e0; padding-bottom: 10px; }
@@ -14,54 +14,64 @@
         .card h3 { margin-top: 0; font-size: 1.25em; color: #333; }
         .card .wait-time { font-size: 3em; font-weight: 700; margin: 10px 0; }
         .card .last-updated { font-size: 0.9em; color: #777; }
-        
-        /* Color Coding */
-        .status-green { border-left-color: #28a745; } /* Short Wait */
-        .status-yellow { border-left-color: #ffc107; } /* Moderate Wait */
-        .status-red { border-left-color: #dc3545; }   /* Long Wait */
+        .status-green { border-left-color: #28a745; }
+        .status-yellow { border-left-color: #ffc107; }
+        .status-red { border-left-color: #dc3545; }
     </style>
 </head>
 <body>
-
     <div id="dashboard" class="dashboard">
-        <h1>Border Wait Times</h1>
-        </div>
+        <h1>Live Border Wait Times</h1>
+        <p id="loading">Loading data...</p>
+    </div>
 
     <script>
-        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQgwjy1utMHHfGJuV_y7dlp_vQvpXo7jvNZ2BPK65BR-KWTgnFNPIk73hiMmX42dJddm5g_QtuUJjRv/pub?gid=2146524467&single=true&output=csv';
+        // The official CBP API URL
+        const apiUrl = 'https://bwt.cbp.gov/api/bwtRss/CSV/-1/57,55/57,55,106';
+        
+        // Prepend a free CORS proxy to avoid browser errors
+        const proxyUrl = 'https://cors-anywhere.herokuapp.com/'; // A popular free proxy
+        const fetchUrl = proxyUrl + apiUrl;
+
         const dashboard = document.getElementById('dashboard');
 
         function getStatusColor(waitTime) {
             const minutes = parseInt(waitTime);
-            if (isNaN(minutes)) return ''; // No color if wait time is not a number
+            if (isNaN(minutes)) return '';
             if (minutes <= 20) return 'status-green';
             if (minutes <= 60) return 'status-yellow';
             return 'status-red';
         }
 
-        fetch(sheetUrl)
-            .then(response => response.text())
+        fetch(fetchUrl)
+            .then(response => response.ok ? response.text() : Promise.reject('Network response was not ok.'))
             .then(csvText => {
                 const data = {};
                 const rows = csvText.trim().split('\n');
                 const headers = rows.shift().split(',');
 
+                // Find the index of the columns we need
+                const portIndex = headers.indexOf('Port of Entry');
+                const laneIndex = headers.indexOf('Lane');
+                const waitTimeIndex = headers.indexOf('Average Wait Time');
+                const updatedIndex = headers.indexOf('Report Time');
+
                 // Group data by Port
                 rows.forEach(rowText => {
                     const row = rowText.split(',');
-                    const port = row[0];
+                    const port = row[portIndex];
                     if (!data[port]) {
                         data[port] = [];
                     }
                     data[port].push({
-                        lane: row[1],
-                        waitTime: row[2],
-                        lastUpdated: row[3]
+                        lane: row[laneIndex],
+                        waitTime: `${row[waitTimeIndex]} min`, // Add "min" for display
+                        lastUpdated: row[updatedIndex]
                     });
                 });
 
-                // Clear any "Loading..." text and build the HTML
-                dashboard.innerHTML = '<h1>Border Wait Times</h1>'; // Reset header
+                // Clear loading text and build the HTML
+                document.getElementById('loading').style.display = 'none';
 
                 for (const portName in data) {
                     const lanes = data[portName];
@@ -83,8 +93,11 @@
                     portHtml += `</div></section>`;
                     dashboard.innerHTML += portHtml;
                 }
+            })
+            .catch(error => {
+                document.getElementById('loading').textContent = 'Failed to load data. Please try again later.';
+                console.error('Fetch Error:', error);
             });
     </script>
-
 </body>
 </html>
