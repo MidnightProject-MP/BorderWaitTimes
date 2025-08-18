@@ -10,8 +10,8 @@
         const apiUrl = 'https://bwt.cbp.gov/api/bwtRss/CSV/-1/57,55/57,55,106';
         // Use the proxy for the live version, but you can comment it out for testing the CORS error
         const proxyUrl = 'https://api.allorigins.win/raw?url='; 
-        //const fetchUrl = proxyUrl + encodeURIComponent(apiUrl);
-        const fetchUrl = apiUrl; // We removed the proxy
+        const fetchUrl = proxyUrl + encodeURIComponent(apiUrl);
+        //const fetchUrl = apiUrl; // We removed the proxy
 
 
         const dashboard = document.getElementById('dashboard');
