@@ -102,16 +102,13 @@
                 const originalPortName = item.querySelector('title').textContent;
                 const portName = originalPortName.split(' - ')[0];
                 const description = item.querySelector('description').textContent;
-                const hoursInfo = getOperatingHoursInfo(description); // Parse hours from the full description for all types.
 
                 if (!portData[portName]) {
                     portData[portName] = createPortTemplate(portName);
                 }
 
-                const vehicleChunk = description.split('Passenger Vehicles')[1]?.split('Pedestrian')[0] || '';
-                const pedestrianChunk = description.split('Pedestrian')[1] || '';
-
                 if (originalPortName.includes('PedWest')) {
+                    const hoursInfo = getOperatingHoursInfo(description, 'Pedestrian');
                     const generalData = extractLaneData(description, 'General Lanes');
                     const readyData = extractLaneData(description, 'Ready Lanes');
 
@@ -128,22 +125,27 @@
                         operatingHours: hoursInfo.operatingHoursText
                     };
                 } else {
-                    portData[portName].vehicles.operatingHours = hoursInfo.operatingHoursText;
+                    const vehicleChunk = description.split('Passenger Vehicles')[1]?.split('Pedestrian')[0] || '';
+                    const pedestrianChunk = description.split('Pedestrian')[1] || '';
+
+                    const vehicleHoursInfo = getOperatingHoursInfo(description, 'Passenger Vehicles');
+                    portData[portName].vehicles.operatingHours = vehicleHoursInfo.operatingHoursText;
                     ['General', 'Ready', 'Sentri'].forEach(laneName => {
                         const laneData = extractLaneData(vehicleChunk, `${laneName} Lanes`);
-                        if (!hoursInfo.isCurrentlyOpen) {
+                        if (!vehicleHoursInfo.isCurrentlyOpen) {
                             laneData.status = 'Closed';
-                            laneData.updateTime = `At ${hoursInfo.closingTimeText}`;
+                            laneData.updateTime = `At ${vehicleHoursInfo.closingTimeText}`;
                         }
                         portData[portName].vehicles[laneName] = laneData;
                     });
 
-                    portData[portName].pedestrians.operatingHours = hoursInfo.operatingHoursText;
+                    const pedestrianHoursInfo = getOperatingHoursInfo(description, 'Pedestrian');
+                    portData[portName].pedestrians.operatingHours = pedestrianHoursInfo.operatingHoursText;
                     ['General', 'Ready'].forEach(laneName => {
                         const laneData = extractLaneData(pedestrianChunk, `${laneName} Lanes`);
-                        if (!hoursInfo.isCurrentlyOpen) {
+                        if (!pedestrianHoursInfo.isCurrentlyOpen) {
                             laneData.status = 'Closed';
-                            laneData.updateTime = `At ${hoursInfo.closingTimeText}`;
+                            laneData.updateTime = `At ${pedestrianHoursInfo.closingTimeText}`;
                         }
                         portData[portName].pedestrians[laneName] = laneData;
                     });
@@ -194,22 +196,31 @@
          * @param {string} textChunk The text to search within.
          * @returns {{operatingHoursText: string, isCurrentlyOpen: boolean, closingTimeText: string}}
          */
-        function getOperatingHoursInfo(textChunk) {
+        function getOperatingHoursInfo(description, laneTypeIdentifier) {
             const defaultInfo = { operatingHoursText: '', isCurrentlyOpen: true, closingTimeText: '' };
-            if (!textChunk) return defaultInfo;
+            if (!description || !laneTypeIdentifier) return defaultInfo;
 
-            const hoursMatch = textChunk.match(/(\d+\s*[ap]m-\d+\s*[ap]m)/);
-            if (!hoursMatch) return defaultInfo;
+            // New regex based on your insight: <hours> <date> <lane_type>
+            const regex = new RegExp(`(.*?)\\s+\\d{1,2}\\/\\d{1,2}\\/\\d{4}\\s+${laneTypeIdentifier}`);
+            const hoursMatch = description.match(regex);
+            if (!hoursMatch || !hoursMatch[1]) return defaultInfo;
 
-            const operatingHoursText = hoursMatch[0];
+            const operatingHoursText = hoursMatch[1].trim();
+
+            // If it's 24 hours, it's always open.
+            if (operatingHoursText.toLowerCase().includes('24 hrs')) {
+                return { operatingHoursText, isCurrentlyOpen: true, closingTimeText: '' };
+            }
+
+            // Otherwise, try to parse it for am/pm format to determine open/closed status.
             const operatingHours = parseOperatingHours(operatingHoursText);
-
             if (operatingHours) {
                 const formattedClosingTime = formatHour(operatingHours.endHour);
                 return { operatingHoursText, isCurrentlyOpen: isCurrentlyOpen(operatingHours), closingTimeText: formattedClosingTime };
             }
 
-            return defaultInfo;
+            // If we found text but couldn't parse it for open/closed status, still display it.
+            return { ...defaultInfo, operatingHoursText };
         }
 
         /**
