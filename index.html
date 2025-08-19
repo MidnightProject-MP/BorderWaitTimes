@@ -12,7 +12,8 @@
         .port-layout { display: flex; flex-wrap: wrap; gap: 40px; }
         .category-column { flex: 1; min-width: 300px; }
         .category-title { font-size: 1.5em; color: #444; margin-top: 0; }
-        .filter-controls { background-color: #fff; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+        .filter-controls { background-color: #fff; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; gap: 40px; align-items: center; flex-wrap: wrap; }
+        .filter-controls > div { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         .filter-controls h3 { margin: 0; font-size: 1em; color: #333; }
         .filter-controls label { cursor: pointer; user-select: none; }
         .port-title.collapsible { cursor: pointer; position: relative; user-select: none; }
@@ -36,10 +37,18 @@
     <div id="dashboard" class="dashboard">
         <h1>Live Border Wait Times</h1>
         <div class="filter-controls">
-            <h3>Filter by Lane Type:</h3>
-            <label><input type="checkbox" name="lane-filter" value="General" checked> General</label>
-            <label><input type="checkbox" name="lane-filter" value="Ready" checked> Ready</label>
-            <label><input type="checkbox" name="lane-filter" value="Sentri" checked> Sentri</label>
+            <div>
+                <h3>Mode:</h3>
+                <label><input type="checkbox" name="mode-filter" value="Vehicles" checked> Vehicles</label>
+                <label><input type="checkbox" name="mode-filter" value="Pedestrians" checked> Pedestrians</label>
+                <label><input type="checkbox" name="mode-filter" value="PedWest" checked> PedWest</label>
+            </div>
+            <div>
+                <h3>Lane Type:</h3>
+                <label><input type="checkbox" name="lane-filter" value="General" checked> General</label>
+                <label><input type="checkbox" name="lane-filter" value="Ready" checked> Ready</label>
+                <label><input type="checkbox" name="lane-filter" value="Sentri" checked> Sentri</label>
+            </div>
         </div>
         <p id="loading">Loading live data from CBP...</p>
     </div>
@@ -162,7 +171,7 @@
                     // Build Vehicle Column
                     const hasVisibleVehicleLanes = Object.values(port.vehicles).some(lane => lane.status !== 'N/A');
                     if (hasVisibleVehicleLanes) {
-                        vehicleHtml += `<div class="category-column"><h3 class="category-title">Vehicles</h3><div class="card-container">`;
+                        vehicleHtml += `<div class="category-column" data-mode-type="Vehicles"><h3 class="category-title">Vehicles</h3><div class="card-container">`;
                         for (const laneName in port.vehicles) {
                             const lane = port.vehicles[laneName];
                             if (lane.status === 'N/A') continue; // Hide lanes with no data
@@ -178,7 +187,7 @@
                     // Build Pedestrian Column
                     const hasVisiblePedestrianLanes = Object.values(port.pedestrians).some(lane => lane.status !== 'N/A');
                     if (hasVisiblePedestrianLanes) {
-                        pedestrianHtml += `<div class="category-column"><h3 class="category-title">Pedestrians</h3><div class="card-container">`;
+                        pedestrianHtml += `<div class="category-column" data-mode-type="Pedestrians"><h3 class="category-title">Pedestrians</h3><div class="card-container">`;
                         for (const laneName in port.pedestrians) {
                             const lane = port.pedestrians[laneName];
                             if (lane.status === 'N/A' || laneName === 'Sentri') continue; // Hide lanes with no data and Ped Sentri
@@ -194,7 +203,7 @@
                     // Build PedWest Column
                     const hasVisiblePedWestLanes = port.pedwest && Object.values(port.pedwest).some(lane => lane.status !== 'N/A');
                     if (hasVisiblePedWestLanes) {
-                        pedwestHtml += `<div class="category-column"><h3 class="category-title">PedWest</h3><div class="card-container">`;
+                        pedwestHtml += `<div class="category-column" data-mode-type="PedWest"><h3 class="category-title">PedWest</h3><div class="card-container">`;
                         for (const laneName in port.pedwest) {
                             const lane = port.pedwest[laneName];
                             if (lane.status === 'N/A') continue;
@@ -238,15 +247,22 @@
          * Applies filters to hide/show cards and sections based on checkbox selections.
          */
         function applyFilters() {
-            const checkedFilters = Array.from(document.querySelectorAll('input[name="lane-filter"]:checked')).map(cb => cb.value);
+            const checkedLaneFilters = Array.from(document.querySelectorAll('input[name="lane-filter"]:checked')).map(cb => cb.value);
+            const checkedModeFilters = Array.from(document.querySelectorAll('input[name="mode-filter"]:checked')).map(cb => cb.value);
 
             document.querySelectorAll('.port-section').forEach(port => {
                 let portHasVisibleCards = false;
                 port.querySelectorAll('.category-column').forEach(category => {
+                    const modeType = category.dataset.modeType;
+                    if (!checkedModeFilters.includes(modeType)) {
+                        category.style.display = 'none';
+                        return;
+                    }
+
                     let categoryHasVisibleCards = false;
                     category.querySelectorAll('.card').forEach(card => {
                         const laneType = card.dataset.laneType;
-                        if (checkedFilters.includes(laneType)) {
+                        if (checkedLaneFilters.includes(laneType)) {
                             card.style.display = 'flex';
                             categoryHasVisibleCards = true;
                             portHasVisibleCards = true;
@@ -256,13 +272,16 @@
                     });
                     category.style.display = categoryHasVisibleCards ? 'block' : 'none';
                 });
-                port.style.display = portHasVisibleCards ? 'block' : 'none';
-            });
 
-            // Recalculate height for any open accordions
-            document.querySelectorAll('.port-layout').forEach(layout => {
-                if (layout.style.maxHeight !== '0px') {
-                    layout.style.maxHeight = layout.scrollHeight + 'px';
+                port.style.display = portHasVisibleCards ? 'block' : 'none';
+
+                // Recalculate height for the port's layout if it's visible and active (expanded)
+                if (portHasVisibleCards) {
+                    const header = port.querySelector('.port-title.collapsible');
+                    const content = port.querySelector('.port-layout');
+                    if (header.classList.contains('active')) {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                    }
                 }
             });
         }
@@ -276,16 +295,26 @@
                 header.addEventListener('click', () => {
                     header.classList.toggle('active');
                     const content = header.nextElementSibling;
-                    if (content.style.maxHeight && content.style.maxHeight !== '0px') {
-                        content.style.maxHeight = '0px';
-                    } else {
+                    if (header.classList.contains('active')) {
                         content.style.maxHeight = content.scrollHeight + 'px';
+                    } else {
+                        content.style.maxHeight = '0px';
                     }
                 });
+
+                // Start expanded by default
+                header.classList.add('active');
+                const content = header.nextElementSibling;
+                // Use a small timeout to ensure browser has rendered and calculated scrollHeight
+                setTimeout(() => {
+                    if (header.classList.contains('active')) {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                    }
+                }, 10);
             });
 
             // Setup filter checkboxes
-            document.querySelectorAll('input[name="lane-filter"]').forEach(checkbox => {
+            document.querySelectorAll('input[name="lane-filter"], input[name="mode-filter"]').forEach(checkbox => {
                 checkbox.addEventListener('change', applyFilters);
             });
         }
