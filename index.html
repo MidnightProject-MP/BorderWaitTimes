@@ -99,8 +99,7 @@
                 for (const item of items) {
                     const originalPortName = item.querySelector('title').textContent;
                     console.groupCollapsed(`Processing Item: ${originalPortName}`);
-                    // const portName = originalPortName.split(' - ')[0];
-                    const portName = originalPortName;
+                    const portName = originalPortName.split(' - ')[0];
                     const description = item.querySelector('description').textContent;
 
                     if (!portData[portName]) {
@@ -108,27 +107,26 @@
                         portData[portName] = createPortTemplate(portName);
                     }
 
-                    // Isolate text chunks for vehicles and pedestrians
                     const vehicleChunk = description.split('Passenger Vehicles')[1] ? description.split('Passenger Vehicles')[1].split('Pedestrian')[0] : '';
                     const pedestrianChunk = description.split('Pedestrian')[1] ? description.split('Pedestrian')[1] : '';
                     console.log("Vehicle Chunk:", vehicleChunk);
                     console.log("Pedestrian Chunk:", pedestrianChunk);
 
-                    // // Fill in the template with data
-                    // if (originalPortName.includes('PedWest')) {
-                    //     console.log("Handling special case: PedWest");
-                    //     // Special handling for PedWest as a unique pedestrian lane
-                    //     portData[portName].pedestrians['Pedestrian West'] = extractLaneData(description, 'Pedestrian Lanes');
-                    // } else {
-                    // Standard vehicle lanes
-                    portData[portName].vehicles['General'] = extractLaneData(vehicleChunk, 'General Lanes');
-                    portData[portName].vehicles['Ready'] = extractLaneData(vehicleChunk, 'Ready Lanes');
-                    portData[portName].vehicles['Sentri'] = extractLaneData(vehicleChunk, 'Sentri Lanes');
+                    // Fill in the template with data
+                    if (originalPortName.includes('PedWest')) {
+                        console.log("Handling special case: PedWest");
+                        // It gets its own section.
+                        portData[portName].pedwest = { 'Pedestrian Lanes': extractLaneData(description, 'Pedestrian Lanes') };
+                    } else {
+                        // Standard vehicle lanes
+                        portData[portName].vehicles['General'] = extractLaneData(vehicleChunk, 'General Lanes');
+                        portData[portName].vehicles['Ready'] = extractLaneData(vehicleChunk, 'Ready Lanes');
+                        portData[portName].vehicles['Sentri'] = extractLaneData(vehicleChunk, 'Sentri Lanes');
 
-                    // Standard pedestrian lanes
-                    portData[portName].pedestrians['General'] = extractLaneData(pedestrianChunk, 'General Lanes');
-                    portData[portName].pedestrians['Ready'] = extractLaneData(pedestrianChunk, 'Ready Lanes');
-                    // }
+                        // Standard pedestrian lanes
+                        portData[portName].pedestrians['General'] = extractLaneData(pedestrianChunk, 'General Lanes');
+                        portData[portName].pedestrians['Ready'] = extractLaneData(pedestrianChunk, 'Ready Lanes');
+                    }
                     console.log(`Finished processing. Current data for ${portName}:`, JSON.parse(JSON.stringify(portData[portName])));
                     console.groupEnd();
                 }
@@ -140,35 +138,67 @@
                 for (const portName in portData) {
                     console.log(`Generating HTML for port: ${portName}`);
                     const port = portData[portName];
-                    let portHtml = `<section class="port-section"><h2 class="port-title">${portName}</h2><div class="port-layout">`;
+                    let vehicleHtml = '';
+                    let pedestrianHtml = '';
+                    let pedwestHtml = '';
 
                     // Build Vehicle Column
-                    portHtml += `<div class="category-column"><h3 class="category-title">Vehicles</h3><div class="card-container">`;
-                    for (const laneName in port.vehicles) {
-                        const lane = port.vehicles[laneName];
-                        const waitTimeDisplay = lane.status === 'Open' ? `${lane.waitTime} min` : lane.status;
-                        const colorClass = lane.status === 'N/A' ? 'status-no-data' : getStatusColor(lane.status, lane.waitTime);
-                        const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : (lane.lanesOpen !== 'N/A' ? `${lane.lanesOpen} lane(s) open` : '');
-                        const updatedDisplay = lane.updateTime ? `As of ${lane.updateTime}` : '';
-                        portHtml += `<div class="card ${colorClass}"><h3>${laneName}</h3><div class="wait-time">${waitTimeDisplay}</div><div class="lanes-open">${lanesOpenDisplay}</div><div class="last-updated">${updatedDisplay}</div></div>`;
+                    const hasVisibleVehicleLanes = Object.values(port.vehicles).some(lane => lane.status !== 'N/A');
+                    if (hasVisibleVehicleLanes) {
+                        vehicleHtml += `<div class="category-column"><h3 class="category-title">Vehicles</h3><div class="card-container">`;
+                        for (const laneName in port.vehicles) {
+                            const lane = port.vehicles[laneName];
+                            if (lane.status === 'N/A') continue; // Hide lanes with no data
+                            const waitTimeDisplay = lane.status === 'Open' ? `${lane.waitTime} min` : lane.status;
+                            const colorClass = getStatusColor(lane.status, lane.waitTime);
+                            const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : (lane.lanesOpen !== 'N/A' ? `${lane.lanesOpen} lane(s) open` : '');
+                            const updatedDisplay = lane.updateTime ? `As of ${lane.updateTime}` : '';
+                            vehicleHtml += `<div class="card ${colorClass}"><h3>${laneName}</h3><div class="wait-time">${waitTimeDisplay}</div><div class="lanes-open">${lanesOpenDisplay}</div><div class="last-updated">${updatedDisplay}</div></div>`;
+                        }
+                        vehicleHtml += `</div></div>`;
                     }
-                    portHtml += `</div></div>`;
 
                     // Build Pedestrian Column
-                    portHtml += `<div class="category-column"><h3 class="category-title">Pedestrians</h3><div class="card-container">`;
-                    for (const laneName in port.pedestrians) {
-                        const lane = port.pedestrians[laneName];
-                        if (laneName === 'Sentri') continue; // Skip Pedestrian Sentri as it doesn't exist
-                        const waitTimeDisplay = lane.status === 'Open' ? `${lane.waitTime} min` : lane.status;
-                        const colorClass = lane.status === 'N/A' ? 'status-no-data' : getStatusColor(lane.status, lane.waitTime);
-                        const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : (lane.lanesOpen !== 'N/A' ? `${lane.lanesOpen} lane(s) open` : '');
-                        const updatedDisplay = lane.updateTime ? `As of ${lane.updateTime}` : '';
-                        portHtml += `<div class="card ${colorClass}"><h3>${laneName}</h3><div class="wait-time">${waitTimeDisplay}</div><div class="lanes-open">${lanesOpenDisplay}</div><div class="last-updated">${updatedDisplay}</div></div>`;
+                    const hasVisiblePedestrianLanes = Object.values(port.pedestrians).some(lane => lane.status !== 'N/A');
+                    if (hasVisiblePedestrianLanes) {
+                        pedestrianHtml += `<div class="category-column"><h3 class="category-title">Pedestrians</h3><div class="card-container">`;
+                        for (const laneName in port.pedestrians) {
+                            const lane = port.pedestrians[laneName];
+                            if (lane.status === 'N/A' || laneName === 'Sentri') continue; // Hide lanes with no data and Ped Sentri
+                            const waitTimeDisplay = lane.status === 'Open' ? `${lane.waitTime} min` : lane.status;
+                            const colorClass = getStatusColor(lane.status, lane.waitTime);
+                            const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : (lane.lanesOpen !== 'N/A' ? `${lane.lanesOpen} lane(s) open` : '');
+                            const updatedDisplay = lane.updateTime ? `As of ${lane.updateTime}` : '';
+                            pedestrianHtml += `<div class="card ${colorClass}"><h3>${laneName}</h3><div class="wait-time">${waitTimeDisplay}</div><div class="lanes-open">${lanesOpenDisplay}</div><div class="last-updated">${updatedDisplay}</div></div>`;
+                        }
+                        pedestrianHtml += `</div></div>`;
                     }
-                    portHtml += `</div></div>`;
 
-                    portHtml += `</div></section>`;
-                    dashboard.innerHTML += portHtml;
+                    // Build PedWest Column
+                    const hasVisiblePedWestLanes = port.pedwest && Object.values(port.pedwest).some(lane => lane.status !== 'N/A');
+                    if (hasVisiblePedWestLanes) {
+                        pedwestHtml += `<div class="category-column"><h3 class="category-title">PedWest</h3><div class="card-container">`;
+                        for (const laneName in port.pedwest) {
+                            const lane = port.pedwest[laneName];
+                            if (lane.status === 'N/A') continue;
+                            const waitTimeDisplay = lane.status === 'Open' ? `${lane.waitTime} min` : lane.status;
+                            const colorClass = getStatusColor(lane.status, lane.waitTime);
+                            const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : (lane.lanesOpen !== 'N/A' ? `${lane.lanesOpen} lane(s) open` : '');
+                            const updatedDisplay = lane.updateTime ? `As of ${lane.updateTime}` : '';
+                            pedwestHtml += `<div class="card ${colorClass}"><h3>${laneName}</h3><div class="wait-time">${waitTimeDisplay}</div><div class="lanes-open">${lanesOpenDisplay}</div><div class="last-updated">${updatedDisplay}</div></div>`;
+                        }
+                        pedwestHtml += `</div></div>`;
+                    }
+
+                    // Only add the port section if it has at least one visible category
+                    if (vehicleHtml || pedestrianHtml || pedwestHtml) {
+                        let portHtml = `<section class="port-section"><h2 class="port-title">${portName}</h2><div class="port-layout">`;
+                        portHtml += vehicleHtml;
+                        portHtml += pedestrianHtml;
+                        portHtml += pedwestHtml;
+                        portHtml += `</div></section>`;
+                        dashboard.innerHTML += portHtml;
+                    }
                 }
             })
             .catch(error => {
