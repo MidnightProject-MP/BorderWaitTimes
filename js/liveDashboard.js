@@ -83,13 +83,17 @@ export async function fetchAndParseData() {
         const desc = item.querySelector('description').textContent;
         if (title.includes('PedWest')) {
             const pedWestHoursInfo = getOperatingHoursInfo(desc, CONFIG.MODES.PEDESTRIANS);
+            console.log(`Operating Hours: ${pedWestHoursInfo.operatingHoursText}`);
             Object.assign(portData[portName].pedwest, parseDescription(desc, CONFIG.MODES.PEDESTRIANS, pedWestHoursInfo));
         } else {
             const vChunk = desc.split('Passenger Vehicles')[1]?.split('Pedestrian')[0] || '';
             const pChunk = desc.split('Pedestrian')[1] || '';
 
             const vehicleHoursInfo = getOperatingHoursInfo(desc, 'Passenger Vehicles');
+            console.log(`Operating Hours: ${vehicleHoursInfo.operatingHoursText}`);
+            
             const pedestrianHoursInfo = getOperatingHoursInfo(desc, CONFIG.MODES.PEDESTRIANS);
+            console.log(`Operating Hours: ${pedestrianHoursInfo.operatingHoursText}`);
 
             Object.assign(portData[portName].vehicles, parseDescription(vChunk, CONFIG.MODES.VEHICLES, vehicleHoursInfo));
             Object.assign(portData[portName].pedestrians, parseDescription(pChunk, CONFIG.MODES.PEDESTRIANS, pedestrianHoursInfo));

@@ -46,6 +46,24 @@ export function createCardElement(laneName, lane, settings) {
     return card;
 }
 
+function createFavoriteStarElement(portName, isFavorited, onStateChange) {
+    const star = document.createElement('span');
+    star.className = `favorite-star ${isFavorited ? 'favorited' : ''}`;
+    star.textContent = '★';
+    star.setAttribute('role', 'button');
+    star.setAttribute('aria-label', isFavorited ? `Unfavorite ${portName}` : `Favorite ${portName}`);
+    star.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent the accordion from toggling
+        let newFavorites = isFavorited
+            ? JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVORITES) || '[]').filter(f => f !== portName)
+            : [...JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVORITES) || '[]'), portName];
+        
+        localStorage.setItem(CONFIG.STORAGE_KEYS.FAVORITES, JSON.stringify(newFavorites));
+        onStateChange({ favorites: newFavorites });
+    });
+    return star;
+}
+
 export function createPortSectionElement(port, filters, favorites, settings, onStateChange) {
     const section = document.createElement('section');
     section.className = 'port-section';
@@ -56,23 +74,8 @@ export function createPortSectionElement(port, filters, favorites, settings, onS
     const layoutId = `port-layout-${port.portName.replace(/\s+/g, '-')}`;
     header.setAttribute('aria-controls', layoutId);
 
-    const isFavorited = favorites.includes(port.portName);
-    const star = document.createElement('span');
-    star.className = `favorite-star ${isFavorited ? 'favorited' : ''}`;
-    star.textContent = '★';
-    star.setAttribute('role', 'button');
-    star.setAttribute('aria-label', isFavorited ? `Unfavorite ${port.portName}` : `Favorite ${port.portName}`);
-    star.addEventListener('click', (e) => {
-        e.stopPropagation();
-        let newFavorites = [...favorites];
-        if (isFavorited) {
-            newFavorites = newFavorites.filter(f => f !== port.portName);
-        } else {
-            newFavorites.push(port.portName);
-        }
-        localStorage.setItem(CONFIG.STORAGE_KEYS.FAVORITES, JSON.stringify(newFavorites));
-        onStateChange({ favorites: newFavorites });
-    });
+    const isFavorited = favorites.includes(port.portName)
+    const star = createFavoriteStarElement(port.portName, isFavorited, onStateChange);
 
     header.append(star, ` ${port.portName}`);
 

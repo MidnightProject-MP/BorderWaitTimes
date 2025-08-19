@@ -189,12 +189,14 @@ function setupEventListeners() {
     }, CONFIG.DASHBOARD.DEBOUNCE_DELAY_MS));
 
     document.getElementById('reset-settings-button').addEventListener('click', () => {
-        // Remove from storage to revert to defaults on next load
-        localStorage.removeItem(CONFIG.STORAGE_KEYS.SETTINGS);
-        // Update state immediately to reflect the change
-        handleStateUpdate({
-            settings: { ...CONFIG.UI.WAIT_THRESHOLDS }
-        });
+        if (window.confirm("Are you sure you want to reset all settings to their default values?")) {
+            // Remove from storage to revert to defaults on next load
+            localStorage.removeItem(CONFIG.STORAGE_KEYS.SETTINGS);
+            // Update state immediately to reflect the change
+            handleStateUpdate({
+                settings: { ...CONFIG.UI.WAIT_THRESHOLDS }
+            });
+        }
     });
 
 
