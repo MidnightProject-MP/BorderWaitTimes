@@ -156,7 +156,7 @@
                             const waitTimeDisplay = lane.status === 'Open' ? `${lane.waitTime} min` : lane.status;
                             const colorClass = getStatusColor(lane.status, lane.waitTime);
                             const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : (lane.lanesOpen !== 'N/A' ? `${lane.lanesOpen} lane(s) open` : '');
-                            const updatedDisplay = lane.updateTime ? `As of ${lane.updateTime}` : '';
+                            const updatedDisplay = lane.updateTime ? `${lane.updateTime}` : '';
                             vehicleHtml += `<div class="card ${colorClass}"><h3>${laneName}</h3><div class="wait-time">${waitTimeDisplay}</div><div class="lanes-open">${lanesOpenDisplay}</div><div class="last-updated">${updatedDisplay}</div></div>`;
                         }
                         vehicleHtml += `</div></div>`;
@@ -172,7 +172,7 @@
                             const waitTimeDisplay = lane.status === 'Open' ? `${lane.waitTime} min` : lane.status;
                             const colorClass = getStatusColor(lane.status, lane.waitTime);
                             const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : (lane.lanesOpen !== 'N/A' ? `${lane.lanesOpen} lane(s) open` : '');
-                            const updatedDisplay = lane.updateTime ? `As of ${lane.updateTime}` : '';
+                            const updatedDisplay = lane.updateTime ? `${lane.updateTime}` : '';
                             pedestrianHtml += `<div class="card ${colorClass}"><h3>${laneName}</h3><div class="wait-time">${waitTimeDisplay}</div><div class="lanes-open">${lanesOpenDisplay}</div><div class="last-updated">${updatedDisplay}</div></div>`;
                         }
                         pedestrianHtml += `</div></div>`;
@@ -188,7 +188,7 @@
                             const waitTimeDisplay = lane.status === 'Open' ? `${lane.waitTime} min` : lane.status;
                             const colorClass = getStatusColor(lane.status, lane.waitTime);
                             const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : (lane.lanesOpen !== 'N/A' ? `${lane.lanesOpen} lane(s) open` : '');
-                            const updatedDisplay = lane.updateTime ? `As of ${lane.updateTime}` : '';
+                            const updatedDisplay = lane.updateTime ? `${lane.updateTime}` : '';
                             pedwestHtml += `<div class="card ${colorClass}"><h3>${laneName}</h3><div class="wait-time">${waitTimeDisplay}</div><div class="lanes-open">${lanesOpenDisplay}</div><div class="last-updated">${updatedDisplay}</div></div>`;
                         }
                         pedwestHtml += `</div></div>`;
