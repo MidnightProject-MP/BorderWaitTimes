@@ -34,24 +34,22 @@ function extractLaneData(text, laneFullName) {
 function getOperatingHoursInfo(desc, id) {
     const defaultInfo = { operatingHoursText: 'N/A', isCurrentlyOpen: true };
 
-    // --- New Strategy: Handle table-like format ---
-    // Find the line containing the identifier (e.g., "Passenger Vehicles")
+    // --- New Strategy: Find the identifier and work backwards on its line ---
     const lines = desc.split('\n');
     const relevantLine = lines.find(line => line.includes(id));
 
     if (relevantLine) {
-        // In this format, the hours are the first column, separated by tabs.
-        const parts = relevantLine.split('\t');
-        const hoursText = parts[0].trim();
-        
-        // If we found non-empty text in the first column, use it.
+        // The hours are typically the first piece of text on the line, often followed by a date or tabs.
+        // We can split by tab and take the first non-empty part, which is more robust than other methods.
+        const hoursText = relevantLine.split('\t')[0].trim();
+
         if (hoursText) {
             return { operatingHoursText: hoursText, isCurrentlyOpen: !hoursText.toLowerCase().includes('closed') };
         }
     }
 
-    // --- Fallback Strategy: Original regex for older formats ---
-    // This regex looks for a pattern like "ID: hours" followed by a date.
+    // --- Fallback Strategy: Original regex for older formats (e.g., "ID: hours MM/DD/YYYY") ---
+    // This is kept for resilience in case the feed format reverts.
     const regexWithDate = new RegExp(`(${id}.*?:.*?)(?=\\s+\\d{1,2}/\\d{1,2}/\\d{4})`);
     const match = desc.match(regexWithDate);
 
@@ -60,7 +58,7 @@ function getOperatingHoursInfo(desc, id) {
         return { operatingHoursText: text, isCurrentlyOpen: !text.toLowerCase().includes('closed') };
     }
 
-    // If both strategies fail, return the default.
+    // If all strategies fail, return the default.
     return defaultInfo;
 }
 
@@ -100,11 +98,15 @@ export async function fetchAndParseData() {
 
         const desc = item.querySelector('description').textContent;
         if (title.includes('PedWest')) {
+            // PedWest has a simpler structure, often just pedestrian data.
             const pedWestHoursInfo = getOperatingHoursInfo(desc, CONFIG.MODES.PEDESTRIANS);
+            // For PedWest, the whole description is the chunk to parse.
             Object.assign(portData[portName].pedwest, parseDescription(desc, CONFIG.MODES.PEDESTRIANS, pedWestHoursInfo));
         } else {
-            const vChunk = desc.split('Passenger Vehicles')[1]?.split('Pedestrian')[0] || '';
-            const pChunk = desc.split('Pedestrian')[1] || '';
+            // For standard ports, find the specific line for each mode to parse. This is more robust than splitting the whole description.
+            const lines = desc.split('\n');
+            const vChunk = lines.find(line => line.includes('Passenger Vehicles')) || '';
+            const pChunk = lines.find(line => line.includes('Pedestrian')) || '';
 
             const vehicleHoursInfo = getOperatingHoursInfo(desc, 'Passenger Vehicles');
             const pedestrianHoursInfo = getOperatingHoursInfo(desc, CONFIG.MODES.PEDESTRIANS);
