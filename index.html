@@ -3,20 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Border Wait Times</title>
+    <title>Live Border Wait Times Dashboard</title>
     <style>
         body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background-color: #f0f2f5; margin: 0; }
         .dashboard { max-width: 1200px; margin: auto; padding: 20px; }
-        .port-section { margin-bottom: 40px; }
+        .header-container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        #last-updated { font-size: 0.9em; color: #555; background-color: #e9ecef; padding: 5px 10px; border-radius: 5px; transition: opacity 0.3s; }
+        .port-section { margin-bottom: 40px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); overflow: hidden; }
         .port-title { font-size: 2em; color: #1c2a38; margin-bottom: 20px; border-bottom: 3px solid #e0e0e0; padding-bottom: 10px; }
         .port-layout { display: flex; flex-wrap: wrap; gap: 40px; }
         .category-column { flex: 1; min-width: 300px; }
         .category-title { font-size: 1.5em; color: #444; margin-top: 0; }
+        .category-header { display: flex; align-items: baseline; gap: 15px; flex-wrap: wrap; margin-bottom: 10px; }
+        .operating-hours { font-size: 0.9em; color: #6c757d; margin: 0; font-style: italic; }
         .filter-controls { background-color: #fff; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; gap: 40px; align-items: center; flex-wrap: wrap; }
         .filter-controls > div { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         .filter-controls h3 { margin: 0; font-size: 1em; color: #333; }
         .filter-controls label { cursor: pointer; user-select: none; }
-        .port-title.collapsible { cursor: pointer; position: relative; user-select: none; }
+        .port-title.collapsible { cursor: pointer; position: relative; user-select: none; margin: 0; padding: 20px; border-bottom: 1px solid #e0e0e0; }
         .port-title.collapsible::after { content: '+'; font-weight: bold; position: absolute; right: 10px; transition: transform 0.2s ease-in-out; font-size: 1.5em; top: 50%; transform: translateY(-55%); }
         .port-title.collapsible.active::after { content: '−'; }
         .port-layout { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
@@ -35,13 +39,19 @@
 </head>
 <body>
     <div id="dashboard" class="dashboard">
-        <h1>Live Border Wait Times</h1>
+        <div class="header-container">
+            <h1>Live Border Wait Times</h1>
+            <span id="last-updated"></span>
+        </div>
         <div class="filter-controls">
+            <div id="port-filter-container">
+                <h3>Port of Entry:</h3>
+                <!-- Port filters will be dynamically inserted here -->
+            </div>
             <div>
                 <h3>Mode:</h3>
                 <label><input type="checkbox" name="mode-filter" value="Vehicles" checked> Vehicles</label>
                 <label><input type="checkbox" name="mode-filter" value="Pedestrians" checked> Pedestrians</label>
-                <label><input type="checkbox" name="mode-filter" value="PedWest" checked> PedWest</label>
             </div>
             <div>
                 <h3>Lane Type:</h3>
@@ -56,20 +66,88 @@
     <script>
         const rssUrl = 'https://bwt.cbp.gov/api/bwtRss/CSV/-1/57,55/57,55,106';
         const fetchUrl = rssUrl;
+        const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
-        const dashboard = document.getElementById('dashboard');
+        // DOM Element References
+        const dashboardContainer = document.getElementById('dashboard');
         const loadingMessage = document.getElementById('loading');
+        const lastUpdatedEl = document.getElementById('last-updated');
 
-        /**
-         * Creates a blank "template" object for a port with all possible lanes.
-         */
-        function createPortTemplate(portName) {
-            const laneTemplate = () => ({ status: 'N/A', waitTime: 'N/A', lanesOpen: 'N/A', updateTime: '' });
-            return {
-                portName: portName,
-                vehicles: { 'General': laneTemplate(), 'Ready': laneTemplate(), 'Sentri': laneTemplate() },
-                pedestrians: { 'General': laneTemplate(), 'Ready': laneTemplate(), 'Sentri': laneTemplate() }
-            };
+        // --- STATE MANAGEMENT ---
+        const appState = {
+            ports: {},
+            filters: {
+                ports: [],
+                modes: [],
+                lanes: []
+            }
+        };
+
+        // =================================================================================
+        // --- DATA LAYER ---
+        // Responsible for fetching and parsing data from the API.
+        // =================================================================================
+
+        async function fetchAndParseData() {
+            const response = await fetch(fetchUrl);
+            if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+            const xmlText = await response.text();
+
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+            const items = xmlDoc.getElementsByTagName('item');
+            console.log(`Found ${items.length} items in the RSS feed.`);
+            const portData = {};
+
+            for (const item of items) {
+                const originalPortName = item.querySelector('title').textContent;
+                const portName = originalPortName.split(' - ')[0];
+                const description = item.querySelector('description').textContent;
+
+                if (!portData[portName]) {
+                    portData[portName] = createPortTemplate(portName);
+                }
+
+                const vehicleChunk = description.split('Passenger Vehicles')[1]?.split('Pedestrian')[0] || '';
+                const pedestrianChunk = description.split('Pedestrian')[1] || '';
+
+                if (originalPortName.includes('PedWest')) {
+                    // PedWest has operating hours in its description which we must respect.
+                    const hoursMatch = description.match(/(\d+\s*[ap]m-\d+\s*[ap]m)/);
+                    let operatingHoursText = '';
+                    let isPedWestOpen = true; // Assume open unless hours state otherwise.
+                    if (hoursMatch) {
+                        operatingHoursText = hoursMatch[0];
+                        const operatingHours = parseOperatingHours(operatingHoursText);
+                        if (operatingHours) {
+                            isPedWestOpen = isCurrentlyOpen(operatingHours);
+                            console.log(`PedWest operating hours: ${hoursMatch[0]}. Currently open: ${isPedWestOpen}`);
+                        }
+                    }
+
+                    const generalData = extractLaneData(description, 'General Lanes');
+                    const readyData = extractLaneData(description, 'Ready Lanes');
+
+                    if (!isPedWestOpen) {
+                        generalData.status = 'Closed';
+                        readyData.status = 'Closed';
+                    }
+
+                    portData[portName].pedwest = {
+                        'General': generalData,
+                        'Ready': readyData,
+                        operatingHours: operatingHoursText
+                    };
+                } else {
+                    portData[portName].vehicles['General'] = extractLaneData(vehicleChunk, 'General Lanes');
+                    portData[portName].vehicles['Ready'] = extractLaneData(vehicleChunk, 'Ready Lanes');
+                    portData[portName].vehicles['Sentri'] = extractLaneData(vehicleChunk, 'Sentri Lanes');
+                    portData[portName].pedestrians['General'] = extractLaneData(pedestrianChunk, 'General Lanes');
+                    portData[portName].pedestrians['Ready'] = extractLaneData(pedestrianChunk, 'Ready Lanes');
+                }
+            }
+            console.log("%c--- All items parsed. Final data structure: ---", "font-weight: bold; font-size: 1.2em;", portData);
+            return portData;
         }
 
         /**
@@ -108,216 +186,251 @@
             return laneData;
         }
 
-        fetch(fetchUrl)
-            .then(response => response.ok ? response.text() : Promise.reject('Network response was not ok.'))
-            .then(xmlText => {
-                console.log("Data fetched successfully. Starting to parse XML.");
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-                const items = xmlDoc.getElementsByTagName('item');
-                console.log(`Found ${items.length} items in the RSS feed.`);
-                const portData = {};
+        /**
+         * Parses an hours string like "6am-2pm" into an object with start and end hours.
+         * @param {string} hoursString The string to parse.
+         * @returns {{startHour: number, endHour: number}|null}
+         */
+        function parseOperatingHours(hoursString) {
+            try {
+                const [startStr, endStr] = hoursString.replace(/\s/g, '').split('-');
 
-                for (const item of items) {
-                    const originalPortName = item.querySelector('title').textContent;
-                    console.groupCollapsed(`Processing Item: ${originalPortName}`);
-                    const portName = originalPortName.split(' - ')[0];
-                    const description = item.querySelector('description').textContent;
+                const parseTime = (timeStr) => {
+                    let hour = parseInt(timeStr.match(/\d+/)[0], 10);
+                    const isPM = timeStr.includes('pm');
 
-                    if (!portData[portName]) {
-                        console.log(`Creating new template for port.`);
-                        portData[portName] = createPortTemplate(portName);
+                    if (isPM && hour !== 12) {
+                        hour += 12;
+                    } else if (!isPM && hour === 12) { // 12am is midnight (hour 0)
+                        hour = 0;
                     }
+                    return hour;
+                };
 
-                    const vehicleChunk = description.split('Passenger Vehicles')[1] ? description.split('Passenger Vehicles')[1].split('Pedestrian')[0] : '';
-                    const pedestrianChunk = description.split('Pedestrian')[1] ? description.split('Pedestrian')[1] : '';
-                    console.log("Vehicle Chunk:", vehicleChunk);
-                    console.log("Pedestrian Chunk:", pedestrianChunk);
+                return { startHour: parseTime(startStr), endHour: parseTime(endStr) };
+            } catch (e) {
+                console.error(`Could not parse operating hours: "${hoursString}"`, e);
+                return null;
+            }
+        }
 
-                    // Fill in the template with data
-                    if (originalPortName.includes('PedWest')) {
-                        console.log("Handling special case: PedWest");
-                        // The description for PedWest contains its own lane data under 'General' and 'Ready'.
-                        // We parse them directly from the full description text.
-                        portData[portName].pedwest = {
-                            'General': extractLaneData(description, 'General Lanes'),
-                            'Ready': extractLaneData(description, 'Ready Lanes')
-                        };
-                    } else {
-                        // Standard vehicle lanes
-                        portData[portName].vehicles['General'] = extractLaneData(vehicleChunk, 'General Lanes');
-                        portData[portName].vehicles['Ready'] = extractLaneData(vehicleChunk, 'Ready Lanes');
-                        portData[portName].vehicles['Sentri'] = extractLaneData(vehicleChunk, 'Sentri Lanes');
+        /**
+         * Checks if the current time is within a given operating hours window.
+         */
+        function isCurrentlyOpen({ startHour, endHour }) {
+            const currentHour = new Date().getHours();
+            // Handles overnight hours (e.g., 10pm - 6am)
+            if (startHour > endHour) return currentHour >= startHour || currentHour < endHour;
+            return currentHour >= startHour && currentHour < endHour;
+        }
 
-                        // Standard pedestrian lanes
-                        portData[portName].pedestrians['General'] = extractLaneData(pedestrianChunk, 'General Lanes');
-                        portData[portName].pedestrians['Ready'] = extractLaneData(pedestrianChunk, 'Ready Lanes');
+        /**
+         * Creates a blank "template" object for a port with all possible lanes.
+         */
+        function createPortTemplate(portName) {
+            const laneTemplate = () => ({ status: 'N/A', waitTime: 'N/A', lanesOpen: 'N/A', updateTime: '' });
+            return {
+                portName: portName,
+                vehicles: { 'General': laneTemplate(), 'Ready': laneTemplate(), 'Sentri': laneTemplate() },
+                pedestrians: { 'General': laneTemplate(), 'Ready': laneTemplate(), 'Sentri': laneTemplate() }
+            };
+        }
+
+        // =================================================================================
+        // --- UI / RENDERING LAYER ---
+        // Responsible for creating and updating DOM elements.
+        // =================================================================================
+
+        function renderDashboard() {
+            console.log("%c--- Starting DOM Generation ---", "font-weight: bold; font-size: 1.2em;");
+
+            // Clear existing port sections before re-rendering
+            document.querySelectorAll('.port-section').forEach(el => el.remove());
+
+            const { ports, filters } = appState;
+            const fragment = document.createDocumentFragment();
+
+            Object.values(ports)
+                .filter(port => filters.ports.includes(port.portName))
+                .forEach(port => {
+                    const portSection = createPortSectionElement(port);
+                    if (portSection) {
+                        fragment.appendChild(portSection);
                     }
-                    console.log(`Finished processing. Current data for ${portName}:`, JSON.parse(JSON.stringify(portData[portName])));
-                    console.groupEnd();
+                });
+
+            dashboardContainer.appendChild(fragment);
+            initializeAccordions();
+        }
+
+        function createPortSectionElement(port) {
+            const { filters } = appState;
+            const portSection = document.createElement('section');
+            portSection.className = 'port-section';
+
+            const header = document.createElement('h2');
+            header.className = 'port-title collapsible';
+            header.textContent = port.portName;
+
+            const layout = document.createElement('div');
+            layout.className = 'port-layout';
+
+            const categories = {
+                Vehicles: port.vehicles,
+                Pedestrians: port.pedestrians,
+                PedWest: port.pedwest
+            };
+
+            for (const [mode, categoryData] of Object.entries(categories)) {
+                if (!categoryData || !filters.modes.includes(mode === 'PedWest' ? 'Pedestrians' : mode)) continue;
+
+                // Filter out non-lane properties like 'operatingHours' by checking if the value is an object
+                const visibleLanes = Object.entries(categoryData)
+                    .filter(([name, data]) => typeof data === 'object' && data.status !== 'N/A' && filters.lanes.includes(name));
+
+                if (visibleLanes.length > 0) {
+                    const categoryColumn = document.createElement('div');
+                    categoryColumn.className = 'category-column';
+
+                    const categoryHeader = document.createElement('div');
+                    categoryHeader.className = 'category-header';
+                    categoryHeader.innerHTML = `<h3 class="category-title">${mode}</h3>`;
+
+                    if (categoryData.operatingHours) {
+                        const hoursEl = document.createElement('p');
+                        hoursEl.className = 'operating-hours';
+                        hoursEl.textContent = `Hours: ${categoryData.operatingHours}`;
+                        categoryHeader.appendChild(hoursEl);
+                    }
+                    categoryColumn.appendChild(categoryHeader);
+
+                    const cardContainer = document.createElement('div');
+                    cardContainer.className = 'card-container';
+
+                    visibleLanes.forEach(([laneName, laneData]) => {
+                        cardContainer.appendChild(createCardElement(laneName, laneData));
+                    });
+                    categoryColumn.appendChild(cardContainer);
+                    layout.appendChild(categoryColumn);
                 }
+            }
 
-                console.log("%c--- All items parsed. Final data structure: ---", "font-weight: bold; font-size: 1.2em;", portData);
-                if (loadingMessage) loadingMessage.style.display = 'none';
+            if (layout.hasChildNodes()) {
+                portSection.append(header, layout);
+                return portSection;
+            }
+            return null; // Return null if the port has no visible categories
+        }
 
-                console.log("%c--- Starting DOM Generation ---", "font-weight: bold; font-size: 1.2em;");
-                for (const portName in portData) {
-                    console.log(`Generating HTML for port: ${portName}`);
-                    const port = portData[portName];
-                    let vehicleHtml = '';
-                    let pedestrianHtml = '';
-                    let pedwestHtml = '';
+        function createCardElement(laneName, lane) {
+            const card = document.createElement('div');
+            const waitTimeDisplay = lane.status === 'Open' ? `${lane.waitTime} min` : lane.status;
+            const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : (lane.lanesOpen !== 'N/A' ? `${lane.lanesOpen} lane(s) open` : '');
+            card.className = `card ${getStatusColor(lane.status, lane.waitTime)}`;
+            card.innerHTML = `
+                <h3>${laneName}</h3>
+                <div class="wait-time">${waitTimeDisplay}</div>
+                <div class="lanes-open">${lanesOpenDisplay}</div>
+                <div class="last-updated">${lane.updateTime}</div>
+            `;
+            return card;
+        }
 
-                    // Build Vehicle Column
-                    const hasVisibleVehicleLanes = Object.values(port.vehicles).some(lane => lane.status !== 'N/A');
-                    if (hasVisibleVehicleLanes) {
-                        vehicleHtml += `<div class="category-column" data-mode-type="Vehicles"><h3 class="category-title">Vehicles</h3><div class="card-container">`;
-                        for (const laneName in port.vehicles) {
-                            const lane = port.vehicles[laneName];
-                            if (lane.status === 'N/A') continue; // Hide lanes with no data
-                            const waitTimeDisplay = lane.status === 'Open' ? `${lane.waitTime} min` : lane.status;
-                            const colorClass = getStatusColor(lane.status, lane.waitTime);
-                            const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : (lane.lanesOpen !== 'N/A' ? `${lane.lanesOpen} lane(s) open` : '');
-                            const updatedDisplay = lane.updateTime ? `${lane.updateTime}` : '';
-                            vehicleHtml += `<div class="card ${colorClass}" data-lane-type="${laneName}"><h3>${laneName}</h3><div class="wait-time">${waitTimeDisplay}</div><div class="lanes-open">${lanesOpenDisplay}</div><div class="last-updated">${updatedDisplay}</div></div>`;
-                        }
-                        vehicleHtml += `</div></div>`;
-                    }
-
-                    // Build Pedestrian Column
-                    const hasVisiblePedestrianLanes = Object.values(port.pedestrians).some(lane => lane.status !== 'N/A');
-                    if (hasVisiblePedestrianLanes) {
-                        pedestrianHtml += `<div class="category-column" data-mode-type="Pedestrians"><h3 class="category-title">Pedestrians</h3><div class="card-container">`;
-                        for (const laneName in port.pedestrians) {
-                            const lane = port.pedestrians[laneName];
-                            if (lane.status === 'N/A' || laneName === 'Sentri') continue; // Hide lanes with no data and Ped Sentri
-                            const waitTimeDisplay = lane.status === 'Open' ? `${lane.waitTime} min` : lane.status;
-                            const colorClass = getStatusColor(lane.status, lane.waitTime);
-                            const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : (lane.lanesOpen !== 'N/A' ? `${lane.lanesOpen} lane(s) open` : '');
-                            const updatedDisplay = lane.updateTime ? `${lane.updateTime}` : '';
-                            pedestrianHtml += `<div class="card ${colorClass}" data-lane-type="${laneName}"><h3>${laneName}</h3><div class="wait-time">${waitTimeDisplay}</div><div class="lanes-open">${lanesOpenDisplay}</div><div class="last-updated">${updatedDisplay}</div></div>`;
-                        }
-                        pedestrianHtml += `</div></div>`;
-                    }
-
-                    // Build PedWest Column
-                    const hasVisiblePedWestLanes = port.pedwest && Object.values(port.pedwest).some(lane => lane.status !== 'N/A');
-                    if (hasVisiblePedWestLanes) {
-                        pedwestHtml += `<div class="category-column" data-mode-type="PedWest"><h3 class="category-title">PedWest</h3><div class="card-container">`;
-                        for (const laneName in port.pedwest) {
-                            const lane = port.pedwest[laneName];
-                            if (lane.status === 'N/A') continue;
-                            const waitTimeDisplay = lane.status === 'Open' ? `${lane.waitTime} min` : lane.status;
-                            const colorClass = getStatusColor(lane.status, lane.waitTime);
-                            const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : (lane.lanesOpen !== 'N/A' ? `${lane.lanesOpen} lane(s) open` : '');
-                            const updatedDisplay = lane.updateTime ? `${lane.updateTime}` : '';
-                            pedwestHtml += `<div class="card ${colorClass}" data-lane-type="${laneName}"><h3>${laneName}</h3><div class="wait-time">${waitTimeDisplay}</div><div class="lanes-open">${lanesOpenDisplay}</div><div class="last-updated">${updatedDisplay}</div></div>`;
-                        }
-                        pedwestHtml += `</div></div>`;
-                    }
-
-                    // Only add the port section if it has at least one visible category
-                    if (vehicleHtml || pedestrianHtml || pedwestHtml) {
-                        let portHtml = `<section class="port-section"><h2 class="port-title collapsible">${portName}</h2><div class="port-layout">`;
-                        portHtml += vehicleHtml;
-                        portHtml += pedestrianHtml;
-                        portHtml += pedwestHtml;
-                        portHtml += `</div></section>`;
-                        dashboard.innerHTML += portHtml;
-                    }
-                }
-
-                setupInteractiveDashboard();
-            })
-            .catch(error => {
-                if(loadingMessage) loadingMessage.textContent = 'Failed to load data. The API may be down.';
-                console.error('Fetch Error:', error);
+        function updateFilterControls(portNames) {
+            const portFilterContainer = document.getElementById('port-filter-container');
+            portFilterContainer.innerHTML = '<h3>Port of Entry:</h3>'; // Clear previous
+            portNames.forEach(portName => {
+                portFilterContainer.innerHTML += `
+                    <label><input type="checkbox" name="port-filter" value="${portName}" checked> ${portName}</label>
+                `;
             });
+        }
+
+        function initializeAccordions() {
+            document.querySelectorAll('.port-title.collapsible').forEach(header => {
+                // Start expanded
+                header.classList.add('active');
+                const content = header.nextElementSibling;
+                content.style.maxHeight = content.scrollHeight + 'px';
+
+                header.addEventListener('click', () => {
+                    header.classList.toggle('active');
+                    content.style.maxHeight = header.classList.contains('active') ? content.scrollHeight + 'px' : '0px';
+                });
+            });
+        }
+
+        // =================================================================================
+        // --- CONTROLLER LAYER ---
+        // Manages state, user events, and orchestrates the app.
+        // =================================================================================
+
+        async function main() {
+            try {
+                const portData = await fetchAndParseData();
+                appState.ports = portData;
+
+                const portNames = Object.keys(portData);
+                updateFilterControls(portNames);
+                updateFiltersFromDOM();
+
+                if (loadingMessage) loadingMessage.style.display = 'none';
+                renderDashboard();
+                setupEventListeners();
+
+                updateLastUpdatedTimestamp();
+                setInterval(refreshData, REFRESH_INTERVAL_MS);
+
+            } catch (error) {
+                if (loadingMessage) loadingMessage.textContent = 'Failed to load data. The API may be down.';
+                console.error('Initialization Error:', error);
+            }
+        }
+
+        function updateFiltersFromDOM() {
+            appState.filters.ports = Array.from(document.querySelectorAll('input[name="port-filter"]:checked')).map(cb => cb.value);
+            appState.filters.modes = Array.from(document.querySelectorAll('input[name="mode-filter"]:checked')).map(cb => cb.value);
+            appState.filters.lanes = Array.from(document.querySelectorAll('input[name="lane-filter"]:checked')).map(cb => cb.value);
+        }
+
+        function setupEventListeners() {
+            document.querySelector('.filter-controls').addEventListener('change', () => {
+                updateFiltersFromDOM();
+                renderDashboard();
+            });
+        }
+
+        async function refreshData() {
+            console.log("Refreshing data...");
+            lastUpdatedEl.style.opacity = '0.5';
+            try {
+                appState.ports = await fetchAndParseData();
+                renderDashboard();
+                updateLastUpdatedTimestamp();
+            } catch (error) {
+                console.error("Failed to refresh data:", error);
+            } finally {
+                lastUpdatedEl.style.opacity = '1';
+            }
+        }
+
+        function updateLastUpdatedTimestamp() {
+            const now = new Date();
+            lastUpdatedEl.textContent = `Last Updated: ${now.toLocaleTimeString()}`;
+        }
 
         function getStatusColor(status, waitTime) {
             if (status !== 'Open') return 'status-closed';
-            const minutes = parseInt(waitTime);
+            const minutes = parseInt(waitTime, 10);
             if (isNaN(minutes)) return '';
             if (minutes <= 20) return 'status-green';
             if (minutes <= 60) return 'status-yellow';
             return 'status-red';
         }
 
-        /**
-         * Applies filters to hide/show cards and sections based on checkbox selections.
-         */
-        function applyFilters() {
-            const checkedLaneFilters = Array.from(document.querySelectorAll('input[name="lane-filter"]:checked')).map(cb => cb.value);
-            const checkedModeFilters = Array.from(document.querySelectorAll('input[name="mode-filter"]:checked')).map(cb => cb.value);
+        // --- App Initialization ---
+        main();
 
-            document.querySelectorAll('.port-section').forEach(port => {
-                let portHasVisibleCards = false;
-                port.querySelectorAll('.category-column').forEach(category => {
-                    const modeType = category.dataset.modeType;
-                    if (!checkedModeFilters.includes(modeType)) {
-                        category.style.display = 'none';
-                        return;
-                    }
-
-                    let categoryHasVisibleCards = false;
-                    category.querySelectorAll('.card').forEach(card => {
-                        const laneType = card.dataset.laneType;
-                        if (checkedLaneFilters.includes(laneType)) {
-                            card.style.display = 'flex';
-                            categoryHasVisibleCards = true;
-                            portHasVisibleCards = true;
-                        } else {
-                            card.style.display = 'none';
-                        }
-                    });
-                    category.style.display = categoryHasVisibleCards ? 'block' : 'none';
-                });
-
-                port.style.display = portHasVisibleCards ? 'block' : 'none';
-
-                // Recalculate height for the port's layout if it's visible and active (expanded)
-                if (portHasVisibleCards) {
-                    const header = port.querySelector('.port-title.collapsible');
-                    const content = port.querySelector('.port-layout');
-                    if (header.classList.contains('active')) {
-                        content.style.maxHeight = content.scrollHeight + 'px';
-                    }
-                }
-            });
-        }
-
-        /**
-         * Sets up all event listeners for interactive elements after they are rendered.
-         */
-        function setupInteractiveDashboard() {
-            // Setup collapsible port sections
-            document.querySelectorAll('.port-title.collapsible').forEach(header => {
-                header.addEventListener('click', () => {
-                    header.classList.toggle('active');
-                    const content = header.nextElementSibling;
-                    if (header.classList.contains('active')) {
-                        content.style.maxHeight = content.scrollHeight + 'px';
-                    } else {
-                        content.style.maxHeight = '0px';
-                    }
-                });
-
-                // Start expanded by default
-                header.classList.add('active');
-                const content = header.nextElementSibling;
-                // Use a small timeout to ensure browser has rendered and calculated scrollHeight
-                setTimeout(() => {
-                    if (header.classList.contains('active')) {
-                        content.style.maxHeight = content.scrollHeight + 'px';
-                    }
-                }, 10);
-            });
-
-            // Setup filter checkboxes
-            document.querySelectorAll('input[name="lane-filter"], input[name="mode-filter"]').forEach(checkbox => {
-                checkbox.addEventListener('change', applyFilters);
-            });
-        }
     </script>
 </body>
 </html>
