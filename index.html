@@ -17,6 +17,7 @@
         <div class="tabs" role="tablist" aria-label="Dashboard sections">
             <button class="tab-button" role="tab" id="tab-live-dashboard" data-tab="live-dashboard" aria-controls="panel-live-dashboard">Live Dashboard</button>
             <button class="tab-button" role="tab" id="tab-historical-analysis" data-tab="historical-analysis" aria-controls="panel-historical-analysis">Historical Analysis</button>
+            <button class="tab-button" role="tab" id="tab-settings" data-tab="settings" aria-controls="panel-settings">Settings</button>
         </div>
 
         <div id="panel-live-dashboard" class="tab-content" role="tabpanel" aria-labelledby="tab-live-dashboard">
@@ -52,6 +53,21 @@
                 </div>
                 <div id="heatmap-container"></div>
                 <p id="historical-loading">Loading historical data...</p>
+            </div>
+        </div>
+
+        <div id="panel-settings" class="tab-content" role="tabpanel" aria-labelledby="tab-settings">
+            <div class="settings-content">
+                <h2>Live Dashboard Settings</h2>
+                <div class="setting-item">
+                    <label for="threshold-green">"Good" wait time (Green) ends at (minutes):</label>
+                    <input type="number" id="threshold-green" name="threshold-green" min="0">
+                </div>
+                <div class="setting-item">
+                    <label for="threshold-yellow">"Okay" wait time (Yellow) ends at (minutes):</label>
+                    <input type="number" id="threshold-yellow" name="threshold-yellow" min="0">
+                </div>
+                <p class="settings-note">Wait times above the "Okay" threshold will be shown as "High" (Red). Changes are saved automatically and applied to the live dashboard.</p>
             </div>
         </div>
     </div>
