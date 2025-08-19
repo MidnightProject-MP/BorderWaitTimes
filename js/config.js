@@ -35,6 +35,9 @@ export const CONFIG = {
             Sentri: '#ef4444',
             Standard: '#f97316', // Fallback for pedestrian lanes often named 'Standard'
             DEFAULT: '#ffffff',
+            TEXT_PRIMARY: '#e0e0e0',
+            TEXT_SECONDARY: '#aaa',
+            GRID: '#444',
         },
         HEATMAP_COLORS: {
             NO_DATA: '#3a3a3a',

@@ -9,13 +9,16 @@ const heatmapContainer = document.getElementById('heatmap-container');
 let chart;
 
 async function fetchAndParse() {
-    console.log('[Hist] Fetching data...');
+    console.groupCollapsed('[HISTORICAL ANALYSIS] Data Processing Pipeline');
+    console.log(`[1/4] Fetching historical data from: ${CONFIG.URLS.HISTORICAL_DATA_CSV}`);
+
     try {
         // Add a cache-busting parameter to prevent browsers from serving stale, empty responses.
         const url = `${CONFIG.URLS.HISTORICAL_DATA_CSV}&_=${new Date().getTime()}`;
         const response = await fetch(url);
         if (!response.ok) throw new Error(`Network response was not ok: ${response.status}`);
         const csvText = await response.text();
+        console.log('[2/4] Raw CSV data received:\n', csvText);
         if (!csvText || csvText.trim() === '') {
             throw new Error("Received empty data from the server. The data source might be temporarily unavailable.");
         }
@@ -49,10 +52,12 @@ async function fetchAndParse() {
                 }
             }
         });
-        console.log('[Hist] Parsing complete.');
+        console.log('[3/4] Parsed data into structured object:', data);
+        console.groupEnd();
         return data;
     } catch (error) {
         console.error("[Hist] Error fetching or parsing data:", error);
+        console.groupEnd();
         loadingMsg.textContent = `Failed to load historical data: ${error.message}`;
         return null;
     }
@@ -122,7 +127,9 @@ export function updateChart(state) {
         heatmapContainer.innerHTML = '';
         return;
     }
-    console.log(`[Hist] Updating chart for ${portName}`);
+    
+    console.groupCollapsed(`[HISTORICAL ANALYSIS] Rendering charts for: ${portName}`);
+    console.log('Using data subset for this port:', portData);
 
     const datasets = [];
     const colors = CONFIG.UI.CHART_COLORS;
@@ -142,6 +149,8 @@ export function updateChart(state) {
         });
     }
 
+    console.log('[1/2] Data prepared for Line Chart:', datasets);
+
     const labels = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
 
     if (chart) chart.destroy();
@@ -151,24 +160,30 @@ export function updateChart(state) {
         options: {
             responsive: true, maintainAspectRatio: false,
             plugins: {
-                title: { display: true, text: `Average Hourly Wait Times at ${portName}`, color: '#e0e0e0', font: { size: 18 } },
-                legend: { labels: { color: '#e0e0e0' } }
+                title: { display: true, text: `Average Hourly Wait Times at ${portName}`, color: colors.TEXT_PRIMARY, font: { size: 18 } },
+                legend: { labels: { color: colors.TEXT_PRIMARY } }
             },
             scales: {
-                x: { ticks: { color: '#aaa' }, grid: { color: '#444' } },
-                y: { ticks: { color: '#aaa' }, grid: { color: '#444' }, title: { display: true, text: 'Wait Time (minutes)', color: '#e0e0e0' } }
+                x: { ticks: { color: colors.TEXT_SECONDARY }, grid: { color: colors.GRID } },
+                y: { ticks: { color: colors.TEXT_SECONDARY }, grid: { color: colors.GRID }, title: { display: true, text: 'Wait Time (minutes)', color: colors.TEXT_PRIMARY } }
             }
         }
     });
 
     // --- Render Heatmaps ---
     heatmapContainer.innerHTML = ''; // Clear previous heatmaps
+    let loggedHeatmapData = false;
     for (const key in portData) {
         const dayHourData = portData[key];
         const heatmapData = calculateDayHourAverages(dayHourData);
         const heatmapEl = ui.createHeatmapElement(key, heatmapData);
         heatmapContainer.appendChild(heatmapEl);
+        if (!loggedHeatmapData) {
+            console.log(`[2/2] Data prepared for Heatmap (Example: '${key}'):`, heatmapData);
+            loggedHeatmapData = true;
+        }
     }
+    console.groupEnd();
 }
 
 export async function init(state, onStateChange) {
