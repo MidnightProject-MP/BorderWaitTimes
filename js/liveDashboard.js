@@ -32,12 +32,26 @@ function extractLaneData(text, laneFullName) {
 }
 
 function getOperatingHoursInfo(desc, id) {
-    console.log(`Extracting operating hours for: ${id} with description: ${desc}`);
-    
     const defaultInfo = { operatingHoursText: 'N/A', isCurrentlyOpen: true };
 
-    // Regex to find a header containing the ID, and capture the text up to (but not including) the date.
-    // Example: "Passenger Vehicles: 6 am - 10 pm 01/01/2024" -> captures "Passenger Vehicles: 6 am - 10 pm"
+    // --- New Strategy: Handle table-like format ---
+    // Find the line containing the identifier (e.g., "Passenger Vehicles")
+    const lines = desc.split('\n');
+    const relevantLine = lines.find(line => line.includes(id));
+
+    if (relevantLine) {
+        // In this format, the hours are the first column, separated by tabs.
+        const parts = relevantLine.split('\t');
+        const hoursText = parts[0].trim();
+        
+        // If we found non-empty text in the first column, use it.
+        if (hoursText) {
+            return { operatingHoursText: hoursText, isCurrentlyOpen: !hoursText.toLowerCase().includes('closed') };
+        }
+    }
+
+    // --- Fallback Strategy: Original regex for older formats ---
+    // This regex looks for a pattern like "ID: hours" followed by a date.
     const regexWithDate = new RegExp(`(${id}.*?:.*?)(?=\\s+\\d{1,2}/\\d{1,2}/\\d{4})`);
     const match = desc.match(regexWithDate);
 
@@ -45,6 +59,8 @@ function getOperatingHoursInfo(desc, id) {
         const text = match[1].trim();
         return { operatingHoursText: text, isCurrentlyOpen: !text.toLowerCase().includes('closed') };
     }
+
+    // If both strategies fail, return the default.
     return defaultInfo;
 }
 
@@ -85,17 +101,13 @@ export async function fetchAndParseData() {
         const desc = item.querySelector('description').textContent;
         if (title.includes('PedWest')) {
             const pedWestHoursInfo = getOperatingHoursInfo(desc, CONFIG.MODES.PEDESTRIANS);
-            console.log(`Operating Hours: ${pedWestHoursInfo.operatingHoursText}`);
             Object.assign(portData[portName].pedwest, parseDescription(desc, CONFIG.MODES.PEDESTRIANS, pedWestHoursInfo));
         } else {
             const vChunk = desc.split('Passenger Vehicles')[1]?.split('Pedestrian')[0] || '';
             const pChunk = desc.split('Pedestrian')[1] || '';
 
             const vehicleHoursInfo = getOperatingHoursInfo(desc, 'Passenger Vehicles');
-            // console.log(`Operating Hours: ${vehicleHoursInfo.operatingHoursText}`);
-
             const pedestrianHoursInfo = getOperatingHoursInfo(desc, CONFIG.MODES.PEDESTRIANS);
-            // console.log(`Operating Hours: ${pedestrianHoursInfo.operatingHoursText}`);
 
             Object.assign(portData[portName].vehicles, parseDescription(vChunk, CONFIG.MODES.VEHICLES, vehicleHoursInfo));
             Object.assign(portData[portName].pedestrians, parseDescription(pChunk, CONFIG.MODES.PEDESTRIANS, pedestrianHoursInfo));
