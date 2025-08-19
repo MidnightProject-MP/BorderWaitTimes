@@ -12,6 +12,13 @@
         .port-layout { display: flex; flex-wrap: wrap; gap: 40px; }
         .category-column { flex: 1; min-width: 300px; }
         .category-title { font-size: 1.5em; color: #444; margin-top: 0; }
+        .filter-controls { background-color: #fff; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+        .filter-controls h3 { margin: 0; font-size: 1em; color: #333; }
+        .filter-controls label { cursor: pointer; user-select: none; }
+        .port-title.collapsible { cursor: pointer; position: relative; user-select: none; }
+        .port-title.collapsible::after { content: '+'; font-weight: bold; position: absolute; right: 10px; transition: transform 0.2s ease-in-out; font-size: 1.5em; top: 50%; transform: translateY(-55%); }
+        .port-title.collapsible.active::after { content: '−'; }
+        .port-layout { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
         .card-container { display: flex; flex-wrap: wrap; gap: 20px; }
         .card { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 20px; border-left: 5px solid #ccc; display: flex; flex-direction: column; flex: 1; min-width: 160px; }
         .card.status-no-data { background-color: #f8f9fa; border-left-color: #e0e0e0; }
@@ -28,6 +35,12 @@
 <body>
     <div id="dashboard" class="dashboard">
         <h1>Live Border Wait Times</h1>
+        <div class="filter-controls">
+            <h3>Filter by Lane Type:</h3>
+            <label><input type="checkbox" name="lane-filter" value="General" checked> General</label>
+            <label><input type="checkbox" name="lane-filter" value="Ready" checked> Ready</label>
+            <label><input type="checkbox" name="lane-filter" value="Sentri" checked> Sentri</label>
+        </div>
         <p id="loading">Loading live data from CBP...</p>
     </div>
 
@@ -157,7 +170,7 @@
                             const colorClass = getStatusColor(lane.status, lane.waitTime);
                             const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : (lane.lanesOpen !== 'N/A' ? `${lane.lanesOpen} lane(s) open` : '');
                             const updatedDisplay = lane.updateTime ? `${lane.updateTime}` : '';
-                            vehicleHtml += `<div class="card ${colorClass}"><h3>${laneName}</h3><div class="wait-time">${waitTimeDisplay}</div><div class="lanes-open">${lanesOpenDisplay}</div><div class="last-updated">${updatedDisplay}</div></div>`;
+                            vehicleHtml += `<div class="card ${colorClass}" data-lane-type="${laneName}"><h3>${laneName}</h3><div class="wait-time">${waitTimeDisplay}</div><div class="lanes-open">${lanesOpenDisplay}</div><div class="last-updated">${updatedDisplay}</div></div>`;
                         }
                         vehicleHtml += `</div></div>`;
                     }
@@ -173,7 +186,7 @@
                             const colorClass = getStatusColor(lane.status, lane.waitTime);
                             const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : (lane.lanesOpen !== 'N/A' ? `${lane.lanesOpen} lane(s) open` : '');
                             const updatedDisplay = lane.updateTime ? `${lane.updateTime}` : '';
-                            pedestrianHtml += `<div class="card ${colorClass}"><h3>${laneName}</h3><div class="wait-time">${waitTimeDisplay}</div><div class="lanes-open">${lanesOpenDisplay}</div><div class="last-updated">${updatedDisplay}</div></div>`;
+                            pedestrianHtml += `<div class="card ${colorClass}" data-lane-type="${laneName}"><h3>${laneName}</h3><div class="wait-time">${waitTimeDisplay}</div><div class="lanes-open">${lanesOpenDisplay}</div><div class="last-updated">${updatedDisplay}</div></div>`;
                         }
                         pedestrianHtml += `</div></div>`;
                     }
@@ -189,14 +202,14 @@
                             const colorClass = getStatusColor(lane.status, lane.waitTime);
                             const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : (lane.lanesOpen !== 'N/A' ? `${lane.lanesOpen} lane(s) open` : '');
                             const updatedDisplay = lane.updateTime ? `${lane.updateTime}` : '';
-                            pedwestHtml += `<div class="card ${colorClass}"><h3>${laneName}</h3><div class="wait-time">${waitTimeDisplay}</div><div class="lanes-open">${lanesOpenDisplay}</div><div class="last-updated">${updatedDisplay}</div></div>`;
+                            pedwestHtml += `<div class="card ${colorClass}" data-lane-type="${laneName}"><h3>${laneName}</h3><div class="wait-time">${waitTimeDisplay}</div><div class="lanes-open">${lanesOpenDisplay}</div><div class="last-updated">${updatedDisplay}</div></div>`;
                         }
                         pedwestHtml += `</div></div>`;
                     }
 
                     // Only add the port section if it has at least one visible category
                     if (vehicleHtml || pedestrianHtml || pedwestHtml) {
-                        let portHtml = `<section class="port-section"><h2 class="port-title">${portName}</h2><div class="port-layout">`;
+                        let portHtml = `<section class="port-section"><h2 class="port-title collapsible">${portName}</h2><div class="port-layout">`;
                         portHtml += vehicleHtml;
                         portHtml += pedestrianHtml;
                         portHtml += pedwestHtml;
@@ -204,6 +217,8 @@
                         dashboard.innerHTML += portHtml;
                     }
                 }
+
+                setupInteractiveDashboard();
             })
             .catch(error => {
                 if(loadingMessage) loadingMessage.textContent = 'Failed to load data. The API may be down.';
@@ -217,6 +232,62 @@
             if (minutes <= 20) return 'status-green';
             if (minutes <= 60) return 'status-yellow';
             return 'status-red';
+        }
+
+        /**
+         * Applies filters to hide/show cards and sections based on checkbox selections.
+         */
+        function applyFilters() {
+            const checkedFilters = Array.from(document.querySelectorAll('input[name="lane-filter"]:checked')).map(cb => cb.value);
+
+            document.querySelectorAll('.port-section').forEach(port => {
+                let portHasVisibleCards = false;
+                port.querySelectorAll('.category-column').forEach(category => {
+                    let categoryHasVisibleCards = false;
+                    category.querySelectorAll('.card').forEach(card => {
+                        const laneType = card.dataset.laneType;
+                        if (checkedFilters.includes(laneType)) {
+                            card.style.display = 'flex';
+                            categoryHasVisibleCards = true;
+                            portHasVisibleCards = true;
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                    category.style.display = categoryHasVisibleCards ? 'block' : 'none';
+                });
+                port.style.display = portHasVisibleCards ? 'block' : 'none';
+            });
+
+            // Recalculate height for any open accordions
+            document.querySelectorAll('.port-layout').forEach(layout => {
+                if (layout.style.maxHeight !== '0px') {
+                    layout.style.maxHeight = layout.scrollHeight + 'px';
+                }
+            });
+        }
+
+        /**
+         * Sets up all event listeners for interactive elements after they are rendered.
+         */
+        function setupInteractiveDashboard() {
+            // Setup collapsible port sections
+            document.querySelectorAll('.port-title.collapsible').forEach(header => {
+                header.addEventListener('click', () => {
+                    header.classList.toggle('active');
+                    const content = header.nextElementSibling;
+                    if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+                        content.style.maxHeight = '0px';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                    }
+                });
+            });
+
+            // Setup filter checkboxes
+            document.querySelectorAll('input[name="lane-filter"]').forEach(checkbox => {
+                checkbox.addEventListener('change', applyFilters);
+            });
         }
     </script>
 </body>
