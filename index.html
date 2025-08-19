@@ -436,7 +436,7 @@
 
         // --- HISTORICAL ANALYSIS SCRIPT ---
         const historicalAnalysis = (function() {
-            const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQgwjy1utMHHfGJuV_y7dlp_vQvpXo7jvNZ2BPK65BR-KWTgnFNPIk73hiMmX42dJddm5g_QtuUJjRv/pub?gid=993792785&single=true&output=csv';
+            const baseUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQgwjy1utMHHfGJuV_y7dlp_vQvpXo7jvNZ2BPK65BR-KWTgnFNPIk73hiMmX42dJddm5g_QtuUJjRv/pub?gid=993792785&single=true&output=csv';
             const loadingMsg = document.getElementById('historical-loading');
             const portSelect = document.getElementById('port-select');
             const ctx = document.getElementById('wait-time-chart').getContext('2d');
@@ -445,13 +445,18 @@
             async function fetchAndParse() {
                 console.log('[Hist] Fetching data...');
                 try {
-                    const response = await fetch(url, { cache: 'no-store' });
+                    // Add a cache-busting parameter to prevent browsers from serving stale, empty responses.
+                    const url = `${baseUrl}&_=${new Date().getTime()}`;
+                    const response = await fetch(url);
                     if (!response.ok) throw new Error(`Network response was not ok: ${response.status}`);
                     const csvText = await response.text();
+                    if (!csvText || csvText.trim() === '') {
+                        throw new Error("Received empty data from the server. The data source might be temporarily unavailable.");
+                    }
                     console.log('[Hist] Data fetched. Parsing...');
                     const lines = csvText.trim().split(/\r?\n/);
                     if (lines.length < 2) { // Need header and at least one data row
-                        throw new Error("Historical data table is missing headers or data.");
+                        throw new Error("Historical data is incomplete (missing headers or data rows).");
                     }
                     const headers = lines.shift().split(',').map(h => h.trim());
                     const rows = lines;
@@ -480,7 +485,7 @@
                     return data;
                 } catch (error) {
                     console.error("[Hist] Error fetching or parsing data:", error);
-                    loadingMsg.textContent = 'Failed to load historical data. Please check the console.';
+                    loadingMsg.textContent = `Failed to load historical data: ${error.message}`;
                     return null;
                 }
             }
