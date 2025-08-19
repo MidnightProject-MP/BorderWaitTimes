@@ -97,8 +97,8 @@
                 const portData = {};
 
                 for (const item of items) {
-                    console.groupCollapsed(`Processing Item: ${originalPortName}`);
                     const originalPortName = item.querySelector('title').textContent;
+                    console.groupCollapsed(`Processing Item: ${originalPortName}`);
                     const portName = originalPortName.split(' - ')[0];
                     const description = item.querySelector('description').textContent;
 
