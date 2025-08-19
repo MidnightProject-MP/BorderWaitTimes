@@ -277,7 +277,9 @@
 
             function getOperatingHoursInfo(desc, id) {
                 const defaultInfo = { operatingHoursText: 'N/A', isCurrentlyOpen: true };
-                const regex = new RegExp(`(.*?)\s+\d{1,2}/\d{1,2}/\d{4}\s+${id}`);
+                // Find a header that starts with the ID (e.g., "Passenger Vehicles" or "Pedestrian"),
+                // and capture the full header text up to the date.
+                const regex = new RegExp(`(${id}[^:]*:.*?)\\s+\\d{1,2}/\\d{1,2}/\\d{4}`);
                 const match = desc.match(regex);
                 if (!match || !match[1]) return defaultInfo;
                 const text = match[1].trim();
@@ -434,7 +436,7 @@
 
         // --- HISTORICAL ANALYSIS SCRIPT ---
         const historicalAnalysis = (function() {
-            const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQgwjy1utMHHfGJuV_y7dlp_vQvpXo7jvNZ2BPK65BR-KWTgnFNPIk73hiMmX42dJddm5g_QtuUJjRv/pubhtml?gid=993792785&single=true';
+            const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQgwjy1utMHHfGJuV_y7dlp_vQvpXo7jvNZ2BPK65BR-KWTgnFNPIk73hiMmX42dJddm5g_QtuUJjRv/pub?gid=993792785&single=true&output=csv';
             const loadingMsg = document.getElementById('historical-loading');
             const portSelect = document.getElementById('port-select');
             const ctx = document.getElementById('wait-time-chart').getContext('2d');
@@ -445,26 +447,24 @@
                 try {
                     const response = await fetch(url);
                     if (!response.ok) throw new Error(`Network response was not ok: ${response.status}`);
-                    const html = await response.text();
+                    const csvText = await response.text();
                     console.log('[Hist] Data fetched. Parsing...');
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const allRows = Array.from(doc.querySelectorAll('tbody tr'));
-                    if (allRows.length < 2) { // Need header and at least one data row
+                    const lines = csvText.trim().split(/\r?\n/);
+                    if (lines.length < 2) { // Need header and at least one data row
                         throw new Error("Historical data table is missing headers or data.");
                     }
-                    const headers = Array.from(allRows.shift().querySelectorAll('td')).map(th => th.innerText.trim());
-                    const rows = allRows;
+                    const headers = lines.shift().split(',').map(h => h.trim());
+                    const rows = lines;
                     const data = {};
                     
                     rows.forEach(row => {
-                        const cells = Array.from(row.querySelectorAll('td')).map(td => td.innerText.trim());
-                        if (cells.length < 3) return; // Skip rows without at least Port, Type, and Lane
+                        const cells = row.split(',').map(c => c.trim());
                         const port = cells[0];
-                        if (!port) return;
-                        if (!data[port]) data[port] = {};
                         const type = cells[1];
                         const lane = cells[2];
+                        // A valid row must have a port, type, and lane to be processed.
+                        if (!port || !type || !lane) return;
+                        if (!data[port]) data[port] = {};
                         const key = `${type} - ${lane}`;
                         if (!data[port][key]) data[port][key] = {};
 
@@ -640,18 +640,16 @@
             // Mocking fetch for historical data
             const originalFetch = window.fetch;
             window.fetch = async (url) => {
-                if (url.includes('docs.google.com')) {
+                if (url.includes('output=csv')) {
                     return Promise.resolve({
                         ok: true,
-                        text: () => Promise.resolve(`
-                            <html><body><table><tbody>
-                                <tr><td>Port</td><td>Type</td><td>Lane</td><td>Mon 08</td><td>Tue 09</td></tr>
-                                <tr><td>San Ysidro</td><td>Vehicles</td><td>Ready</td><td>25</td><td>30</td></tr>
-                                <tr><td>San Ysidro</td><td>Pedestrians</td><td>General</td><td>10</td><td>15</td></tr>
-                                <tr><td>Otay Mesa</td><td>Vehicles</td><td>Sentri</td><td>5</td><td>No Delay</td></tr>
-                                <tr><td>Malformed Port</td><td></td><td></td><td></td><td></td></tr>
-                            </tbody></table></body></html>
-                        `)
+                        text: () => Promise.resolve(
+`Port,Type,Lane,Mon 08,Tue 09
+San Ysidro,Vehicles,Ready,25,30
+San Ysidro,Pedestrians,General,10,15
+Otay Mesa,Vehicles,Sentri,5,No Delay
+Malformed Port,,,`
+                        )
                     });
                 }
                 return originalFetch(url);
