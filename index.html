@@ -245,12 +245,20 @@
             
             function parseDescription(chunk, type, hoursInfo) {
                 const data = {};
+                let hasOpenLanes = false;
                 data.operatingHours = hoursInfo.operatingHoursText;
                 ['General', 'Ready', 'Sentri'].forEach(lane => {
                     const laneData = extractLaneData(chunk, `${lane} Lanes`);
                     if (!hoursInfo.isCurrentlyOpen) laneData.status = 'Closed';
+                    if (laneData.status === 'Open') hasOpenLanes = true;
                     data[lane] = laneData;
                 });
+
+                // If no specific hours were found, but lanes are open, assume 24 hours.
+                if (data.operatingHours === 'N/A' && hasOpenLanes) {
+                    console.log(`[Hours] Inferring '24 Hours' for '${type}' based on open lanes.`);
+                    data.operatingHours = '24 Hours';
+                }
                 return data;
             }
 
@@ -276,14 +284,22 @@
             }
 
             function getOperatingHoursInfo(desc, id) {
+                console.log(`[Hours] Attempting to find hours for '${id}'...`);
                 const defaultInfo = { operatingHoursText: 'N/A', isCurrentlyOpen: true };
-                // Find a header that starts with the ID (e.g., "Passenger Vehicles" or "Pedestrian"),
-                // and capture the full header text up to the date.
-                const regex = new RegExp(`(${id}[^:]*:.*?)\\s+\\d{1,2}/\\d{1,2}/\\d{4}`);
-                const match = desc.match(regex);
-                if (!match || !match[1]) return defaultInfo;
-                const text = match[1].trim();
-                return { operatingHoursText: text, isCurrentlyOpen: !text.toLowerCase().includes('closed') };
+                
+                // Regex to find a header containing the ID, and capture the text up to (but not including) the date.
+                // This is more robust than the previous regex.
+                // Example: "Passenger Vehicles: 6 am - 10 pm 01/01/2024" -> captures "Passenger Vehicles: 6 am - 10 pm"
+                const regexWithDate = new RegExp(`(${id}.*?:.*?)(?=\\s+\\d{1,2}/\\d{1,2}/\\d{4})`);
+                const match = desc.match(regexWithDate);
+
+                if (match && match[1]) {
+                    const text = match[1].trim();
+                    console.log(`[Hours] Found explicit hours for '${id}': "${text}"`);
+                    return { operatingHoursText: text, isCurrentlyOpen: !text.toLowerCase().includes('closed') };
+                }
+                console.warn(`[Hours] Could not find date-based hours string for '${id}'. This may be expected for 24-hour ports.`);
+                return defaultInfo;
             }
 
             function createPortTemplate(portName) {
