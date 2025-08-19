@@ -8,6 +8,20 @@ const heatmapContainer = document.getElementById('heatmap-container');
 
 let chart;
 
+/**
+ * Parses a time string like "12:00 AM" or "3:00 PM" into a 24-hour format number.
+ * @param {string} timeStr The time string to parse.
+ * @returns {number} The hour in 24-hour format (0-23).
+ */
+function parseTimeToHour(timeStr) {
+    const [time, modifier] = timeStr.split(' ');
+    let [hours] = time.split(':').map(Number);
+
+    if (modifier === 'PM' && hours < 12) hours += 12;
+    if (modifier === 'AM' && hours === 12) hours = 0; // Midnight case
+    return hours;
+}
+
 async function fetchAndParse() {
     console.groupCollapsed('[HISTORICAL ANALYSIS] Data Processing Pipeline');
     console.log(`[1/4] Fetching historical data from: ${CONFIG.URLS.HISTORICAL_DATA_CSV}`);
@@ -22,35 +36,54 @@ async function fetchAndParse() {
         if (!csvText || csvText.trim() === '') {
             throw new Error("Received empty data from the server. The data source might be temporarily unavailable.");
         }
-        console.log('[Hist] Data fetched. Parsing...');
+        
         const lines = csvText.trim().split(/\r?\n/);
-        if (lines.length < 2) { // Need header and at least one data row
+        if (lines.length < 2) {
             throw new Error("Historical data is incomplete (missing headers or data rows).");
         }
-        const headers = lines.shift().split(',').map(h => h.trim());
-        const rows = lines;
+
+        const headerLine = lines.shift();
+        const headers = headerLine.split(',').map(h => h.trim());
+
+        // Find column indices dynamically to be resilient to column reordering
+        const colIndices = {
+            port: headers.indexOf('Port Name'),
+            category: headers.indexOf('Category'),
+            lane: headers.indexOf('Lane Type'),
+            day: headers.indexOf('Day Label'),
+            time: headers.indexOf('Report Time'),
+            wait: headers.indexOf('Average Wait Time')
+        };
+
+        // Verify that all required columns were found in the header
+        for (const [key, index] of Object.entries(colIndices)) {
+            if (index === -1) {
+                throw new Error(`Historical data is missing required column: "${key}" (Header was: ${headerLine})`);
+            }
+        }
+
         const data = {};
+        const rows = lines;
 
         rows.forEach(row => {
             const cells = row.split(',').map(c => c.trim());
-            const port = cells[0];
-            const type = cells[1];
-            const lane = cells[2];
-            // A valid row must have a port, type, and lane to be processed.
-            if (!port || !type || !lane) return;
-            if (!data[port]) data[port] = {};
-            const key = `${type} - ${lane}`;
-            if (!data[port][key]) data[port][key] = {};
+            if (cells.length < headers.length) return; // Skip malformed or empty rows
 
-            for (let i = 3; i < cells.length; i++) {
-                const dayHour = headers[i];
-                const waitTimeText = cells[i];
-                // Handle "No Delay" as 0
-                const waitTime = waitTimeText.toLowerCase() === 'no delay' ? 0 : parseInt(waitTimeText, 10);
-                if (dayHour && i < headers.length) {
-                    data[port][key][dayHour] = isNaN(waitTime) ? 0 : waitTime;
-                }
-            }
+            const portName = cells[colIndices.port];
+            const category = cells[colIndices.category];
+            const laneType = cells[colIndices.lane].replace(' Lanes', ''); // "General Lanes" -> "General"
+            const day = cells[colIndices.day].substring(0, 3); // "Friday" -> "Fri"
+            const waitTime = parseInt(cells[colIndices.wait], 10);
+            const hour = parseTimeToHour(cells[colIndices.time]);
+
+            if (!portName || !category || !laneType || !day || isNaN(hour) || isNaN(waitTime)) return;
+
+            if (!data[portName]) data[portName] = {};
+            const laneKey = `${category} - ${laneType}`;
+            if (!data[portName][laneKey]) data[portName][laneKey] = {};
+            
+            const dayHourKey = `${day} ${hour}`;
+            data[portName][laneKey][dayHourKey] = waitTime;
         });
         console.log('[3/4] Parsed data into structured object:', data);
         console.groupEnd();
