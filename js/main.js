@@ -188,6 +188,16 @@ function setupEventListeners() {
         }
     }, CONFIG.DASHBOARD.DEBOUNCE_DELAY_MS));
 
+    document.getElementById('reset-settings-button').addEventListener('click', () => {
+        // Remove from storage to revert to defaults on next load
+        localStorage.removeItem(CONFIG.STORAGE_KEYS.SETTINGS);
+        // Update state immediately to reflect the change
+        handleStateUpdate({
+            settings: { ...CONFIG.UI.WAIT_THRESHOLDS }
+        });
+    });
+
+
     // Handle back/forward browser navigation
     window.addEventListener('popstate', () => {
         const hashState = getStateFromHash();
