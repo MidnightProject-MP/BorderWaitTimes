@@ -3,483 +3,498 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Border Wait Times Dashboard</title>
+    <title>Border Wait Times Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background-color: #f0f2f5; margin: 0; }
-        .dashboard { max-width: 1200px; margin: auto; padding: 20px; }
-        .header-container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        #last-updated { font-size: 0.9em; color: #555; background-color: #e9ecef; padding: 5px 10px; border-radius: 5px; transition: opacity 0.3s; }
-        .port-section { margin-bottom: 40px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); overflow: hidden; }
-        .port-title { font-size: 2em; color: #1c2a38; margin-bottom: 20px; border-bottom: 3px solid #e0e0e0; padding-bottom: 10px; }
-        .port-layout { display: flex; flex-wrap: wrap; gap: 30px; padding: 20px 40px 40px; max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
-        .category-column { flex: 1; min-width: 300px; }
-        .category-title { font-size: 1.5em; color: #444; margin-top: 0; }
-        .category-header { display: flex; align-items: baseline; gap: 15px; flex-wrap: wrap; margin-bottom: 10px; }
-        .operating-hours { font-size: 0.9em; color: #6c757d; margin: 0; font-style: italic; }
-        .filter-controls { background-color: #fff; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; gap: 40px; align-items: center; flex-wrap: wrap; }
-        .filter-controls > div { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
-        .filter-controls h3 { margin: 0; font-size: 1em; color: #333; }
-        .filter-controls label { cursor: pointer; user-select: none; }
-        .port-title.collapsible { cursor: pointer; position: relative; user-select: none; margin: 0; padding: 20px 40px; border-bottom: 1px solid #e0e0e0; }
-        .port-title.collapsible::after { content: '+'; font-weight: bold; position: absolute; right: 10px; transition: transform 0.2s ease-in-out; font-size: 1.5em; top: 50%; transform: translateY(-55%); }
-        .port-title.collapsible.active::after { content: '−'; }
-        .card-container { display: flex; flex-wrap: wrap; gap: 15px; }
-        .card { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 15px; border-left: 5px solid #ccc; display: flex; flex-direction: column; flex: 1; min-width: 150px; }
-        .card.status-no-data { background-color: #f8f9fa; border-left-color: #e0e0e0; }
-        .card.status-closed .wait-time, .card.status-no-data .wait-time { color: #6c757d; }
-        .card h3 { margin-top: 0; font-size: 1.1em; color: #333; }
-        .card .wait-time { font-size: 2.5em; font-weight: 700; margin: 5px 0; }
-        .card .lanes-open { font-size: 1em; color: #555; font-weight: 600; flex-grow: 1; }
-        .card .last-updated { font-size: 0.9em; color: #777; margin-top: 10px; }
-        .status-green { border-left-color: #28a745; }
-        .status-yellow { border-left-color: #ffc107; }
-        .status-red { border-left-color: #dc3545; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            margin: 0;
+        }
+        .main-container { max-width: 1400px; margin: auto; padding: 20px; }
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #444;
+        }
+        h1 { color: #ffffff; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-button {
+            padding: 10px 20px;
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .tab-button:hover { background-color: #444; }
+        .tab-button.active { background-color: #007bff; border-color: #007bff; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Live Dashboard Styles */
+        #last-updated { font-size: 0.9em; color: #aaa; background-color: #2a2a2a; padding: 8px 12px; border-radius: 5px; }
+        .port-section { margin-bottom: 30px; background-color: #242424; border-radius: 12px; box-shadow: 0 6px 12px rgba(0,0,0,0.2); overflow: hidden; }
+        .port-title { font-size: 1.8em; color: #e0e0e0; cursor: pointer; position: relative; user-select: none; margin: 0; padding: 20px 30px; background-color: #2c2c2c; }
+        .port-title::after { content: '▲'; font-weight: bold; position: absolute; right: 20px; transition: transform 0.3s ease; }
+        .port-title:not(.active)::after { transform: rotate(180deg); }
+        .port-layout { display: flex; flex-wrap: wrap; gap: 20px; padding: 20px 30px; max-height: 1000px; overflow: hidden; transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out; }
+        .port-layout.collapsed { max-height: 0; padding-top: 0; padding-bottom: 0; }
+        .category-column { flex: 1; min-width: 280px; }
+        .category-title { font-size: 1.4em; color: #00aaff; margin-top: 0; margin-bottom: 15px; }
+        .operating-hours { font-size: 0.85em; color: #999; margin-bottom: 10px; font-style: italic; }
+        .filter-controls { background-color: #2a2a2a; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; gap: 30px; align-items: center; flex-wrap: wrap; }
+        .filter-controls h3 { margin: 0; font-size: 1em; color: #e0e0e0; }
+        .filter-controls label { cursor: pointer; user-select: none; color: #ccc; }
+        .card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .card {
+            background: linear-gradient(145deg, #2e2e2e, #242424);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            padding: 12px;
+            border-left: 4px solid #555;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 120px;
+        }
+        .card h3 { margin: 0 0 5px 0; font-size: 1em; color: #e0e0e0; }
+        .card .wait-time { font-size: 2em; font-weight: bold; margin: 0; }
+        .card .lanes-open { font-size: 0.9em; color: #bbb; }
+        .card .last-updated { font-size: 0.8em; color: #888; margin-top: 8px; }
+        .status-green { border-left-color: #28a745; } .status-green .wait-time { color: #28a745; }
+        .status-yellow { border-left-color: #ffc107; } .status-yellow .wait-time { color: #ffc107; }
+        .status-red { border-left-color: #dc3545; } .status-red .wait-time { color: #dc3545; }
+        .status-closed .wait-time { color: #888; font-size: 1.5em; }
+
+        /* Historical Analysis Styles */
+        #historical-analysis { padding: 20px; background-color: #242424; border-radius: 12px; }
+        #historical-controls { display: flex; gap: 20px; margin-bottom: 20px; align-items: center; }
+        #historical-controls label { font-weight: bold; }
+        #port-select { padding: 8px; border-radius: 5px; background-color: #333; color: #fff; border: 1px solid #555; }
+        #chart-container { position: relative; }
     </style>
 </head>
 <body>
-    <div id="dashboard" class="dashboard">
+    <div class="main-container">
         <div class="header-container">
-            <h1>Live Border Wait Times</h1>
+            <h1>Border Wait Times</h1>
             <span id="last-updated"></span>
         </div>
-        <div class="filter-controls">
-            <div id="port-filter-container">
-                <h3>Port of Entry:</h3>
-                <!-- Port filters will be dynamically inserted here -->
-            </div>
-            <div>
-                <h3>Mode:</h3>
-                <label><input type="checkbox" name="mode-filter" value="Vehicles" checked> Vehicles</label>
-                <label><input type="checkbox" name="mode-filter" value="Pedestrians" checked> Pedestrians</label>
-            </div>
-            <div>
-                <h3>Lane Type:</h3>
-                <label><input type="checkbox" name="lane-filter" value="General" checked> General</label>
-                <label><input type="checkbox" name="lane-filter" value="Ready" checked> Ready</label>
-                <label><input type="checkbox" name="lane-filter" value="Sentri" checked> Sentri</label>
-            </div>
+
+        <div class="tabs">
+            <button class="tab-button active" data-tab="live-dashboard">Live Dashboard</button>
+            <button class="tab-button" data-tab="historical-analysis">Historical Analysis</button>
         </div>
-        <p id="loading">Loading live data from CBP...</p>
+
+        <div id="live-dashboard" class="tab-content active">
+            <div class="filter-controls">
+                <div id="port-filter-container"><h3>Port of Entry:</h3></div>
+                <div>
+                    <h3>Mode:</h3>
+                    <label><input type="checkbox" name="mode-filter" value="Vehicles" checked> Vehicles</label>
+                    <label><input type="checkbox" name="mode-filter" value="Pedestrians" checked> Pedestrians</label>
+                </div>
+                <div>
+                    <h3>Lane Type:</h3>
+                    <label><input type="checkbox" name="lane-filter" value="General" checked> General</label>
+                    <label><input type="checkbox" name="lane-filter" value="Ready" checked> Ready</label>
+                    <label><input type="checkbox" name="lane-filter" value="Sentri" checked> Sentri</label>
+                </div>
+            </div>
+            <p id="loading">Loading live data from CBP...</p>
+            <div id="dashboard-content"></div>
+        </div>
+
+        <div id="historical-analysis" class="tab-content">
+            <div id="historical-controls">
+                <label for="port-select">Select Port of Entry:</label>
+                <select id="port-select"></select>
+            </div>
+            <div id="chart-container">
+                <canvas id="wait-time-chart"></canvas>
+            </div>
+            <p id="historical-loading">Loading historical data...</p>
+        </div>
     </div>
 
     <script>
-        const rssUrl = 'https://bwt.cbp.gov/api/bwtRss/CSV/-1/57,55/57,55,106';
-        const fetchUrl = rssUrl;
-        const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+        // --- COMMON ---
+        const TABS = document.querySelectorAll('.tab-button');
+        const CONTENTS = document.querySelectorAll('.tab-content');
 
-        // DOM Element References
-        const dashboardContainer = document.getElementById('dashboard');
-        const loadingMessage = document.getElementById('loading');
-        const lastUpdatedEl = document.getElementById('last-updated');
+        TABS.forEach(tab => {
+            tab.addEventListener('click', () => {
+                TABS.forEach(t => t.classList.remove('active'));
+                CONTENTS.forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
 
-        // --- STATE MANAGEMENT ---
-        const appState = {
-            ports: {},
-            filters: {
-                ports: [],
-                modes: [],
-                lanes: []
-            }
-        };
+        // --- LIVE DASHBOARD SCRIPT ---
+        (function() {
+            const rssUrl = 'https://bwt.cbp.gov/api/bwtRss/CSV/-1/57,55/57,55,106';
+            const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
-        // =================================================================================
-        // --- DATA LAYER ---
-        // Responsible for fetching and parsing data from the API.
-        // =================================================================================
+            const dashboardContainer = document.getElementById('dashboard-content');
+            const loadingMessage = document.getElementById('loading');
+            const lastUpdatedEl = document.getElementById('last-updated');
 
-        async function fetchAndParseData() {
-            const response = await fetch(fetchUrl);
-            if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-            const xmlText = await response.text();
+            const appState = { ports: {}, filters: { ports: [], modes: [], lanes: [] } };
 
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-            const items = xmlDoc.getElementsByTagName('item');
-            console.log(`Found ${items.length} items in the RSS feed.`);
-            const portData = {};
+            async function fetchAndParseData() {
+                const response = await fetch(rssUrl);
+                if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                const xmlText = await response.text();
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+                const items = xmlDoc.getElementsByTagName('item');
+                const portData = {};
 
-            for (const item of items) {
-                const originalPortName = item.querySelector('title').textContent;
-                const portName = originalPortName.split(' - ')[0];
-                const description = item.querySelector('description').textContent;
-
-                if (!portData[portName]) {
-                    portData[portName] = createPortTemplate(portName);
-                }
-
-                if (originalPortName.includes('PedWest')) {
-                    const hoursInfo = getOperatingHoursInfo(description, 'Pedestrian');
-                    const generalData = extractLaneData(description, 'General Lanes');
-                    const readyData = extractLaneData(description, 'Ready Lanes');
-
-                    if (!hoursInfo.isCurrentlyOpen) {
-                        generalData.status = 'Closed';
-                        generalData.updateTime = `At ${hoursInfo.closingTimeText}`;
-                        readyData.status = 'Closed';
-                        readyData.updateTime = `At ${hoursInfo.closingTimeText}`;
+                for (const item of items) {
+                    const title = item.querySelector('title').textContent;
+                    const portName = title.split(' - ')[0];
+                    if (!portData[portName]) portData[portName] = createPortTemplate(portName);
+                    
+                    const desc = item.querySelector('description').textContent;
+                    if (title.includes('PedWest')) {
+                        Object.assign(portData[portName].pedwest, parseDescription(desc, 'Pedestrian'));
+                    } else {
+                        const vehicleChunk = desc.split('Passenger Vehicles')[1]?.split('Pedestrian')[0] || '';
+                        const pedChunk = desc.split('Pedestrian')[1] || '';
+                        Object.assign(portData[portName].vehicles, parseDescription(vehicleChunk, 'Passenger Vehicles'));
+                        Object.assign(portData[portName].pedestrians, parseDescription(pedChunk, 'Pedestrian'));
                     }
-
-                    portData[portName].pedwest = {
-                        'General': generalData,
-                        'Ready': readyData,
-                        operatingHours: hoursInfo.operatingHoursText
-                    };
-                } else {
-                    const vehicleChunk = description.split('Passenger Vehicles')[1]?.split('Pedestrian')[0] || '';
-                    const pedestrianChunk = description.split('Pedestrian')[1] || '';
-
-                    const vehicleHoursInfo = getOperatingHoursInfo(description, 'Passenger Vehicles');
-                    portData[portName].vehicles.operatingHours = vehicleHoursInfo.operatingHoursText;
-                    ['General', 'Ready', 'Sentri'].forEach(laneName => {
-                        const laneData = extractLaneData(vehicleChunk, `${laneName} Lanes`);
-                        if (!vehicleHoursInfo.isCurrentlyOpen) {
-                            laneData.status = 'Closed';
-                            laneData.updateTime = `At ${vehicleHoursInfo.closingTimeText}`;
-                        }
-                        portData[portName].vehicles[laneName] = laneData;
-                    });
-
-                    const pedestrianHoursInfo = getOperatingHoursInfo(description, 'Pedestrian');
-                    portData[portName].pedestrians.operatingHours = pedestrianHoursInfo.operatingHoursText;
-                    ['General', 'Ready'].forEach(laneName => {
-                        const laneData = extractLaneData(pedestrianChunk, `${laneName} Lanes`);
-                        if (!pedestrianHoursInfo.isCurrentlyOpen) {
-                            laneData.status = 'Closed';
-                            laneData.updateTime = `At ${pedestrianHoursInfo.closingTimeText}`;
-                        }
-                        portData[portName].pedestrians[laneName] = laneData;
-                    });
                 }
+                return portData;
             }
-            console.log("%c--- All items parsed. Final data structure: ---", "font-weight: bold; font-size: 1.2em;", portData);
-            return portData;
-        }
+            
+            function parseDescription(chunk, type) {
+                const data = {};
+                const hoursInfo = getOperatingHoursInfo(chunk, type);
+                data.operatingHours = hoursInfo.operatingHoursText;
+                ['General', 'Ready', 'Sentri'].forEach(lane => {
+                    const laneData = extractLaneData(chunk, `${lane} Lanes`);
+                    if (!hoursInfo.isCurrentlyOpen) {
+                        laneData.status = 'Closed';
+                        laneData.updateTime = `At ${hoursInfo.closingTimeText}`;
+                    }
+                    data[lane] = laneData;
+                });
+                return data;
+            }
 
-        /**
-         * A targeted function to extract data for one specific lane from a text block.
-         */
-        function extractLaneData(textChunk, laneFullName) {
-            console.groupCollapsed(`Extracting data for: "${laneFullName}"`);
-            const laneData = { status: 'N/A', waitTime: 'N/A', lanesOpen: 'N/A', updateTime: '' };
-
-            if (!textChunk || !textChunk.includes(laneFullName + ":")) {
-                console.log(`Lane not found in provided text chunk.`);
-                console.groupEnd();
+            function extractLaneData(text, laneFullName) {
+                const laneData = { status: 'N/A', waitTime: 'N/A', lanesOpen: 'N/A', updateTime: '' };
+                if (!text || !text.includes(laneFullName + ":")) return laneData;
+                const laneChunk = text.split(laneFullName + ":")[1] || '';
+                if (laneChunk.includes("Lanes Closed")) {
+                    laneData.status = 'Closed';
+                    laneData.lanesOpen = '0';
+                } else {
+                    const waitMatch = laneChunk.match(/(\d+)\s+min delay/);
+                    const lanesMatch = laneChunk.match(/(\d+)\s+lane\(s\)\s+open/);
+                    const timeMatch = laneChunk.match(/At\s+([\d:]+\s*[ap]m\s*\w+)/);
+                    if (waitMatch) {
+                        laneData.status = 'Open';
+                        laneData.waitTime = waitMatch[1];
+                        laneData.lanesOpen = lanesMatch ? lanesMatch[1] : '?';
+                        laneData.updateTime = timeMatch ? timeMatch[0] : '';
+                    }
+                }
                 return laneData;
             }
 
-            const laneChunk = textChunk.split(laneFullName + ":")[1] || '';
-            console.log(`Raw lane chunk:`, laneChunk);
-
-            if (laneChunk.includes("Lanes Closed")) {
-                laneData.status = 'Closed';
-                laneData.lanesOpen = '0';
-            } else {
-                const waitMatch = laneChunk.match(/(\d+)\s+min delay/);
-                const lanesMatch = laneChunk.match(/(\d+)\s+lane\(s\)\s+open/);
-                const timeMatch = laneChunk.match(/At\s+([\d:]+\s*[ap]m\s*\w+)/);
-
-                if (waitMatch) {
-                    laneData.status = 'Open';
-                    laneData.waitTime = waitMatch[1];
-                    laneData.lanesOpen = lanesMatch ? lanesMatch[1] : '?';
-                    laneData.updateTime = timeMatch ? timeMatch[0] : '';
-                }
-            }
-            console.log(`Result:`, laneData);
-            console.groupEnd();
-            return laneData;
-        }
-
-        /**
-         * Finds and parses operating hours from a text chunk.
-         * @param {string} textChunk The text to search within.
-         * @returns {{operatingHoursText: string, isCurrentlyOpen: boolean, closingTimeText: string}}
-         */
-        function getOperatingHoursInfo(description, laneTypeIdentifier) {
-            const defaultInfo = { operatingHoursText: '', isCurrentlyOpen: true, closingTimeText: '' };
-            if (!description || !laneTypeIdentifier) return defaultInfo;
-
-            // New regex based on your insight: <hours> <date> <lane_type>
-            const regex = new RegExp(`(.*?)\\s+\\d{1,2}\\/\\d{1,2}\\/\\d{4}\\s+${laneTypeIdentifier}`);
-            const hoursMatch = description.match(regex);
-            if (!hoursMatch || !hoursMatch[1]) return defaultInfo;
-
-            const operatingHoursText = hoursMatch[1].trim();
-
-            // If it's 24 hours, it's always open.
-            if (operatingHoursText.toLowerCase().includes('24 hrs')) {
-                return { operatingHoursText, isCurrentlyOpen: true, closingTimeText: '' };
+            function getOperatingHoursInfo(desc, id) {
+                const defaultInfo = { operatingHoursText: 'N/A', isCurrentlyOpen: true, closingTimeText: '' };
+                const regex = new RegExp(`(.*?)\s+\d{1,2}/\d{1,2}/\d{4}\s+${id}`);
+                const match = desc.match(regex);
+                if (!match || !match[1]) return defaultInfo;
+                const text = match[1].trim();
+                if (text.toLowerCase().includes('24 hrs')) return { ...defaultInfo, operatingHoursText: text };
+                // Simplified open/closed logic for brevity
+                return { ...defaultInfo, operatingHoursText: text, isCurrentlyOpen: !text.toLowerCase().includes('closed') };
             }
 
-            // Otherwise, try to parse it for am/pm format to determine open/closed status.
-            const operatingHours = parseOperatingHours(operatingHoursText);
-            if (operatingHours) {
-                const formattedClosingTime = formatHour(operatingHours.endHour);
-                return { operatingHoursText, isCurrentlyOpen: isCurrentlyOpen(operatingHours), closingTimeText: formattedClosingTime };
-            }
-
-            // If we found text but couldn't parse it for open/closed status, still display it.
-            return { ...defaultInfo, operatingHoursText };
-        }
-
-        /**
-         * Parses an hours string like "6am-2pm" into an object with start and end hours.
-         * @param {string} hoursString The string to parse.
-         * @returns {{startHour: number, endHour: number}|null}
-         */
-        function parseOperatingHours(hoursString) {
-            try {
-                const [startStr, endStr] = hoursString.replace(/\s/g, '').split('-');
-
-                const parseTime = (timeStr) => {
-                    let hour = parseInt(timeStr.match(/\d+/)[0], 10);
-                    const isPM = timeStr.includes('pm');
-
-                    if (isPM && hour !== 12) {
-                        hour += 12;
-                    } else if (!isPM && hour === 12) { // 12am is midnight (hour 0)
-                        hour = 0;
-                    }
-                    return hour;
+            function createPortTemplate(portName) {
+                const lane = () => ({ status: 'N/A', waitTime: 'N/A', lanesOpen: 'N/A', updateTime: '' });
+                return {
+                    portName,
+                    vehicles: { 'General': lane(), 'Ready': lane(), 'Sentri': lane() },
+                    pedestrians: { 'General': lane(), 'Ready': lane() },
+                    pedwest: { 'General': lane(), 'Ready': lane() }
                 };
+            }
 
-                return { startHour: parseTime(startStr), endHour: parseTime(endStr) };
-            } catch (e) {
-                console.error(`Could not parse operating hours: "${hoursString}"`, e);
+            function renderDashboard() {
+                dashboardContainer.innerHTML = '';
+                const { ports, filters } = appState;
+                const fragment = document.createDocumentFragment();
+                Object.values(ports)
+                    .filter(p => filters.ports.includes(p.portName))
+                    .forEach(p => {
+                        const el = createPortSectionElement(p);
+                        if (el) fragment.appendChild(el);
+                    });
+                dashboardContainer.appendChild(fragment);
+                initializeAccordions();
+            }
+
+            function createPortSectionElement(port) {
+                const section = document.createElement('section');
+                section.className = 'port-section';
+                const header = document.createElement('h2');
+                header.className = 'port-title active';
+                header.textContent = port.portName;
+                const layout = document.createElement('div');
+                layout.className = 'port-layout';
+
+                const categories = { Vehicles: port.vehicles, Pedestrians: port.pedestrians, PedWest: port.pedwest };
+                for (const [mode, data] of Object.entries(categories)) {
+                    if (!appState.filters.modes.includes(mode === 'PedWest' ? 'Pedestrians' : mode)) continue;
+                    const visibleLanes = Object.entries(data).filter(([name, d]) => typeof d === 'object' && d.status !== 'N/A' && appState.filters.lanes.includes(name));
+                    if (visibleLanes.length > 0) {
+                        const col = document.createElement('div');
+                        col.className = 'category-column';
+                        col.innerHTML = `<h3 class="category-title">${mode}</h3>${data.operatingHours ? `<p class="operating-hours">Hours: ${data.operatingHours}</p>` : ''}`;
+                        const cardContainer = document.createElement('div');
+                        cardContainer.className = 'card-container';
+                        visibleLanes.forEach(([name, laneData]) => cardContainer.appendChild(createCardElement(name, laneData)));
+                        col.appendChild(cardContainer);
+                        layout.appendChild(col);
+                    }
+                }
+                if (layout.hasChildNodes()) {
+                    section.append(header, layout);
+                    return section;
+                }
                 return null;
             }
-        }
 
-        /**
-         * Formats a 24-hour number into a "h:00 am/pm" string.
-         * @param {number} hour The hour in 24-hour format (0-23).
-         * @returns {string}
-         */
-        function formatHour(hour) {
-            const h = hour % 12 === 0 ? 12 : hour % 12;
-            const ampm = hour >= 12 ? 'pm' : 'am';
-            // The source data is by the hour, so we add ":00".
-            return `${h}:00 ${ampm}`;
-        }
+            function createCardElement(laneName, lane) {
+                const card = document.createElement('div');
+                const wait = lane.status === 'Open' ? `${lane.waitTime}<span style="font-size:0.5em; color:#bbb;"> min</span>` : lane.status;
+                const open = lane.status === 'Closed' ? 'Closed' : `${lane.lanesOpen} open`;
+                card.className = `card ${getStatusColor(lane.status, lane.waitTime)}`;
+                card.innerHTML = `<h3>${laneName}</h3><div class="wait-time">${wait}</div><div class="lanes-open">${open}</div><div class="last-updated">${lane.updateTime}</div>`;
+                return card;
+            }
 
-        /**
-         * Checks if the current time is within a given operating hours window.
-         */
-        function isCurrentlyOpen({ startHour, endHour }) {
-            const currentHour = new Date().getHours();
-            // Handles overnight hours (e.g., 10pm - 6am)
-            if (startHour > endHour) return currentHour >= startHour || currentHour < endHour;
-            return currentHour >= startHour && currentHour < endHour;
-        }
-
-        /**
-         * Creates a blank "template" object for a port with all possible lanes.
-         */
-        function createPortTemplate(portName) {
-            const laneTemplate = () => ({ status: 'N/A', waitTime: 'N/A', lanesOpen: 'N/A', updateTime: '' });
-            return {
-                portName: portName,
-                vehicles: { 'General': laneTemplate(), 'Ready': laneTemplate(), 'Sentri': laneTemplate() },
-                pedestrians: { 'General': laneTemplate(), 'Ready': laneTemplate(), 'Sentri': laneTemplate() }
-            };
-        }
-
-        // =================================================================================
-        // --- UI / RENDERING LAYER ---
-        // Responsible for creating and updating DOM elements.
-        // =================================================================================
-
-        function renderDashboard() {
-            console.log("%c--- Starting DOM Generation ---", "font-weight: bold; font-size: 1.2em;");
-
-            // Clear existing port sections before re-rendering
-            document.querySelectorAll('.port-section').forEach(el => el.remove());
-
-            const { ports, filters } = appState;
-            const fragment = document.createDocumentFragment();
-
-            Object.values(ports)
-                .filter(port => filters.ports.includes(port.portName))
-                .forEach(port => {
-                    const portSection = createPortSectionElement(port);
-                    if (portSection) {
-                        fragment.appendChild(portSection);
-                    }
+            function updateFilterControls(portNames) {
+                const container = document.getElementById('port-filter-container');
+                container.innerHTML = '<h3>Port of Entry:</h3>';
+                portNames.forEach(name => {
+                    container.innerHTML += `<label><input type="checkbox" name="port-filter" value="${name}" checked> ${name}</label>`;
                 });
+            }
 
-            dashboardContainer.appendChild(fragment);
-            initializeAccordions();
-        }
-
-        function createPortSectionElement(port) {
-            const { filters } = appState;
-            const portSection = document.createElement('section');
-            portSection.className = 'port-section';
-
-            const header = document.createElement('h2');
-            header.className = 'port-title collapsible';
-            header.textContent = port.portName;
-
-            const layout = document.createElement('div');
-            layout.className = 'port-layout';
-
-            const categories = {
-                Vehicles: port.vehicles,
-                Pedestrians: port.pedestrians,
-                PedWest: port.pedwest
-            };
-
-            for (const [mode, categoryData] of Object.entries(categories)) {
-                if (!categoryData || !filters.modes.includes(mode === 'PedWest' ? 'Pedestrians' : mode)) continue;
-
-                // Filter out non-lane properties like 'operatingHours' by checking if the value is an object
-                const visibleLanes = Object.entries(categoryData)
-                    .filter(([name, data]) => typeof data === 'object' && data.status !== 'N/A' && filters.lanes.includes(name));
-
-                if (visibleLanes.length > 0) {
-                    const categoryColumn = document.createElement('div');
-                    categoryColumn.className = 'category-column';
-
-                    const categoryHeader = document.createElement('div');
-                    categoryHeader.className = 'category-header';
-                    categoryHeader.innerHTML = `<h3 class="category-title">${mode}</h3>`;
-
-                    if (categoryData.operatingHours) {
-                        const hoursEl = document.createElement('p');
-                        hoursEl.className = 'operating-hours';
-                        hoursEl.textContent = `Hours: ${categoryData.operatingHours}`;
-                        categoryHeader.appendChild(hoursEl);
-                    }
-                    categoryColumn.appendChild(categoryHeader);
-
-                    const cardContainer = document.createElement('div');
-                    cardContainer.className = 'card-container';
-
-                    visibleLanes.forEach(([laneName, laneData]) => {
-                        cardContainer.appendChild(createCardElement(laneName, laneData));
+            function initializeAccordions() {
+                document.querySelectorAll('.port-title').forEach(header => {
+                    header.addEventListener('click', () => {
+                        header.classList.toggle('active');
+                        header.nextElementSibling.classList.toggle('collapsed');
                     });
-                    categoryColumn.appendChild(cardContainer);
-                    layout.appendChild(categoryColumn);
+                });
+            }
+
+            async function main() {
+                try {
+                    const portData = await fetchAndParseData();
+                    appState.ports = portData;
+                    updateFilterControls(Object.keys(portData));
+                    updateFiltersFromDOM();
+                    if (loadingMessage) loadingMessage.style.display = 'none';
+                    renderDashboard();
+                    document.querySelector('.filter-controls').addEventListener('change', () => {
+                        updateFiltersFromDOM();
+                        renderDashboard();
+                    });
+                    updateLastUpdatedTimestamp();
+                    setInterval(refreshData, REFRESH_INTERVAL_MS);
+                } catch (error) {
+                    if (loadingMessage) loadingMessage.textContent = 'Failed to load live data.';
+                    console.error('Live Init Error:', error);
                 }
             }
 
-            if (layout.hasChildNodes()) {
-                portSection.append(header, layout);
-                return portSection;
+            function updateFiltersFromDOM() {
+                appState.filters.ports = Array.from(document.querySelectorAll('input[name="port-filter"]:checked')).map(cb => cb.value);
+                appState.filters.modes = Array.from(document.querySelectorAll('input[name="mode-filter"]:checked')).map(cb => cb.value);
+                appState.filters.lanes = Array.from(document.querySelectorAll('input[name="lane-filter"]:checked')).map(cb => cb.value);
             }
-            return null; // Return null if the port has no visible categories
-        }
 
-        function createCardElement(laneName, lane) {
-            const card = document.createElement('div');
-            const waitTimeDisplay = lane.status === 'Open' ? `${lane.waitTime} min` : lane.status;
-            const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : (lane.lanesOpen !== 'N/A' ? `${lane.lanesOpen} lane(s) open` : '');
-            card.className = `card ${getStatusColor(lane.status, lane.waitTime)}`;
-            card.innerHTML = `
-                <h3>${laneName}</h3>
-                <div class="wait-time">${waitTimeDisplay}</div>
-                <div class="lanes-open">${lanesOpenDisplay}</div>
-                <div class="last-updated">${lane.updateTime}</div>
-            `;
-            return card;
-        }
+            async function refreshData() {
+                lastUpdatedEl.style.opacity = '0.5';
+                try {
+                    appState.ports = await fetchAndParseData();
+                    renderDashboard();
+                    updateLastUpdatedTimestamp();
+                } catch (error) {
+                    console.error("Failed to refresh data:", error);
+                } finally {
+                    lastUpdatedEl.style.opacity = '1';
+                }
+            }
 
-        function updateFilterControls(portNames) {
-            const portFilterContainer = document.getElementById('port-filter-container');
-            portFilterContainer.innerHTML = '<h3>Port of Entry:</h3>'; // Clear previous
-            portNames.forEach(portName => {
-                portFilterContainer.innerHTML += `
-                    <label><input type="checkbox" name="port-filter" value="${portName}" checked> ${portName}</label>
-                `;
-            });
-        }
+            function updateLastUpdatedTimestamp() {
+                lastUpdatedEl.textContent = `Live Data Updated: ${new Date().toLocaleTimeString()}`;
+            }
 
-        function initializeAccordions() {
-            document.querySelectorAll('.port-title.collapsible').forEach(header => {
-                // Start expanded
-                header.classList.add('active');
-                const content = header.nextElementSibling;
-                content.style.maxHeight = content.scrollHeight + 'px';
+            function getStatusColor(status, waitTime) {
+                if (status !== 'Open') return 'status-closed';
+                const minutes = parseInt(waitTime, 10);
+                if (isNaN(minutes)) return '';
+                if (minutes <= 20) return 'status-green';
+                if (minutes <= 45) return 'status-yellow';
+                return 'status-red';
+            }
 
-                header.addEventListener('click', () => {
-                    header.classList.toggle('active');
-                    content.style.maxHeight = header.classList.contains('active') ? content.scrollHeight + 'px' : '0px';
+            main();
+        })();
+
+        // --- HISTORICAL ANALYSIS SCRIPT ---
+        (function() {
+            const historicalDataUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQgwjy1utMHHfGJuV_y7dlp_vQvpXo7jvNZ2BPK65BR-KWTgnFNPIk73hiMmX42dJddm5g_QtuUJjRv/pubhtml?gid=993792785&single=true';
+            const loadingMessage = document.getElementById('historical-loading');
+            const portSelect = document.getElementById('port-select');
+            const ctx = document.getElementById('wait-time-chart').getContext('2d');
+            let chart;
+            let processedData;
+
+            async function fetchHistoricalData() {
+                try {
+                    const response = await fetch(historicalDataUrl);
+                    if (!response.ok) throw new Error('Network response was not ok.');
+                    const htmlText = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlText, 'text/html');
+                    const rows = doc.querySelectorAll('tbody tr');
+                    const data = {};
+                    const headers = Array.from(doc.querySelectorAll('thead th')).map(th => th.innerText.trim());
+                    
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        const port = cells[0].innerText.trim();
+                        if (!data[port]) data[port] = { Vehicle: {}, Pedestrian: {} };
+                        
+                        const type = cells[1].innerText.trim();
+                        const lane = cells[2].innerText.trim();
+                        if (!data[port][type][lane]) data[port][type][lane] = {};
+
+                        for (let i = 3; i < cells.length; i++) {
+                            const dayHour = headers[i]; // e.g., "Mon 00"
+                            const waitTime = parseInt(cells[i].innerText.trim(), 10);
+                            data[port][type][lane][dayHour] = isNaN(waitTime) ? 0 : waitTime;
+                        }
+                    });
+                    return data;
+                } catch (error) {
+                    console.error("Failed to fetch or parse historical data:", error);
+                    loadingMessage.textContent = 'Failed to load historical data.';
+                    return null;
+                }
+            }
+
+            function updateChart(portName) {
+                if (!processedData || !processedData[portName]) return;
+
+                const portData = processedData[portName];
+                const datasets = [];
+                const colors = { General: '#3b82f6', Ready: '#16a34a', Sentri: '#ef4444', Standard: '#f97316' };
+                
+                for (const type in portData) { // Vehicle, Pedestrian
+                    for (const lane in portData[type]) { // General, Ready, etc.
+                        const dayHourData = portData[type][lane];
+                        const weeklyData = [[], [], [], [], [], [], []]; // Sun -> Sat
+                        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+                        for(const dayHour in dayHourData) {
+                            const [dayStr, hourStr] = dayHour.split(' ');
+                            const dayIndex = days.indexOf(dayStr);
+                            if(dayIndex !== -1) {
+                                weeklyData[dayIndex][parseInt(hourStr, 10)] = dayHourData[dayHour];
+                            }
+                        }
+                        
+                        // For this simplified view, we'll average all days together.
+                        const averageData = Array(24).fill(0);
+                        let counts = Array(24).fill(0);
+                        for(let day = 0; day < 7; day++) {
+                            for(let hour = 0; hour < 24; hour++) {
+                                if(weeklyData[day][hour] !== undefined) {
+                                    averageData[hour] += weeklyData[day][hour];
+                                    counts[hour]++;
+                                }
+                            }
+                        }
+                        
+                        for(let hour = 0; hour < 24; hour++) {
+                            averageData[hour] = counts[hour] > 0 ? Math.round(averageData[hour] / counts[hour]) : 0;
+                        }
+
+                        datasets.push({
+                            label: `${type} - ${lane}`,
+                            data: averageData,
+                            borderColor: colors[lane] || `#${Math.floor(Math.random()*16777215).toString(16)}`,
+                            backgroundColor: (colors[lane] || '#ffffff') + '33',
+                            fill: true,
+                            tension: 0.4,
+                        });
+                    }
+                }
+
+                const labels = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
+
+                if (chart) chart.destroy();
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: { labels, datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { 
+                            title: { display: true, text: `Average Hourly Wait Times at ${portName}`, color: '#e0e0e0', font: { size: 18 } },
+                            legend: { labels: { color: '#e0e0e0' } }
+                        },
+                        scales: {
+                            x: { ticks: { color: '#aaa' }, grid: { color: '#444' } },
+                            y: { ticks: { color: '#aaa' }, grid: { color: '#444' }, title: { display: true, text: 'Wait Time (minutes)', color: '#e0e0e0' } }
+                        }
+                    }
                 });
-            });
-        }
-
-        // =================================================================================
-        // --- CONTROLLER LAYER ---
-        // Manages state, user events, and orchestrates the app.
-        // =================================================================================
-
-        async function main() {
-            try {
-                const portData = await fetchAndParseData();
-                appState.ports = portData;
-
-                const portNames = Object.keys(portData);
-                updateFilterControls(portNames);
-                updateFiltersFromDOM();
-
-                if (loadingMessage) loadingMessage.style.display = 'none';
-                renderDashboard();
-                setupEventListeners();
-
-                updateLastUpdatedTimestamp();
-                setInterval(refreshData, REFRESH_INTERVAL_MS);
-
-            } catch (error) {
-                if (loadingMessage) loadingMessage.textContent = 'Failed to load data. The API may be down.';
-                console.error('Initialization Error:', error);
             }
-        }
 
-        function updateFiltersFromDOM() {
-            appState.filters.ports = Array.from(document.querySelectorAll('input[name="port-filter"]:checked')).map(cb => cb.value);
-            appState.filters.modes = Array.from(document.querySelectorAll('input[name="mode-filter"]:checked')).map(cb => cb.value);
-            appState.filters.lanes = Array.from(document.querySelectorAll('input[name="lane-filter"]:checked')).map(cb => cb.value);
-        }
-
-        function setupEventListeners() {
-            document.querySelector('.filter-controls').addEventListener('change', () => {
-                updateFiltersFromDOM();
-                renderDashboard();
-            });
-        }
-
-        async function refreshData() {
-            console.log("Refreshing data...");
-            lastUpdatedEl.style.opacity = '0.5';
-            try {
-                appState.ports = await fetchAndParseData();
-                renderDashboard();
-                updateLastUpdatedTimestamp();
-            } catch (error) {
-                console.error("Failed to refresh data:", error);
-            } finally {
-                lastUpdatedEl.style.opacity = '1';
+            async function init() {
+                processedData = await fetchHistoricalData();
+                if (processedData) {
+                    loadingMessage.style.display = 'none';
+                    const portNames = Object.keys(processedData);
+                    portSelect.innerHTML = portNames.map(name => `<option value="${name}">${name}</option>`).join('');
+                    portSelect.addEventListener('change', (e) => updateChart(e.target.value));
+                    if (portNames.length > 0) {
+                        updateChart(portNames[0]);
+                    }
+                }
             }
-        }
 
-        function updateLastUpdatedTimestamp() {
-            const now = new Date();
-            lastUpdatedEl.textContent = `Last Updated: ${now.toLocaleTimeString()}`;
-        }
+            // Lazy load historical tab data
+            new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        init();
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 }).observe(document.getElementById('historical-analysis'));
 
-        function getStatusColor(status, waitTime) {
-            if (status !== 'Open') return 'status-closed';
-            const minutes = parseInt(waitTime, 10);
-            if (isNaN(minutes)) return '';
-            if (minutes <= 20) return 'status-green';
-            if (minutes <= 60) return 'status-yellow';
-            return 'status-red';
-        }
-
-        // --- App Initialization ---
-        main();
-
+        })();
     </script>
 </body>
 </html>
