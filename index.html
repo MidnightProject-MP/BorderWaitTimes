@@ -11,7 +11,7 @@
         #last-updated { font-size: 0.9em; color: #555; background-color: #e9ecef; padding: 5px 10px; border-radius: 5px; transition: opacity 0.3s; }
         .port-section { margin-bottom: 40px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); overflow: hidden; }
         .port-title { font-size: 2em; color: #1c2a38; margin-bottom: 20px; border-bottom: 3px solid #e0e0e0; padding-bottom: 10px; }
-        .port-layout { display: flex; flex-wrap: wrap; gap: 40px; }
+        .port-layout { display: flex; flex-wrap: wrap; gap: 40px; padding: 20px 40px 40px; max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
         .category-column { flex: 1; min-width: 300px; }
         .category-title { font-size: 1.5em; color: #444; margin-top: 0; }
         .category-header { display: flex; align-items: baseline; gap: 15px; flex-wrap: wrap; margin-bottom: 10px; }
@@ -20,10 +20,9 @@
         .filter-controls > div { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         .filter-controls h3 { margin: 0; font-size: 1em; color: #333; }
         .filter-controls label { cursor: pointer; user-select: none; }
-        .port-title.collapsible { cursor: pointer; position: relative; user-select: none; margin: 0; padding: 20px; border-bottom: 1px solid #e0e0e0; }
+        .port-title.collapsible { cursor: pointer; position: relative; user-select: none; margin: 0; padding: 20px 40px; border-bottom: 1px solid #e0e0e0; }
         .port-title.collapsible::after { content: '+'; font-weight: bold; position: absolute; right: 10px; transition: transform 0.2s ease-in-out; font-size: 1.5em; top: 50%; transform: translateY(-55%); }
         .port-title.collapsible.active::after { content: '−'; }
-        .port-layout { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
         .card-container { display: flex; flex-wrap: wrap; gap: 20px; }
         .card { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 20px; border-left: 5px solid #ccc; display: flex; flex-direction: column; flex: 1; min-width: 160px; }
         .card.status-no-data { background-color: #f8f9fa; border-left-color: #e0e0e0; }
@@ -103,6 +102,7 @@
                 const originalPortName = item.querySelector('title').textContent;
                 const portName = originalPortName.split(' - ')[0];
                 const description = item.querySelector('description').textContent;
+                const hoursInfo = getOperatingHoursInfo(description); // Parse hours from the full description for all types.
 
                 if (!portData[portName]) {
                     portData[portName] = createPortTemplate(portName);
@@ -112,7 +112,6 @@
                 const pedestrianChunk = description.split('Pedestrian')[1] || '';
 
                 if (originalPortName.includes('PedWest')) {
-                    const hoursInfo = getOperatingHoursInfo(description);
                     const generalData = extractLaneData(description, 'General Lanes');
                     const readyData = extractLaneData(description, 'Ready Lanes');
 
@@ -129,24 +128,22 @@
                         operatingHours: hoursInfo.operatingHoursText
                     };
                 } else {
-                    const vehicleHoursInfo = getOperatingHoursInfo(vehicleChunk);
-                    portData[portName].vehicles.operatingHours = vehicleHoursInfo.operatingHoursText;
+                    portData[portName].vehicles.operatingHours = hoursInfo.operatingHoursText;
                     ['General', 'Ready', 'Sentri'].forEach(laneName => {
                         const laneData = extractLaneData(vehicleChunk, `${laneName} Lanes`);
-                        if (!vehicleHoursInfo.isCurrentlyOpen) {
+                        if (!hoursInfo.isCurrentlyOpen) {
                             laneData.status = 'Closed';
-                            laneData.updateTime = `At ${vehicleHoursInfo.closingTimeText}`;
+                            laneData.updateTime = `At ${hoursInfo.closingTimeText}`;
                         }
                         portData[portName].vehicles[laneName] = laneData;
                     });
 
-                    const pedestrianHoursInfo = getOperatingHoursInfo(pedestrianChunk);
-                    portData[portName].pedestrians.operatingHours = pedestrianHoursInfo.operatingHoursText;
+                    portData[portName].pedestrians.operatingHours = hoursInfo.operatingHoursText;
                     ['General', 'Ready'].forEach(laneName => {
                         const laneData = extractLaneData(pedestrianChunk, `${laneName} Lanes`);
-                        if (!pedestrianHoursInfo.isCurrentlyOpen) {
+                        if (!hoursInfo.isCurrentlyOpen) {
                             laneData.status = 'Closed';
-                            laneData.updateTime = `At ${pedestrianHoursInfo.closingTimeText}`;
+                            laneData.updateTime = `At ${hoursInfo.closingTimeText}`;
                         }
                         portData[portName].pedestrians[laneName] = laneData;
                     });
@@ -205,11 +202,11 @@
             if (!hoursMatch) return defaultInfo;
 
             const operatingHoursText = hoursMatch[0];
-            const closingTimeText = operatingHoursText.split('-')[1]?.trim() || '';
             const operatingHours = parseOperatingHours(operatingHoursText);
 
             if (operatingHours) {
-                return { operatingHoursText, isCurrentlyOpen: isCurrentlyOpen(operatingHours), closingTimeText };
+                const formattedClosingTime = formatHour(operatingHours.endHour);
+                return { operatingHoursText, isCurrentlyOpen: isCurrentlyOpen(operatingHours), closingTimeText: formattedClosingTime };
             }
 
             return defaultInfo;
@@ -241,6 +238,18 @@
                 console.error(`Could not parse operating hours: "${hoursString}"`, e);
                 return null;
             }
+        }
+
+        /**
+         * Formats a 24-hour number into a "h:00 am/pm" string.
+         * @param {number} hour The hour in 24-hour format (0-23).
+         * @returns {string}
+         */
+        function formatHour(hour) {
+            const h = hour % 12 === 0 ? 12 : hour % 12;
+            const ampm = hour >= 12 ? 'pm' : 'am';
+            // The source data is by the hour, so we add ":00".
+            return `${h}:00 ${ampm}`;
         }
 
         /**
