@@ -115,8 +115,12 @@
                     // Fill in the template with data
                     if (originalPortName.includes('PedWest')) {
                         console.log("Handling special case: PedWest");
-                        // It gets its own section.
-                        portData[portName].pedwest = { 'Pedestrian Lanes': extractLaneData(description, 'Pedestrian Lanes') };
+                        // The description for PedWest contains its own lane data under 'General' and 'Ready'.
+                        // We parse them directly from the full description text.
+                        portData[portName].pedwest = {
+                            'General': extractLaneData(description, 'General Lanes'),
+                            'Ready': extractLaneData(description, 'Ready Lanes')
+                        };
                     } else {
                         // Standard vehicle lanes
                         portData[portName].vehicles['General'] = extractLaneData(vehicleChunk, 'General Lanes');
