@@ -12,8 +12,8 @@
         .port-layout { display: flex; flex-wrap: wrap; gap: 40px; }
         .category-column { flex: 1; min-width: 300px; }
         .category-title { font-size: 1.5em; color: #444; margin-top: 0; }
-        .card-container { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        .card { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 20px; border-left: 5px solid #ccc; display: flex; flex-direction: column; }
+        .card-container { display: flex; flex-wrap: wrap; gap: 20px; }
+        .card { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 20px; border-left: 5px solid #ccc; display: flex; flex-direction: column; flex: 1; min-width: 160px; }
         .card.status-no-data { background-color: #f8f9fa; border-left-color: #e0e0e0; }
         .card.status-closed .wait-time, .card.status-no-data .wait-time { color: #6c757d; }
         .card h3 { margin-top: 0; font-size: 1.25em; color: #333; }
@@ -45,8 +45,8 @@
             const laneTemplate = () => ({ status: 'N/A', waitTime: 'N/A', lanesOpen: 'N/A', updateTime: '' });
             return {
                 portName: portName,
-                vehicles: { 'General': laneTemplate(), 'SENTRI': laneTemplate(), 'Ready': laneTemplate() },
-                pedestrians: { 'General': laneTemplate(), 'Pedestrian West': laneTemplate(), 'Ready': laneTemplate() }
+                vehicles: { 'General': laneTemplate(), 'Ready': laneTemplate(), 'Sentri': laneTemplate() },
+                pedestrians: { 'General': laneTemplate(), 'Ready': laneTemplate(), 'Sentri': laneTemplate() }
             };
         }
 
@@ -54,13 +54,17 @@
          * A targeted function to extract data for one specific lane from a text block.
          */
         function extractLaneData(textChunk, laneFullName) {
+            console.groupCollapsed(`Extracting data for: "${laneFullName}"`);
             const laneData = { status: 'N/A', waitTime: 'N/A', lanesOpen: 'N/A', updateTime: '' };
 
             if (!textChunk || !textChunk.includes(laneFullName + ":")) {
+                console.log(`Lane not found in provided text chunk.`);
+                console.groupEnd();
                 return laneData;
             }
 
             const laneChunk = textChunk.split(laneFullName + ":")[1] || '';
+            console.log(`Raw lane chunk:`, laneChunk);
 
             if (laneChunk.includes("Lanes Closed")) {
                 laneData.status = 'Closed';
@@ -77,49 +81,63 @@
                     laneData.updateTime = timeMatch ? timeMatch[0] : '';
                 }
             }
+            console.log(`Result:`, laneData);
+            console.groupEnd();
             return laneData;
         }
 
         fetch(fetchUrl)
             .then(response => response.ok ? response.text() : Promise.reject('Network response was not ok.'))
             .then(xmlText => {
+                console.log("Data fetched successfully. Starting to parse XML.");
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(xmlText, "text/xml");
                 const items = xmlDoc.getElementsByTagName('item');
+                console.log(`Found ${items.length} items in the RSS feed.`);
                 const portData = {};
 
                 for (const item of items) {
+                    console.groupCollapsed(`Processing Item: ${originalPortName}`);
                     const originalPortName = item.querySelector('title').textContent;
                     const portName = originalPortName.split(' - ')[0];
                     const description = item.querySelector('description').textContent;
 
                     if (!portData[portName]) {
+                        console.log(`Creating new template for port.`);
                         portData[portName] = createPortTemplate(portName);
                     }
 
                     // Isolate text chunks for vehicles and pedestrians
                     const vehicleChunk = description.split('Passenger Vehicles')[1] ? description.split('Passenger Vehicles')[1].split('Pedestrian')[0] : '';
                     const pedestrianChunk = description.split('Pedestrian')[1] ? description.split('Pedestrian')[1] : '';
+                    console.log("Vehicle Chunk:", vehicleChunk);
+                    console.log("Pedestrian Chunk:", pedestrianChunk);
 
-                    // Fill in the template with data
-                    if (originalPortName.includes('PedWest')) {
-                        // Special handling for PedWest as a unique pedestrian lane
-                        portData[portName].pedestrians['Pedestrian West'] = extractLaneData(description, 'Pedestrian Lanes');
-                    } else {
-                        // Standard vehicle lanes
-                        portData[portName].vehicles['General'] = extractLaneData(vehicleChunk, 'General Lanes');
-                        portData[portName].vehicles['SENTRI'] = extractLaneData(vehicleChunk, 'SENTRI Lanes');
-                        portData[portName].vehicles['Ready'] = extractLaneData(vehicleChunk, 'Ready Lanes');
+                    // // Fill in the template with data
+                    // if (originalPortName.includes('PedWest')) {
+                    //     console.log("Handling special case: PedWest");
+                    //     // Special handling for PedWest as a unique pedestrian lane
+                    //     portData[portName].pedestrians['Pedestrian West'] = extractLaneData(description, 'Pedestrian Lanes');
+                    // } else {
+                    // Standard vehicle lanes
+                    portData[portName].vehicles['General'] = extractLaneData(vehicleChunk, 'General Lanes');
+                    portData[portName].vehicles['Ready'] = extractLaneData(vehicleChunk, 'Ready Lanes');
+                    portData[portName].vehicles['Sentri'] = extractLaneData(vehicleChunk, 'Sentri Lanes');
 
-                        // Standard pedestrian lanes
-                        portData[portName].pedestrians['General'] = extractLaneData(pedestrianChunk, 'General Lanes');
-                        portData[portName].pedestrians['Ready'] = extractLaneData(pedestrianChunk, 'Ready Lanes');
-                    }
+                    // Standard pedestrian lanes
+                    portData[portName].pedestrians['General'] = extractLaneData(pedestrianChunk, 'General Lanes');
+                    portData[portName].pedestrians['Ready'] = extractLaneData(pedestrianChunk, 'Ready Lanes');
+                    // }
+                    console.log(`Finished processing. Current data for ${portName}:`, JSON.parse(JSON.stringify(portData[portName])));
+                    console.groupEnd();
                 }
 
+                console.log("%c--- All items parsed. Final data structure: ---", "font-weight: bold; font-size: 1.2em;", portData);
                 if (loadingMessage) loadingMessage.style.display = 'none';
 
+                console.log("%c--- Starting DOM Generation ---", "font-weight: bold; font-size: 1.2em;");
                 for (const portName in portData) {
+                    console.log(`Generating HTML for port: ${portName}`);
                     const port = portData[portName];
                     let portHtml = `<section class="port-section"><h2 class="port-title">${portName}</h2><div class="port-layout">`;
 
@@ -139,7 +157,7 @@
                     portHtml += `<div class="category-column"><h3 class="category-title">Pedestrians</h3><div class="card-container">`;
                     for (const laneName in port.pedestrians) {
                         const lane = port.pedestrians[laneName];
-                        if (laneName === 'SENTRI') continue; // Skip Pedestrian SENTRI as it doesn't exist
+                        if (laneName === 'Sentri') continue; // Skip Pedestrian Sentri as it doesn't exist
                         const waitTimeDisplay = lane.status === 'Open' ? `${lane.waitTime} min` : lane.status;
                         const colorClass = lane.status === 'N/A' ? 'status-no-data' : getStatusColor(lane.status, lane.waitTime);
                         const lanesOpenDisplay = lane.status === 'Closed' ? 'All lanes closed' : (lane.lanesOpen !== 'N/A' ? `${lane.lanesOpen} lane(s) open` : '');
