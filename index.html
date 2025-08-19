@@ -490,6 +490,27 @@
                 }
             }
 
+            function calculateHourlyAverages(dayHourData) {
+                const averageData = Array(24).fill(0);
+                const counts = Array(24).fill(0);
+
+                for (const dayHour in dayHourData) {
+                    // Use a regex to robustly find the hour number at the end of the string.
+                    // This is safer than splitting by space, which can fail with unexpected whitespace.
+                    const hourMatch = dayHour.match(/(\d+)$/);
+                    const hour = hourMatch ? parseInt(hourMatch[1], 10) : NaN;
+                    if (!isNaN(hour)) {
+                        averageData[hour] += dayHourData[dayHour];
+                        counts[hour]++;
+                    }
+                }
+                
+                for (let i = 0; i < 24; i++) {
+                    averageData[i] = counts[i] > 0 ? Math.round(averageData[i] / counts[i]) : 0;
+                }
+                return averageData;
+            }
+
             function updateChart(portName) {
                 if (!processedData || !processedData[portName]) {
                     console.warn(`[Hist] No data for selected port: ${portName}`);
@@ -504,21 +525,7 @@
                 for (const key in portData) {
                     const laneType = key.split(' - ')[1];
                     const dayHourData = portData[key];
-                    const averageData = Array(24).fill(0);
-                    const counts = Array(24).fill(0);
-
-                    for (const dayHour in dayHourData) {
-                        const hour = parseInt(dayHour.split(' ')[1], 10);
-                        if (!isNaN(hour)) {
-                            averageData[hour] += dayHourData[dayHour];
-                            counts[hour]++;
-                        }
-                    }
-                    
-                    for (let i = 0; i < 24; i++) {
-                        averageData[i] = counts[i] > 0 ? Math.round(averageData[i] / counts[i]) : 0;
-                    }
-
+                    const averageData = calculateHourlyAverages(dayHourData);
                     datasets.push({
                         label: key,
                         data: averageData,
@@ -577,7 +584,7 @@
 
             // Expose private functions for testing
             if (new URLSearchParams(window.location.search).has('run_tests')) {
-                publicApi.fetchAndParse = fetchAndParse;
+                publicApi.test_export = { fetchAndParse, calculateHourlyAverages };
             }
 
             return publicApi;
@@ -661,7 +668,7 @@ Malformed Port,,,`
             };
 
             await testRunner.testGroup('Historical Data Parsing', async () => {
-                const data = await historicalAnalysis.fetchAndParse();
+                const data = await historicalAnalysis.test_export.fetchAndParse();
                 testRunner.assertEquals(true, data.hasOwnProperty('San Ysidro'), 'Should parse "San Ysidro" port');
                 testRunner.assertEquals(true, data.hasOwnProperty('Otay Mesa'), 'Should parse "Otay Mesa" port');
                 testRunner.assertEquals(false, data.hasOwnProperty('Malformed Port'), 'Should ignore malformed rows');
@@ -669,6 +676,23 @@ Malformed Port,,,`
                 testRunner.assertEquals(25, sanYsidroReady['Mon 08'], 'Should correctly parse wait time for San Ysidro Ready');
                 const otaySentri = data['Otay Mesa']['Vehicles - Sentri'];
                 testRunner.assertEquals(0, otaySentri['Tue 09'], 'Should handle "No Delay" as 0');
+            });
+
+            testRunner.testGroup('Historical Data Processing', () => {
+                const { calculateHourlyAverages } = historicalAnalysis.test_export;
+                const mockDayHourData = {
+                    "Mon 08": 10,
+                    "Tue 08": 20,      // Same hour, different day
+                    "Wed  09": 30,     // Double space before hour
+                    "Thu   10": 40,    // Triple space
+                    "Fri BAD": 50,     // Invalid hour format
+                };
+                const expectedAverages = Array(24).fill(0);
+                expectedAverages[8] = 15; // (10+20)/2
+                expectedAverages[9] = 30;
+                expectedAverages[10] = 40;
+                const actualAverages = calculateHourlyAverages(mockDayHourData);
+                testRunner.assertEquals(expectedAverages, actualAverages, 'Should correctly calculate hourly averages with irregular spacing');
             });
 
             testRunner.testGroup('Live Data Parsing', () => {
