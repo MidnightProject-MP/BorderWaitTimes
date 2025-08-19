@@ -32,6 +32,8 @@ function extractLaneData(text, laneFullName) {
 }
 
 function getOperatingHoursInfo(desc, id) {
+    console.log(`Extracting operating hours for: ${id} with description: ${desc}`);
+    
     const defaultInfo = { operatingHoursText: 'N/A', isCurrentlyOpen: true };
 
     // Regex to find a header containing the ID, and capture the text up to (but not including) the date.
@@ -90,10 +92,10 @@ export async function fetchAndParseData() {
             const pChunk = desc.split('Pedestrian')[1] || '';
 
             const vehicleHoursInfo = getOperatingHoursInfo(desc, 'Passenger Vehicles');
-            console.log(`Operating Hours: ${vehicleHoursInfo.operatingHoursText}`);
-            
+            // console.log(`Operating Hours: ${vehicleHoursInfo.operatingHoursText}`);
+
             const pedestrianHoursInfo = getOperatingHoursInfo(desc, CONFIG.MODES.PEDESTRIANS);
-            console.log(`Operating Hours: ${pedestrianHoursInfo.operatingHoursText}`);
+            // console.log(`Operating Hours: ${pedestrianHoursInfo.operatingHoursText}`);
 
             Object.assign(portData[portName].vehicles, parseDescription(vChunk, CONFIG.MODES.VEHICLES, vehicleHoursInfo));
             Object.assign(portData[portName].pedestrians, parseDescription(pChunk, CONFIG.MODES.PEDESTRIANS, pedestrianHoursInfo));
