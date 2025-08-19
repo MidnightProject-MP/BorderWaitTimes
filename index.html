@@ -9,12 +9,9 @@
         .dashboard { max-width: 1200px; margin: auto; padding: 20px; }
         .port-section { margin-bottom: 40px; }
         .port-title { font-size: 2em; color: #1c2a38; margin-bottom: 20px; border-bottom: 3px solid #e0e0e0; padding-bottom: 10px; }
-        
-        /* New Two-Column Layout */
         .port-layout { display: flex; flex-wrap: wrap; gap: 40px; }
         .category-column { flex: 1; min-width: 300px; }
         .category-title { font-size: 1.5em; color: #444; margin-top: 0; }
-
         .card-container { display: grid; grid-template-columns: 1fr; gap: 20px; }
         .card { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 20px; border-left: 5px solid #ccc; display: flex; flex-direction: column; }
         .card.status-closed { background-color: #f8f9fa; border-left-color: #6c757d; }
@@ -36,12 +33,11 @@
 
     <script>
         const rssUrl = 'https://bwt.cbp.gov/api/bwtRss/CSV/-1/57,55/57,55,106';
-        const fetchUrl = rssUrl; 
+        const fetchUrl = rssUrl;
 
         const dashboard = document.getElementById('dashboard');
         const loadingMessage = document.getElementById('loading');
 
-        // (Helper functions like normalizePortName, getStatusColor, parseLanesFromDescription are the same as before)
         function normalizePortName(name) { return name.split(' - ')[0]; }
         function getStatusColor(status, waitTime) {
             if (status !== 'Open') return 'status-closed';
@@ -51,48 +47,79 @@
             if (minutes <= 60) return 'status-yellow';
             return 'status-red';
         }
+
+        /**
+         * A new, robust parser that reads the description line-by-line to correctly
+         * identify and extract all vehicle and pedestrian lane data.
+         */
         function parseLanesFromDescription(description, originalPortName) {
             const allLanes = [];
-            const categories = {
-                'Passenger Vehicles': ['General Lanes', 'Ready Lanes', 'SENTRI Lanes'],
-                'Pedestrian Lanes': ['General Lanes', 'Ready Lanes'] 
-            };
+            const lines = description.split('\n');
+            let currentCategory = '';
+
+            // Handle the PedWest special case directly
             if (originalPortName.includes('PedWest')) {
-                const chunk = description.split('Pedestrian Lanes:')[1] || '';
                 const laneName = "Pedestrian West";
                 let status = 'Pending', waitTime = 'N/A', lanesOpen = 'N/A', updateTime = '';
-                if (chunk.includes("Lanes Closed")) { status = 'Closed'; lanesOpen = '0'; }
-                else {
-                    const waitMatch = chunk.match(/(\d+)\s+min delay/);
-                    const lanesMatch = chunk.match(/(\d+)\s+lane\(s\)\s+open/);
-                    const timeMatch = chunk.match(/At\s+([\d:]+\s*[ap]m\s*\w+)/);
-                    if (waitMatch) { status = 'Open'; waitTime = waitMatch[1]; lanesOpen = lanesMatch ? lanesMatch[1] : '?'; updateTime = timeMatch ? timeMatch[0] : ''; }
+                if (description.includes("Lanes Closed")) {
+                    status = 'Closed'; lanesOpen = '0';
+                } else {
+                    const waitMatch = description.match(/(\d+)\s+min delay/);
+                    const lanesMatch = description.match(/(\d+)\s+lane\(s\)\s+open/);
+                    const timeMatch = description.match(/At\s+([\d:]+\s*[ap]m\s*\w+)/);
+                    if (waitMatch) {
+                        status = 'Open';
+                        waitTime = waitMatch[1];
+                        lanesOpen = lanesMatch ? lanesMatch[1] : '?';
+                        updateTime = timeMatch ? timeMatch[0] : '';
+                    }
                 }
-                allLanes.push({ name: laneName, status, waitTime, lanesOpen, updateTime });
+                allLanes.push({ name: laneName, status, waitTime, lanesOpen, updateTime, type: 'pedestrian' });
                 return allLanes;
             }
-            for (const category in categories) {
-                if (!description.includes(category)) continue;
-                let chunk = description.split(category)[1] || '';
-                for (const nextCategory in categories) { if (chunk.includes(nextCategory)) { chunk = chunk.split(nextCategory)[0]; } }
-                for (const laneType of categories[category]) {
-                    if (!chunk.includes(laneType + ":")) continue;
-                    let status = 'Pending', waitTime = 'N/A', lanesOpen = 'N/A', updateTime = '';
-                    const laneChunk = chunk.split(laneType + ":")[1] || '';
-                    if (laneChunk.includes("Lanes Closed")) { status = 'Closed'; lanesOpen = '0'; }
-                    else {
-                        const waitMatch = laneChunk.match(/(\d+)\s+min delay/);
-                        const lanesMatch = laneChunk.match(/(\d+)\s+lane\(s\)\s+open/);
-                        const timeMatch = laneChunk.match(/At\s+([\d:]+\s*[ap]m\s*\w+)/);
-                        if (waitMatch) { status = 'Open'; waitTime = waitMatch[1]; lanesOpen = lanesMatch ? lanesMatch[1] : '?'; updateTime = timeMatch ? timeMatch[0] : ''; }
+
+            // Standard line-by-line parsing for all other ports
+            for (const line of lines) {
+                // Check if the line is a category header
+                if (line.includes('Passenger Vehicles')) {
+                    currentCategory = 'vehicle';
+                    continue; // Move to the next line
+                } else if (line.includes('Pedestrian')) {
+                    currentCategory = 'pedestrian';
+                    continue; // Move to the next line
+                }
+
+                // If we haven't identified a category yet, skip
+                if (!currentCategory) continue;
+
+                const laneTypes = ['General Lanes', 'Ready Lanes', 'SENTRI Lanes'];
+                for (const laneType of laneTypes) {
+                    if (line.trim().startsWith(laneType)) {
+                        let status = 'Pending', waitTime = 'N/A', lanesOpen = 'N/A', updateTime = '';
+                        
+                        if (line.includes("Lanes Closed")) {
+                            status = 'Closed'; lanesOpen = '0';
+                        } else {
+                            const waitMatch = line.match(/(\d+)\s+min delay/);
+                            const lanesMatch = line.match(/(\d+)\s+lane\(s\)\s+open/);
+                            const timeMatch = line.match(/At\s+([\d:]+\s*[ap]m\s*\w+)/);
+
+                            if (waitMatch) {
+                                status = 'Open';
+                                waitTime = waitMatch[1];
+                                lanesOpen = lanesMatch ? lanesMatch[1] : '?';
+                                updateTime = timeMatch ? timeMatch[0] : '';
+                            }
+                        }
+                        
+                        const laneName = laneType.replace(' Lanes', '');
+                        allLanes.push({ name: laneName, status, waitTime, lanesOpen, updateTime, type: currentCategory });
+                        break; // Found a lane type on this line, move to the next line
                     }
-                    const laneName = category.includes('Pedestrian') ? `Pedestrian ${laneType.replace(' Lanes', '')}` : laneType.replace(' Lanes', '');
-                    allLanes.push({ name: laneName, status, waitTime, lanesOpen, updateTime });
                 }
             }
             return allLanes;
         }
-
 
         fetch(fetchUrl)
             .then(response => response.ok ? response.text() : Promise.reject('Network response was not ok.'))
@@ -107,6 +134,7 @@
                     const normalizedPortName = normalizePortName(originalPortName);
                     const description = item.querySelector('description').textContent;
                     const parsedLanes = parseLanesFromDescription(description, originalPortName);
+
                     if (parsedLanes.length > 0) {
                         if (!portData[normalizedPortName]) {
                             portData[normalizedPortName] = [];
@@ -119,20 +147,15 @@
 
                 for (const portName in portData) {
                     const lanes = portData[portName];
-                    
-                    // --- NEW: Filter lanes into vehicle and pedestrian groups ---
-                    const vehicleLanes = lanes.filter(lane => !lane.name.toLowerCase().includes('pedestrian'));
-                    const pedestrianLanes = lanes.filter(lane => lane.name.toLowerCase().includes('pedestrian'));
+                    const vehicleLanes = lanes.filter(lane => lane.type === 'vehicle');
+                    const pedestrianLanes = lanes.filter(lane => lane.type === 'pedestrian');
 
                     let portHtml = `<section class="port-section">
                                         <h2 class="port-title">${portName}</h2>
                                         <div class="port-layout">`;
                     
-                    // --- NEW: Build the Vehicle column if it has data ---
                     if (vehicleLanes.length > 0) {
-                        portHtml += `<div class="category-column">
-                                        <h3 class="category-title">Vehicles</h3>
-                                        <div class="card-container">`;
+                        portHtml += `<div class="category-column"><h3 class="category-title">Vehicles</h3><div class="card-container">`;
                         vehicleLanes.forEach(lane => {
                             const waitTimeDisplay = lane.status === 'Open' ? `${lane.waitTime} min` : lane.status;
                             const colorClass = getStatusColor(lane.status, lane.waitTime);
@@ -143,11 +166,8 @@
                         portHtml += `</div></div>`;
                     }
 
-                    // --- NEW: Build the Pedestrian column if it has data ---
                     if (pedestrianLanes.length > 0) {
-                         portHtml += `<div class="category-column">
-                                        <h3 class="category-title">Pedestrians</h3>
-                                        <div class="card-container">`;
+                         portHtml += `<div class="category-column"><h3 class="category-title">Pedestrians</h3><div class="card-container">`;
                         pedestrianLanes.forEach(lane => {
                             const waitTimeDisplay = lane.status === 'Open' ? `${lane.waitTime} min` : lane.status;
                             const colorClass = getStatusColor(lane.status, lane.waitTime);
