@@ -87,6 +87,25 @@
         #historical-controls label { font-weight: bold; }
         #port-select { padding: 8px; border-radius: 5px; background-color: #333; color: #fff; border: 1px solid #555; }
         #chart-container { position: relative; min-height: 400px; }
+
+        /* Test runner styles */
+        #test-results {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #111;
+            border-top: 2px solid #555;
+            max-height: 30vh;
+            overflow-y: auto;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.9em;
+            z-index: 1000;
+        }
+        #test-results .pass { color: #28a745; }
+        #test-results .fail { color: #dc3545; font-weight: bold; }
+        #test-results h3 { margin: 10px 0 5px; color: #00aaff; }
     </style>
 </head>
 <body>
@@ -133,6 +152,7 @@
             </div>
         </div>
     </div>
+    <!-- Test results will be injected here if run -->
 
     <script>
         // --- URL HASH AND TAB MANAGEMENT ---
@@ -207,20 +227,24 @@
                     if (!portData[portName]) portData[portName] = createPortTemplate(portName);
                     const desc = item.querySelector('description').textContent;
                     if (title.includes('PedWest')) {
-                        Object.assign(portData[portName].pedwest, parseDescription(desc, 'Pedestrian'));
+                        const pedWestHoursInfo = getOperatingHoursInfo(desc, 'Pedestrian');
+                        Object.assign(portData[portName].pedwest, parseDescription(desc, 'Pedestrian', pedWestHoursInfo));
                     } else {
                         const vChunk = desc.split('Passenger Vehicles')[1]?.split('Pedestrian')[0] || '';
                         const pChunk = desc.split('Pedestrian')[1] || '';
-                        Object.assign(portData[portName].vehicles, parseDescription(vChunk, 'Passenger Vehicles'));
-                        Object.assign(portData[portName].pedestrians, parseDescription(pChunk, 'Pedestrian'));
+
+                        const vehicleHoursInfo = getOperatingHoursInfo(desc, 'Passenger Vehicles');
+                        const pedestrianHoursInfo = getOperatingHoursInfo(desc, 'Pedestrian');
+
+                        Object.assign(portData[portName].vehicles, parseDescription(vChunk, 'Passenger Vehicles', vehicleHoursInfo));
+                        Object.assign(portData[portName].pedestrians, parseDescription(pChunk, 'Pedestrian', pedestrianHoursInfo));
                     }
                 }
                 return portData;
             }
             
-            function parseDescription(chunk, type) {
+            function parseDescription(chunk, type, hoursInfo) {
                 const data = {};
-                const hoursInfo = getOperatingHoursInfo(chunk, type);
                 data.operatingHours = hoursInfo.operatingHoursText;
                 ['General', 'Ready', 'Sentri'].forEach(lane => {
                     const laneData = extractLaneData(chunk, `${lane} Lanes`);
@@ -398,7 +422,14 @@
                 return 'status-red';
             }
 
-            return { init, render, applyFiltersFromUrl };
+            const publicApi = { init, render, applyFiltersFromUrl };
+
+            // Expose private functions for testing
+            if (new URLSearchParams(window.location.search).has('run_tests')) {
+                publicApi.test_export = { getOperatingHoursInfo, extractLaneData };
+            }
+
+            return publicApi;
         })();
 
         // --- HISTORICAL ANALYSIS SCRIPT ---
@@ -418,13 +449,17 @@
                     console.log('[Hist] Data fetched. Parsing...');
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
-                    const rows = doc.querySelectorAll('tbody tr');
+                    const allRows = Array.from(doc.querySelectorAll('tbody tr'));
+                    if (allRows.length < 2) { // Need header and at least one data row
+                        throw new Error("Historical data table is missing headers or data.");
+                    }
+                    const headers = Array.from(allRows.shift().querySelectorAll('td')).map(th => th.innerText.trim());
+                    const rows = allRows;
                     const data = {};
-                    const headers = Array.from(doc.querySelectorAll('thead th')).map(th => th.innerText.trim());
                     
                     rows.forEach(row => {
                         const cells = Array.from(row.querySelectorAll('td')).map(td => td.innerText.trim());
-                        if (cells.length < headers.length) return; // Skip malformed rows
+                        if (cells.length < 3) return; // Skip rows without at least Port, Type, and Lane
                         const port = cells[0];
                         if (!port) return;
                         if (!data[port]) data[port] = {};
@@ -436,7 +471,9 @@
                         for (let i = 3; i < cells.length; i++) {
                             const dayHour = headers[i];
                             const waitTime = parseInt(cells[i], 10);
-                            if (dayHour) data[port][key][dayHour] = isNaN(waitTime) ? 0 : waitTime;
+                            if (dayHour && i < headers.length) {
+                                data[port][key][dayHour] = isNaN(waitTime) ? 0 : waitTime;
+                            }
                         }
                     });
                     console.log('[Hist] Parsing complete. Processed data:', data);
@@ -530,14 +567,133 @@
                     }
                 }
             }
-            return { init };
+
+            const publicApi = { init };
+
+            // Expose private functions for testing
+            if (new URLSearchParams(window.location.search).has('run_tests')) {
+                publicApi.fetchAndParse = fetchAndParse;
+            }
+
+            return publicApi;
         })();
+
+        // --- SIMPLE TEST SUITE ---
+        const testRunner = (function() {
+            let resultsEl = null;
+            let testsRun = 0;
+            let testsFailed = 0;
+
+            function init() {
+                resultsEl = document.createElement('div');
+                document.body.appendChild(resultsEl);
+                resultsEl.id = 'test-results';
+                resultsEl.innerHTML = '<h3>Running Tests...</h3>';
+                console.log('--- Running All Tests ---');
+            }
+
+            function finish() {
+                const summary = `${testsRun - testsFailed}/${testsRun} tests passed.`;
+                const summaryEl = document.createElement('h3');
+                summaryEl.textContent = summary;
+                summaryEl.className = testsFailed > 0 ? 'fail' : 'pass';
+                resultsEl.prepend(summaryEl);
+                console.log(`--- Test Summary: ${summary} ---`);
+            }
+
+            function testGroup(name, testFn) {
+                resultsEl.innerHTML += `<h3>${name}</h3>`;
+                console.log(`\n--- Testing: ${name} ---`);
+                testFn();
+            }
+
+            function assertEquals(expected, actual, message) {
+                testsRun++;
+                // Use stringify for simple object/array comparison
+                const result = (JSON.stringify(expected) === JSON.stringify(actual));
+                const status = result ? 'PASS' : 'FAIL';
+                const colorClass = result ? 'pass' : 'fail';
+
+                const resultLine = document.createElement('div');
+                resultLine.className = colorClass;
+                resultLine.textContent = `[${status}] ${message}`;
+                resultsEl.appendChild(resultLine);
+                console.log(`[${status}] ${message}`);
+
+                if (!result) {
+                    testsFailed++;
+                    console.error(`  - Expected: ${JSON.stringify(expected)}`);
+                    console.error(`  - Actual:   ${JSON.stringify(actual)}`);
+                    const details = document.createElement('pre');
+                    details.style.marginLeft = '20px';
+                    details.textContent = `  - Expected: ${JSON.stringify(expected, null, 2)}\n  - Actual:   ${JSON.stringify(actual, null, 2)}`;
+                    resultsEl.appendChild(details);
+                }
+            }
+
+            return { init, finish, testGroup, assertEquals };
+        })();
+
+        async function runAllTests() {
+            testRunner.init();
+
+            // Mocking fetch for historical data
+            const originalFetch = window.fetch;
+            window.fetch = async (url) => {
+                if (url.includes('docs.google.com')) {
+                    return Promise.resolve({
+                        ok: true,
+                        text: () => Promise.resolve(`
+                            <html><body><table><tbody>
+                                <tr><td>Port</td><td>Type</td><td>Lane</td><td>Mon 08</td><td>Tue 09</td></tr>
+                                <tr><td>San Ysidro</td><td>Vehicles</td><td>Ready</td><td>25</td><td>30</td></tr>
+                                <tr><td>San Ysidro</td><td>Pedestrians</td><td>General</td><td>10</td><td>15</td></tr>
+                                <tr><td>Otay Mesa</td><td>Vehicles</td><td>Sentri</td><td>5</td><td>No Delay</td></tr>
+                                <tr><td>Malformed Port</td><td></td><td></td><td></td><td></td></tr>
+                            </tbody></table></body></html>
+                        `)
+                    });
+                }
+                return originalFetch(url);
+            };
+
+            await testRunner.testGroup('Historical Data Parsing', async () => {
+                const data = await historicalAnalysis.fetchAndParse();
+                testRunner.assertEquals(true, data.hasOwnProperty('San Ysidro'), 'Should parse "San Ysidro" port');
+                testRunner.assertEquals(true, data.hasOwnProperty('Otay Mesa'), 'Should parse "Otay Mesa" port');
+                testRunner.assertEquals(false, data.hasOwnProperty('Malformed Port'), 'Should ignore malformed rows');
+                const sanYsidroReady = data['San Ysidro']['Vehicles - Ready'];
+                testRunner.assertEquals(25, sanYsidroReady['Mon 08'], 'Should correctly parse wait time for San Ysidro Ready');
+                const otaySentri = data['Otay Mesa']['Vehicles - Sentri'];
+                testRunner.assertEquals(0, otaySentri['Tue 09'], 'Should handle "No Delay" as 0');
+            });
+
+            testRunner.testGroup('Live Data Parsing', () => {
+                const { getOperatingHoursInfo, extractLaneData } = liveDashboard.test_export;
+                let desc = "Passenger Vehicles: 6 am - 10 pm 01/01/2024 Passenger Vehicles";
+                let hoursInfo = getOperatingHoursInfo(desc, 'Passenger Vehicles');
+                testRunner.assertEquals("Passenger Vehicles: 6 am - 10 pm", hoursInfo.operatingHoursText, 'Should extract operating hours text');
+                desc = "Pedestrian Lanes: Lanes Closed 01/01/2024 Pedestrian";
+                hoursInfo = getOperatingHoursInfo(desc, 'Pedestrian');
+                testRunner.assertEquals(false, hoursInfo.isCurrentlyOpen, 'Should correctly identify as closed');
+                let chunk = "Ready Lanes: 25 min delay, 3 lane(s) open. At 10:00am PST";
+                let laneData = extractLaneData(chunk, 'Ready Lanes');
+                testRunner.assertEquals({ status: 'Open', waitTime: '25', lanesOpen: '3', updateTime: 'At 10:00am PST' }, laneData, 'Should parse open lane with full details');
+            });
+
+            window.fetch = originalFetch; // Restore fetch
+            testRunner.finish();
+        }
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
             const params = getHashParams();
             switchTab(params.tab);
             liveDashboard.init();
+
+            if (new URLSearchParams(window.location.search).has('run_tests')) {
+                runAllTests();
+            }
         });
 
     </script>
