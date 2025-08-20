@@ -99,17 +99,17 @@ export async function fetchAndParseData() {
         const desc = item.querySelector('description').textContent;
         if (title.includes('PedWest')) {
             // PedWest has a simpler structure, often just pedestrian data.
-            const pedWestHoursInfo = getOperatingHoursInfo(desc, CONFIG.MODES.PEDESTRIANS);
+            const pedWestHoursInfo = getOperatingHoursInfo(desc, CONFIG.DATA_FEED_IDS.PEDESTRIANS);
             // For PedWest, the whole description is the chunk to parse.
             Object.assign(portData[portName].pedwest, parseDescription(desc, CONFIG.MODES.PEDESTRIANS, pedWestHoursInfo));
         } else {
             // For standard ports, find the specific line for each mode to parse. This is more robust than splitting the whole description.
             const lines = desc.split('\n');
-            const vChunk = lines.find(line => line.includes('Passenger Vehicles')) || '';
-            const pChunk = lines.find(line => line.includes('Pedestrian')) || '';
+            const vChunk = lines.find(line => line.includes(CONFIG.DATA_FEED_IDS.VEHICLES)) || '';
+            const pChunk = lines.find(line => line.includes(CONFIG.DATA_FEED_IDS.PEDESTRIANS)) || '';
 
-            const vehicleHoursInfo = getOperatingHoursInfo(desc, 'Passenger Vehicles');
-            const pedestrianHoursInfo = getOperatingHoursInfo(desc, CONFIG.MODES.PEDESTRIANS);
+            const vehicleHoursInfo = getOperatingHoursInfo(desc, CONFIG.DATA_FEED_IDS.VEHICLES);
+            const pedestrianHoursInfo = getOperatingHoursInfo(desc, CONFIG.DATA_FEED_IDS.PEDESTRIANS);
 
             Object.assign(portData[portName].vehicles, parseDescription(vChunk, CONFIG.MODES.VEHICLES, vehicleHoursInfo));
             Object.assign(portData[portName].pedestrians, parseDescription(pChunk, CONFIG.MODES.PEDESTRIANS, pedestrianHoursInfo));

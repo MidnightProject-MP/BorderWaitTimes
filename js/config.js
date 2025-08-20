@@ -17,6 +17,11 @@ export const CONFIG = {
         PEDESTRIANS: 'Pedestrians',
         PEDWEST: 'PedWest', // Special case
     },
+    DATA_FEED_IDS: {
+        // Identifiers used to find data chunks in the raw RSS feed description.
+        VEHICLES: 'Passenger Vehicles',
+        PEDESTRIANS: 'Pedestrian', // Note: The feed uses the singular form.
+    },
     UI: {
         DEFAULT_TAB: 'live-dashboard',
         STATUS_COLORS: {
