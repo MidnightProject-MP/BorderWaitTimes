@@ -199,6 +199,28 @@ function setupEventListeners() {
         }
     });
 
+    // Handle copy buttons on About page using event delegation
+    document.getElementById('panel-about').addEventListener('click', (e) => {
+        const button = e.target.closest('.copy-button');
+        if (button) {
+            const targetSelector = button.dataset.copyTarget;
+            const textToCopy = document.querySelector(targetSelector)?.innerText;
+
+            if (textToCopy) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const originalText = button.innerText;
+                    button.innerText = 'Copied!';
+                    button.classList.add('copied');
+                    setTimeout(() => {
+                        button.innerText = originalText;
+                        button.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
+            }
+        }
+    });
 
     // Handle back/forward browser navigation
     window.addEventListener('popstate', () => {

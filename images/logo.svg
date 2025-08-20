@@ -1,0 +1,70 @@
+<svg width="512" height="512" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="Midnight Project Logo">
+    <defs>
+        <!-- Gradient for the moon surface to give a grayish, cratered feel -->
+        <radialGradient id="moonSurface" cx="50%" cy="50%" r="50%" fx="40%" fy="40%">
+            <!-- Using lighter grays to make the moon visible on dark backgrounds -->
+            <stop offset="0%" stop-color="#E0E0E0" />
+            <stop offset="50%" stop-color="#C0C0C0" />
+            <stop offset="100%" stop-color="#A0A0A0" />
+        </radialGradient>
+
+        <!-- A filter to give the moon a 3D, cratered appearance using lighting effects -->
+        <filter id="moonEffect" x="-20%" y="-20%" width="140%" height="140%">
+            <!-- 1. Generate noise. Lower frequency for larger features. -->
+            <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="4" stitchTiles="stitch" result="rawNoise"/>
+
+            <!-- 2. Blur the noise to create softer, more rounded crater shapes instead of sharp creases. -->
+            <feGaussianBlur in="rawNoise" stdDeviation="1.2" result="blurredNoise"/>
+
+            <!-- 3. Create a diffuse lighting effect from the blurred noise map. -->
+            <feDiffuseLighting in="blurredNoise" lighting-color="white" surfaceScale="5" result="light">
+                <feDistantLight azimuth="225" elevation="60" />
+            </feDiffuseLighting>
+
+            <!-- 4. Multiply the original moon gradient with the light map to create the 3D texture. -->
+            <feComposite in="SourceGraphic" in2="light" operator="arithmetic" k1="1" k2="0" k3="0" k4="0" result="texturedMoon" />
+
+            <!-- 5. Add a subtle specular highlight for a bit of shine on the peaks. -->
+            <feSpecularLighting in="blurredNoise" surfaceScale="5" specularConstant="0.7" specularExponent="40" lighting-color="white" result="specularLight">
+                <feDistantLight azimuth="225" elevation="60" />
+            </feSpecularLighting>
+            <feComposite in="texturedMoon" in2="specularLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" />
+        </filter>
+
+        <!-- A subtle glow filter for the nodes to make them pop -->
+        <filter id="nodeGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="0.8" result="blur" />
+            <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    
+    <!-- Central Planet/Circle element with grayish fill and texture -->
+    <circle cx="50" cy="50" r="35" fill="url(#moonSurface)" filter="url(#moonEffect)" />
+ 
+    <!-- Network Lines/Edges connecting the craters -->
+    <g stroke="#00aaff" stroke-opacity="0.5" stroke-width="0.75">
+        <path d="M 40 35 L 60 28" />
+        <path d="M 40 35 L 30 55" />
+        <path d="M 30 55 L 55 70" />
+        <path d="M 55 70 L 75 65" />
+        <path d="M 75 65 L 68 45" />
+        <path d="M 68 45 L 60 28" />
+        <!-- A cross-connection -->
+        <path d="M 68 45 L 40 35" />
+    </g>
+ 
+    <!-- Network Nodes as "craters" with a subtle glow -->
+    <g fill="#00aaff" filter="url(#nodeGlow)">
+        <!-- Larger "craters" -->
+        <circle cx="40" cy="35" r="4" />
+        <circle cx="68" cy="45" r="3" />
+        <circle cx="55" cy="70" r="3.5" />
+        <!-- Smaller "craters" -->
+        <circle cx="30" cy="55" r="2" />
+        <circle cx="75" cy="65" r="1.5" />
+        <circle cx="60" cy="28" r="2.5" />
+    </g>
+</svg>

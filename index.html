@@ -84,30 +84,25 @@
 
                 <h2 style="margin-top: 2rem;">Show Your Appreciation</h2>
                 <p>If you find this tool useful, please consider showing your support. Your contribution helps cover server costs and fuels future development. Thank you!</p>
-                <a href="https://www.buymeacoffee.com/your-username" target="_blank" rel="noopener noreferrer" class="button-primary" style="display: inline-block; margin-top: 0.5rem;">
-                    Buy Me a Coffee ☕
-                </a>
+                <div class="donation-options">
+                    <div class="donation-item">
+                        <p><strong>Venmo:</strong> <span id="venmo-id">@Your-Venmo-Handle</span></p>
+                        <button class="copy-button" data-copy-target="#venmo-id" title="Copy Venmo ID">Copy</button>
+                    </div>
+                    <div class="donation-item">
+                        <p><strong>Zelle:</strong> <span id="zelle-id">your-zelle-info-will-go-here</span></p>
+                        <button class="copy-button" data-copy-target="#zelle-id" title="Copy Zelle Info">Copy</button>
+                    </div>
+                </div>
 
                 <hr style="margin: 2rem 0; border-color: #444;">
 
                 <h2>Feedback &amp; Suggestions</h2>
                 <p>Have an idea for a new feature or found a bug? Please let me know! Your feedback is valuable in making this tool better.</p>
-                <!-- 
-                    To make this form work, you can use a free service like Formspree (formspree.io).
-                    1. Create an account and a new form.
-                    2. Replace "YOUR_FORM_ID" in the action URL below with your actual Formspree form ID.
-                -->
-                <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST" class="feedback-form">
-                    <div class="setting-item">
-                        <label for="feedback-email">Your Email:</label>
-                        <input type="email" id="feedback-email" name="email" required>
-                    </div>
-                    <div class="setting-item">
-                        <label for="feedback-message">Message:</label>
-                        <textarea id="feedback-message" name="message" rows="5" required></textarea>
-                    </div>
-                    <button type="submit" class="button-primary">Send Feedback</button>
-                </form>
+                <p>Click the button below to open the feedback form in a new tab. Thank you for your input!</p>
+                <a href="https://forms.gle/oD1TN5h7iq3gxnnK8" target="_blank" rel="noopener noreferrer" class="button-primary" style="display: inline-block; margin-top: 0.5rem;">
+                    Open Feedback Form
+                </a>
             </div>
         </div>
     </div>
