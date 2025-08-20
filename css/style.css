@@ -283,3 +283,54 @@ h1 {
     color: var(--color-text-inverse);
     border-color: var(--color-status-green);
 }
+
+/* --- Responsive Design for Mobile --- */
+@media (max-width: 768px) {
+    .main-container {
+        padding: 10px;
+    }
+
+    .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .tabs {
+        overflow-x: auto;
+        /* Hide scrollbar for a cleaner look, but still allow scrolling */
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+    }
+    .tabs::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+    }
+
+    .tab-button {
+        white-space: nowrap; /* Prevent tab text from wrapping */
+        padding: 10px 15px;
+        font-size: 1em;
+    }
+
+    h1 { font-size: 1.8em; }
+    .port-title { font-size: 1.5em; padding: 15px 20px; }
+    .filter-title { font-size: 1.3em; padding: 15px 20px; }
+
+    .port-layout { padding: 15px; }
+    .filter-controls { padding: 15px; flex-direction: column; align-items: flex-start; }
+    .filter-controls > div { margin-bottom: 15px; }
+
+    .card-container {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+
+    /* Make the historical data heatmap scrollable horizontally */
+    .heatmap-wrapper {
+        overflow-x: auto;
+    }
+
+    .setting-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
