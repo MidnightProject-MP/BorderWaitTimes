@@ -1,6 +1,5 @@
 <svg width="512" height="512" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="Midnight Project Logo">
     <defs>
-        <!-- Gradient for the moon surface to give a grayish, cratered feel -->
         <radialGradient id="moonSurface" cx="50%" cy="50%" r="50%" fx="40%" fy="40%">
             <stop offset="0%" stop-color="#999999" />
             <stop offset="35%" stop-color="#808080" />
@@ -9,14 +8,12 @@
             <stop offset="100%" stop-color="#484848" />
         </radialGradient>
 
-
-        <!-- A subtle noise filter to add a parchment-like texture to the moon -->
         <filter id="moonTexture">
             <feTurbulence type="fractalNoise" baseFrequency="0.4" numOctaves="3" result="noise" stitchTiles="stitch"/>
             <feColorMatrix in="noise" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 .3 0" result="tonedNoise"/>
             <feComposite in="SourceGraphic" in2="tonedNoise" operator="arithmetic" k1="1" k2="0" k3="0" k4="0" />
         </filter>
-        <!-- A subtle glow filter for the nodes to make them pop -->
+        
         <filter id="nodeGlow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur in="SourceAlpha" stdDeviation="0.8" result="blur" />
             <feMerge>
@@ -24,21 +21,16 @@
                 <feMergeNode in="SourceGraphic" />
             </feMerge>
         </filter>
+
+        <filter id="moonShadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="3" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.4"/>
+        </filter>
     </defs>
- 
-    <radialGradient id="specularHighlight" cx="25%" cy="25%" r="15%" gradientUnits="userSpaceOnUse">
-        <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.5" />
-        <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
-    </radialGradient>
 
-
-    <!-- background rect -->
-    <rect width="100" height="100" fill="#ffffffff" />
+    <circle cx="50" cy="50" r="45" fill="#ffffff" />
     
-    <!-- Central Planet/Circle element with grayish fill and texture -->
-    <circle cx="50" cy="50" r="35" fill="url(#moonSurface)" filter="url(#moonTexture)" />
- 
-    <!-- Network Lines/Edges connecting the craters -->
+    <circle cx="50" cy="50" r="35" fill="url(#moonSurface)" filter="url(#moonTexture) url(#moonShadow)" />
+
     <g stroke="#00aaff" stroke-opacity="0.5" stroke-width="0.75">
         <path d="M 40 35 L 60 28" />
         <path d="M 40 35 L 30 55" />
@@ -46,17 +38,13 @@
         <path d="M 55 70 L 75 65" />
         <path d="M 75 65 L 68 45" />
         <path d="M 68 45 L 60 28" />
-        <!-- A cross-connection -->
         <path d="M 68 45 L 40 35" />
     </g>
- 
-    <!-- Network Nodes as "craters" with a subtle glow -->
+
     <g fill="#00aaff" filter="url(#nodeGlow)">
-        <!-- Larger "craters" -->
         <circle cx="40" cy="35" r="4" />
         <circle cx="68" cy="45" r="3" />
         <circle cx="55" cy="70" r="3.5" />
-        <!-- Smaller "craters" -->
         <circle cx="30" cy="55" r="2" />
         <circle cx="75" cy="65" r="1.5" />
         <circle cx="60" cy="28" r="2.5" />
