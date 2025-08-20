@@ -32,7 +32,19 @@ body {
     gap: 20px;
     padding-bottom: 20px;
 }
-h1 { color: var(--color-text-inverse); }
+.title-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.header-logo {
+    width: 45px;
+    height: 45px;
+}
+h1 {
+    color: var(--color-text-inverse);
+    margin: 0;
+}
 .tabs {
     display: flex;
     border-bottom: 1px solid var(--color-border);
