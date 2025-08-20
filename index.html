@@ -6,6 +6,7 @@
     <title>Border Wait Times Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="images/logo.svg" type="image/svg+xml">
 </head>
 <body>
     <div class="main-container">
@@ -18,6 +19,7 @@
             <button class="tab-button" role="tab" id="tab-live-dashboard" data-tab="live-dashboard" aria-controls="panel-live-dashboard">Live Dashboard</button>
             <button class="tab-button" role="tab" id="tab-historical-analysis" data-tab="historical-analysis" aria-controls="panel-historical-analysis">Historical Analysis</button>
             <button class="tab-button" role="tab" id="tab-settings" data-tab="settings" aria-controls="panel-settings">Settings</button>
+            <button class="tab-button" role="tab" id="tab-about" data-tab="about" aria-controls="panel-about">About & Support</button>
         </div>
 
         <div id="panel-live-dashboard" class="tab-content" role="tabpanel" aria-labelledby="tab-live-dashboard">
@@ -69,6 +71,40 @@
                 </div>
                 <button id="reset-settings-button" class="button-secondary">Reset to Defaults</button>
                 <p class="settings-note">Wait times above the "Okay" threshold will be shown as "High" (Red). Changes are saved automatically and applied to the live dashboard.</p>
+            </div>
+        </div>
+
+        <div id="panel-about" class="tab-content" role="tabpanel" aria-labelledby="tab-about">
+            <div class="settings-content">
+                <h2>About This Project</h2>
+                <p>This dashboard was created to provide a clear, fast, and user-friendly way to view US-Mexico border wait times. It's a personal project built with modern web technologies.</p>
+
+                <h2 style="margin-top: 2rem;">Show Your Appreciation</h2>
+                <p>If you find this tool useful, please consider showing your support. Your contribution helps cover server costs and fuels future development. Thank you!</p>
+                <a href="https://www.buymeacoffee.com/your-username" target="_blank" rel="noopener noreferrer" class="button-primary" style="display: inline-block; margin-top: 0.5rem;">
+                    Buy Me a Coffee ☕
+                </a>
+
+                <hr style="margin: 2rem 0; border-color: #444;">
+
+                <h2>Feedback &amp; Suggestions</h2>
+                <p>Have an idea for a new feature or found a bug? Please let me know! Your feedback is valuable in making this tool better.</p>
+                <!-- 
+                    To make this form work, you can use a free service like Formspree (formspree.io).
+                    1. Create an account and a new form.
+                    2. Replace "YOUR_FORM_ID" in the action URL below with your actual Formspree form ID.
+                -->
+                <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST" class="feedback-form">
+                    <div class="setting-item">
+                        <label for="feedback-email">Your Email:</label>
+                        <input type="email" id="feedback-email" name="email" required>
+                    </div>
+                    <div class="setting-item">
+                        <label for="feedback-message">Message:</label>
+                        <textarea id="feedback-message" name="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="button-primary">Send Feedback</button>
+                </form>
             </div>
         </div>
     </div>
