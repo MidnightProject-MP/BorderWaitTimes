@@ -12,7 +12,7 @@ Why now: Traveler feedback establishes that the current experience feels like a 
 2. Put direction, recommendation, compact crossing comparison, and the dominant crossing action first on mobile. Complete.
 3. Progressively disclose roadway, CBP lane, history, and notes without implying they power illustrative totals. Complete.
 4. Verify the primary journey inside a 390 x 844 viewport, plus bilingual, desktop, source, and consent behavior. Complete.
-5. Update durable state, commit, push, and inspect the rendered result. In progress.
+5. Update durable state, commit, push, and inspect the rendered result. In progress; implementation committed in `0e0602b`.
 
 Constraints:
 
