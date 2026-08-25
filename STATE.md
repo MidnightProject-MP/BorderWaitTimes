@@ -8,4 +8,4 @@
 - Next Ready Story: As a traveler, I can see roadway approach context separately from customs wait, with freshness and source provenance visible.
 - Status: The traveler-facing prototype, source-boundary evidence, and pure Caltrans adapter are complete. The adapter is not wired into the UI; no stale or unverified feed is displayed.
 - Verification: `npm run check:adapter` passes fresh, stale, malformed, missing-segment, closure, timeout-boundary, and unavailable-source checks. `node --check app.js` and `npm run check:browser` remain passing.
-- Delivery: GitHub account `MidnightProject-MP` is authenticated. Remote is `https://github.com/MidnightProject-MP/BorderWaitTimes.git`; local `main` will be pushed at the completed Story commit.
+- Delivery: GitHub account `MidnightProject-MP` is authenticated. Remote is `https://github.com/MidnightProject-MP/BorderWaitTimes.git`; local `main` is pushed and tracks `origin/main` at `f4bdec5`.
