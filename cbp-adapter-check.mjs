@@ -19,6 +19,8 @@ const stale = normalizeCbpXml(fixture, { now, maxAgeMs: 60 * 1000 });
 assert.equal(stale.ports[0].lanes.passengerStandard.status, 'stale');
 assert.equal(stale.ports[0].lanes.passengerStandard.delayMinutes, null);
 assert.equal(stale.ports[0].lanes.passengerStandard.lanesOpen, null);
+assert.equal(stale.ports[0].lanes.passengerStandard.reportedDelayMinutes, 60);
+assert.equal(stale.ports[0].lanes.passengerStandard.reportedLanesOpen, 3);
 assert.equal(normalizeCbpXml('<border_wait_time></border_wait_time>').status, 'unknown');
 assert.equal(normalizeCbpXml(fixture.replace('250401', '999999')).ports.length, 1);
 assert.equal(normalizeCbpXml(fixture.replace('Mexican Border', 'Other Border')).ports.length, 1);

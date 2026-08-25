@@ -1,0 +1,39 @@
+name: Collect CBP history
+
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collect-cbp-history
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run check:cbp
+      - run: npm run check:cbp-archive
+      - run: npm run collect:cbp-archive
+      - name: Commit new observations
+        run: |
+          if [ -z "$(git status --porcelain -- data/cbp)" ]; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/cbp
+          git commit -m "Collect CBP lane observations"
+          git pull --rebase origin main
+          git push origin HEAD:main

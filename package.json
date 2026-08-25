@@ -6,7 +6,9 @@
   "scripts": {
     "check:browser": "node browser-check.mjs",
     "check:adapter": "node caltrans-adapter-check.mjs",
-    "check:cbp": "node cbp-adapter-check.mjs"
+    "check:cbp": "node cbp-adapter-check.mjs",
+    "check:cbp-archive": "node cbp-archive-check.mjs",
+    "collect:cbp-archive": "node cbp-archive-collector.mjs"
   },
   "devDependencies": {
     "playwright": "^1.55.0"

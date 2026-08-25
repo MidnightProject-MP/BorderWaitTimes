@@ -1,48 +1,27 @@
 # Temporary Execution Plan
 
-Status: completed; the strongest legacy product idea was reimplemented safely in Celestan and the dormant legacy tree was removed.
+Project: Celestan border intelligence network
 
-Completed Story: As a maintainer, I can distinguish confirmed official roadway feeds from unverified customs estimates and know when roadway data is stale before integrating it into Celestan.
+Epic: Phase 1, become the best place to see the San Diego/Tijuana border
 
-Completed Story: As a maintainer, I can run a fail-closed Caltrans adapter that exposes roadway context separately from border-processing wait time.
+Completed Story: As a maintainer, I can accumulate an auditable history of official CBP lane observations without confusing collection time, source time, or total crossing time.
 
-1. Normalize confirmed D11 travel-time and lane-closure payloads. Complete.
-2. Fail closed on stale, malformed, missing, future, or unavailable source data. Complete.
-3. Add deterministic adapter checks and preserve roadway/customs semantics. Complete.
-4. Update durable Project/Epic/Story state, commit, and push. Complete.
+Why now: CBP publishes a verified current feed but no official historical archive was found. Observations are perishable, this work compounds over time, and it can proceed independently of traveler observation of the current UI.
 
-Completed Story: As a traveler, I can see roadway approach context separately from customs wait, with freshness and source provenance visible.
+1. Extend the existing fail-closed adapter to retain validated source-reported values independently of display freshness. Complete.
+2. Add a deterministic, append-only, date-partitioned collector with content-based deduplication. Complete.
+3. Verify timestamp semantics, repeated polls, source corrections, stale observations, future timestamps, and unavailable input. Complete.
+4. Add bounded scheduled collection with explicit provenance and no traveler-facing integration. Complete.
+5. Seed the archive from a live CBP response and update durable Project/Epic/Story state. Complete.
 
-Verification: `node --check app.js`, `node --check browser-check.mjs`, `npm run check:adapter`, `npm run check:browser`, and `git diff --check` pass. Browser coverage includes explicit request timing, official Caltrans fixtures, fresh/stale/unavailable rendering, bilingual switching, customs-value separation, consent flow, and mobile layout.
+Boundaries:
 
-Completed Story: As a maintainer, I can normalize the officially linked CBP Border Wait Times XML feed fail-closed, without changing the illustrative traveler UI.
+- Archive only the three verified San Diego/Tijuana ports and four supported lane classes.
+- Treat each row as Celestan's observation of the CBP feed, not an official historical CBP dataset or a total crossing-time measurement.
+- Keep CBP source time distinct from collection time.
+- Never copy values forward, synthesize zeroes, or alter illustrative recommendations.
+- Human observation still gates further UX commitments, but not this independent evidence-building Story.
 
-1. Record current CBP evidence, feed URL, schema boundary, and timestamp limitations. Complete.
-2. Implement a read-only XML adapter for the San Diego Mexico ports and selected lane classes. Complete.
-3. Verify fresh, stale, malformed, missing-port, unavailable, and semantically ambiguous responses. Complete.
-4. Update durable Project/Epic/Story state, commit, and push. Complete.
+Verification: all JavaScript syntax checks, `npm run check:cbp`, `npm run check:cbp-archive`, `npm run check:adapter`, `npm run check:browser`, live collection, and `git diff --check` pass. The first live run also confirmed that future source timestamps fail closed and are excluded from the archive.
 
-Verification: `npm run check:cbp`, `npm run check:adapter`, `node --check cbp-adapter.mjs`, `node --check app.js`, `npm run check:browser`, and `git diff --check` pass.
-
-Completed Story: As a traveler, I can inspect official CBP lane estimates separately from illustrative total crossing waits, with lane class, freshness, source, and northbound scope visible.
-
-1. Define a separate lane-only presentation contract. Complete.
-2. Add bilingual fresh, stale, pending, unavailable, and northbound-only states. Complete.
-3. Verify that CBP lane values never alter illustrative totals, roadway values, or recommendations. Complete.
-4. Update durable Project/Epic/Story state, commit, and push. Complete.
-
-Verification: `node --check app.js`, `node --check browser-check.mjs`, `npm run check:cbp`, `npm run check:adapter`, `npm run check:browser`, and `git diff --check` pass.
-
-Post-delivery correction: the southbound CBP control now visibly reads “Northbound only” and is disabled; the rendered browser check asserts this affordance.
-
-Completed Story: As a northbound traveler, I can choose an applicable CBP lane class and see its official delay, operating state, and lanes open without changing Celestan's illustrative total-crossing estimate.
-
-1. Assess the legacy feature set and reject unsafe or unsupported implementation choices. Complete.
-2. Add a bilingual CBP lane selector plus fail-closed operating state and lanes-open metadata. Complete.
-3. Verify lane changes reuse one request and never alter illustrative totals, recommendations, history, or roadway context. Complete.
-4. Delete the dormant legacy `js/`, `css/`, and `images/` trees. Complete.
-5. Inspect the rendered result, update durable state, commit, and push. Complete.
-
-Verification: all JavaScript syntax checks, `npm run check:cbp`, `npm run check:adapter`, `npm run check:browser`, mobile selector bounds, and `git diff --check` pass.
-
-Next step: Observe the reconciled lane-selection experience with travelers before selecting another product Story.
+Next step: Keep collecting source observations while traveler observation of the reconciled lane-selection experience remains the next evidence required for further UX work.

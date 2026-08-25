@@ -28,6 +28,14 @@ CBP's official help page links the mobile/RSS guide at `https://www.cbp.gov/docu
 - No official municipal Tijuana crossing-condition feed was found.
 - Caltrans provides U.S.-side roadway context, not Mexico-to-U.S. customs processing time.
 
+## Celestan Observation Archive
+
+Because CBP provides a current feed but no official historical archive was found, Celestan records its own observations of the verified XML feed in `data/cbp/YYYY-MM-DD.ndjson`. These rows are not an official CBP historical dataset and do not measure total queue-to-crossing time.
+
+Each lane row preserves the CBP-derived source timestamp separately from Celestan's collection timestamp. Identity excludes collection time and includes source time plus reported values, so repeated polls deduplicate while same-minute source corrections remain distinct. Missing, malformed, unavailable, or future source timestamps are not archived; valid stale observations may be retained with their collection-time freshness state.
+
+The first live collection on 2026-08-25 exposed a feed-date inconsistency for San Ysidro: lane update text resolved into the future while other target ports resolved normally. Those ambiguous San Ysidro rows failed closed and were excluded rather than silently shifted to the prior day.
+
 ## CBP Adapter Boundary
 
 The smallest safe implementation slice is a read-only CBP adapter that:
@@ -43,5 +51,7 @@ The smallest safe implementation slice is a read-only CBP adapter that:
 `caltrans-adapter.mjs` now implements this boundary with independent source failure, timeout, timestamp validation, and `fresh`/`stale`/`unknown` states. `caltrans-adapter-check.mjs` verifies fresh, stale, malformed, missing-segment, and unavailable cases.
 
 `cbp-adapter.mjs` implements the read-only XML boundary with target-port selection, lane-level timestamp parsing, and fail-closed freshness. `cbp-adapter-check.mjs` verifies fresh, stale, pending, malformed, missing-target, and unavailable cases.
+
+`cbp-archive-collector.mjs` projects timestamped lane observations into a deterministic append-only archive. `cbp-archive-check.mjs` verifies source/collection time separation, deduplication, corrections, stale retention, future exclusion, and unavailable-source behavior. `.github/workflows/collect-cbp-history.yml` requests the feed four times per hour and commits only new observations.
 
 Neither adapter changes the traveler-facing customs estimates. The UI remains explicitly illustrative until a separate product story establishes how official customs data can be presented without confusing lane estimates with total crossing time.

@@ -54,6 +54,8 @@ function lane(block, date, now, maxAgeMs) {
     updateTime,
     delayMinutes: status === 'fresh' ? delayMinutes : null,
     lanesOpen: status === 'fresh' ? numeric(tag(block, 'lanes_open')) : null,
+    reportedDelayMinutes: delayMinutes,
+    reportedLanesOpen: numeric(tag(block, 'lanes_open')),
     sourceEpoch: epoch,
   };
 }
