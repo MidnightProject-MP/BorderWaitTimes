@@ -791,6 +791,121 @@ main {
 .roadway-context-card.is-stale .roadway-readout strong,
 .roadway-context-card.is-unavailable .roadway-readout strong { color: var(--orange-soft); }
 
+.cbp-lane-section { margin-top: 16px; }
+
+.cbp-lane-card {
+  padding: 24px 27px 20px;
+  border: 1px solid rgba(255, 178, 102, 0.4);
+  border-radius: var(--radius-lg);
+  background: var(--paper);
+  color: var(--ink-paper);
+  box-shadow: 0 15px 34px rgba(0, 0, 0, 0.1);
+}
+
+.cbp-lane-heading,
+.cbp-lane-footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.cbp-lane-heading h2 {
+  max-width: 620px;
+  margin: 5px 0 0;
+  font-size: 1.28rem;
+  letter-spacing: -0.045em;
+}
+
+.cbp-disclaimer {
+  margin: 8px 0 0;
+  color: #6d645e;
+  font-family: var(--mono);
+  font-size: 0.59rem;
+}
+
+.cbp-state {
+  padding: 6px 8px;
+  border: 1px solid rgba(31, 95, 104, 0.28);
+  border-radius: 6px;
+  color: #1f5f68;
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.cbp-lane-body {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(260px, 1.2fr);
+  gap: 1px;
+  margin-top: 22px;
+  background: rgba(31, 95, 104, 0.16);
+}
+
+.cbp-lane-readout,
+.cbp-lane-source {
+  display: grid;
+  gap: 7px;
+  min-height: 112px;
+  padding: 17px 18px;
+  background: #f4efe7;
+}
+
+.cbp-lane-readout strong {
+  color: #1f5f68;
+  font-size: 1.55rem;
+  letter-spacing: -0.055em;
+}
+
+.cbp-lane-readout > span:last-child,
+.cbp-lane-source > span:last-child,
+.cbp-lane-footer span:last-child {
+  color: #6d645e;
+  font-family: var(--mono);
+  font-size: 0.56rem;
+}
+
+.cbp-lane-source strong {
+  color: var(--ink-paper);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+}
+
+.cbp-lane-footer {
+  align-items: center;
+  padding-top: 14px;
+}
+
+.cbp-lane-footer > div {
+  display: grid;
+  gap: 3px;
+}
+
+.cbp-lane-footer strong {
+  color: #1f5f68;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+}
+
+.cbp-check-button {
+  padding: 10px 13px;
+  border: 1px solid var(--orange);
+  border-radius: 7px;
+  background: var(--orange);
+  color: var(--ink);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.cbp-check-button:hover:not(:disabled) { background: var(--orange-soft); }
+.cbp-lane-card.is-stale .cbp-state,
+.cbp-lane-card.is-pending .cbp-state,
+.cbp-lane-card.is-unavailable .cbp-state { border-color: var(--orange); color: #9a4d24; }
+.cbp-lane-card.is-stale .cbp-lane-readout strong,
+.cbp-lane-card.is-pending .cbp-lane-readout strong,
+.cbp-lane-card.is-unavailable .cbp-lane-readout strong { color: #9a4d24; }
+
 .paper-card,
 .dark-card {
   border-radius: var(--radius-lg);
@@ -2307,6 +2422,23 @@ main {
 
   .estimate-card {
     padding: 22px 20px 20px;
+  }
+
+  .cbp-lane-card {
+    padding: 22px 20px 20px;
+  }
+
+  .cbp-lane-body {
+    grid-template-columns: 1fr;
+  }
+
+  .cbp-lane-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .cbp-check-button {
+    width: 100%;
   }
 
   .estimate-main {

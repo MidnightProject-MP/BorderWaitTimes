@@ -30,12 +30,22 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
 let roadwayAvailable = true;
 let roadwayStale = false;
 let roadwayRequests = 0;
+let cbpAvailable = true;
+let cbpStale = false;
 const sourceNow = new Date();
 const sourceTimestamp = {
   recordDate: sourceNow.toISOString().slice(0, 10),
   recordTime: sourceNow.toISOString().slice(11, 19),
   recordEpoch: String(Math.floor(sourceNow.getTime() / 1000))
 };
+const cbpPdtNow = new Date(Date.now() - 7 * 60 * 60 * 1000);
+const cbpHour24 = cbpPdtNow.getUTCHours();
+const cbpHour = cbpHour24 % 12 || 12;
+const cbpMeridiem = cbpHour24 >= 12 ? "pm" : "am";
+const cbpDate = `${cbpPdtNow.getUTCFullYear()}-${cbpPdtNow.getUTCMonth() + 1}-${cbpPdtNow.getUTCDate()}`;
+const cbpUpdate = `At ${cbpHour}:${String(cbpPdtNow.getUTCMinutes()).padStart(2, "0")} ${cbpMeridiem} PDT`;
+const cbpFixture = `<?xml version="1.0"?><border_wait_time><last_updated_date>${cbpDate}</last_updated_date><port><port_number>250401</port_number><border>Mexican Border</border><port_name>San Ysidro</port_name><crossing_name></crossing_name><port_status>Open</port_status><passenger_vehicle_lanes><standard_lanes><operational_status>delay</operational_status><update_time>${cbpUpdate}</update_time><delay_minutes>60</delay_minutes><lanes_open>3</lanes_open></standard_lanes><NEXUS_SENTRI_lanes><operational_status>delay</operational_status><update_time>${cbpUpdate}</update_time><delay_minutes>10</delay_minutes><lanes_open>4</lanes_open></NEXUS_SENTRI_lanes><ready_lanes><operational_status>Update Pending</operational_status><update_time></update_time><delay_minutes></delay_minutes><lanes_open></lanes_open></ready_lanes></passenger_vehicle_lanes><pedestrian_lanes><standard_lanes><operational_status>no delay</operational_status><update_time>${cbpUpdate}</update_time><delay_minutes>5</delay_minutes><lanes_open>12</lanes_open></standard_lanes></pedestrian_lanes></port></border_wait_time>`;
+const cbpStaleFixture = cbpFixture.replace(new RegExp(cbpDate, "g"), "2020-1-1");
 const travelFixture = {
   data: [{ tt: {
     index: "130-1122544-1118326-BORDER",
@@ -72,6 +82,10 @@ await page.route("**/lcsStatusD11.json", async route => {
   const fixture = roadwayStale ? staleClosureFixture : closureFixture;
   return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fixture) });
 });
+await page.route("**/xml/bwt.xml", async route => {
+  if (!cbpAvailable) return route.fulfill({ status: 503, body: "unavailable" });
+  return route.fulfill({ status: 200, contentType: "application/xml", body: cbpStale ? cbpStaleFixture : cbpFixture });
+});
 
 try {
   await page.goto(appUrl);
@@ -93,6 +107,24 @@ try {
   assert.equal(await page.locator("#mainWait").textContent(), "42");
   assert.equal(await page.locator("#estimate-title").innerText(), "Illustrative estimate");
 
+  await page.locator("#cbpCheckButton").click();
+  await page.waitForFunction(() => document.querySelector("#cbpLaneMinutes").textContent.includes("5"));
+  assert.match(await page.locator("#cbpState").innerText(), /Fresh from CBP/i);
+  assert.match(await page.locator("#cbpLaneCard").innerText(), /not the total time to cross/i);
+  assert.equal(await page.locator("#mainWait").textContent(), "42");
+  assert.equal(await page.locator("#pulseWait").textContent(), "42");
+
+  cbpStale = true;
+  await page.locator("#cbpCheckButton").click();
+  await page.waitForFunction(() => document.querySelector("#cbpState").textContent.includes("Stale"));
+  assert.equal(await page.locator("#cbpLaneMinutes").textContent(), "No current lane estimate");
+
+  cbpStale = false;
+  cbpAvailable = false;
+  await page.locator("#cbpCheckButton").click();
+  await page.waitForFunction(() => document.querySelector("#cbpState").textContent.includes("unavailable"));
+  assert.equal(await page.locator("#cbpLaneMinutes").textContent(), "No current lane estimate");
+
   await page.locator('[data-direction="south"]').click();
   assert.equal(await page.locator("#pulseWait").textContent(), "24");
   assert.equal(await page.locator("#pulseStartLabel").textContent(), "US");
@@ -104,6 +136,7 @@ try {
   await page.locator("#languageToggle").click();
   assert.equal(await page.locator("#page-title").innerText(), "Cruza con\nclaridad.");
   assert.equal(await page.locator("#roadwayCheckButton").innerText(), "Consultar contexto vial");
+  assert.match(await page.locator("#cbpLaneCard").innerText(), /Estimaciones de carril de CBP/i);
   assert.match(await page.locator("#roadwayContextCard").innerText(), /Contexto vial/i);
   await page.locator("#languageToggle").click();
 

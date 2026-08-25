@@ -251,6 +251,39 @@
           </article>
         </section>
 
+        <section class="cbp-lane-section" aria-labelledby="cbp-lane-title">
+          <article class="cbp-lane-card" id="cbpLaneCard">
+            <div class="cbp-lane-heading">
+              <div>
+                <p class="card-kicker orange-kicker" data-i18n="cbpKicker">CBP lane estimates</p>
+                <h2 id="cbp-lane-title" data-i18n="cbpTitle">Customs lane read, separate from total crossing time</h2>
+                <p class="cbp-disclaimer" data-i18n="cbpDisclaimer">Lane estimate only · not the total time to cross</p>
+              </div>
+              <span class="cbp-state" id="cbpState" data-i18n="cbpNotChecked">Not checked</span>
+            </div>
+            <div class="cbp-lane-body">
+              <div class="cbp-lane-readout" aria-labelledby="cbp-lane-value-label">
+                <span class="metric-label" id="cbp-lane-value-label" data-i18n="cbpPortLabel">Port and lane</span>
+                <strong id="cbpLaneMinutes" aria-live="polite" data-i18n="cbpNoValue">No current lane estimate</strong>
+                <span id="cbpLaneName">San Ysidro · Pedestrian · standard</span>
+              </div>
+              <div class="cbp-lane-source">
+                <span class="metric-label" data-i18n="cbpSourceLabel">Source</span>
+                <strong data-i18n="cbpSource">U.S. Customs and Border Protection (CBP)</strong>
+                <span data-i18n="cbpNorthboundScope">CBP feed covers northbound entry to the United States.</span>
+              </div>
+            </div>
+            <div class="cbp-lane-footer">
+              <div>
+                <span class="metric-label" data-i18n="cbpTimestampLabel">Source update</span>
+                <strong id="cbpTimestamp" data-i18n="cbpNotChecked">Not checked</strong>
+                <span id="cbpFreshness" data-i18n="cbpFreshnessPending">No live CBP request has been made.</span>
+              </div>
+              <button class="cbp-check-button" id="cbpCheckButton" type="button" data-i18n="checkCbp">Check CBP lanes</button>
+            </div>
+          </article>
+        </section>
+
         <section class="crossings-section" id="crossings" aria-labelledby="crossings-title">
           <div class="section-heading">
             <div>

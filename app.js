@@ -134,6 +134,30 @@
       ,roadwayClosureStale: "Closure data is stale"
       ,roadwayClosureUnavailable: "Closure data unavailable"
       ,roadwayTimestampValue: "{date} {time} UTC"
+      ,cbpKicker: "CBP lane estimates"
+      ,cbpTitle: "Customs lane read, separate from total crossing time"
+      ,cbpDisclaimer: "Lane estimate only · not the total time to cross"
+      ,cbpPortLabel: "Port and lane"
+      ,cbpSourceLabel: "Source"
+      ,cbpSource: "U.S. Customs and Border Protection (CBP)"
+      ,cbpTimestampLabel: "Source update"
+      ,cbpNotChecked: "Not checked"
+      ,cbpNoValue: "No current lane estimate"
+      ,cbpNorthboundOnly: "Northbound CBP data only"
+      ,cbpFresh: "Fresh from CBP"
+      ,cbpStale: "Stale · value hidden"
+      ,cbpPending: "CBP update pending"
+      ,cbpUnavailable: "CBP unavailable · no current lane estimate"
+      ,cbpFreshnessPending: "No live CBP request has been made."
+      ,cbpStaleDetail: "The source is stale; the last numeric lane value is hidden."
+      ,cbpUnavailableDetail: "No current CBP lane value is available."
+      ,cbpChecking: "Checking CBP lane estimates..."
+      ,checkCbp: "Check CBP lanes"
+      ,cbpPassengerStandard: "Passenger · standard"
+      ,cbpPassengerSentri: "Passenger · SENTRI"
+      ,cbpPassengerReady: "Passenger · Ready Lane"
+      ,cbpPedestrianStandard: "Pedestrian · standard"
+      ,cbpNorthboundScope: "CBP feed covers northbound entry to the United States."
     },
     es: {
       skipLink: "Saltar al contenido",
@@ -267,6 +291,30 @@
       ,roadwayClosureStale: "Datos de cierres desactualizados"
       ,roadwayClosureUnavailable: "Datos de cierres no disponibles"
       ,roadwayTimestampValue: "{date} {time} UTC"
+      ,cbpKicker: "Estimaciones de carril de CBP"
+      ,cbpTitle: "Lectura aduanera, separada del tiempo total de cruce"
+      ,cbpDisclaimer: "Solo estimación de carril · no es el tiempo total para cruzar"
+      ,cbpPortLabel: "Puerto y carril"
+      ,cbpSourceLabel: "Fuente"
+      ,cbpSource: "Aduanas y Protección Fronteriza de EE. UU. (CBP)"
+      ,cbpTimestampLabel: "Actualización de la fuente"
+      ,cbpNotChecked: "Sin consultar"
+      ,cbpNoValue: "Sin estimación actual de carril"
+      ,cbpNorthboundOnly: "Datos CBP solo hacia el norte"
+      ,cbpFresh: "Actualizado por CBP"
+      ,cbpStale: "Desactualizado · valor oculto"
+      ,cbpPending: "Actualización CBP pendiente"
+      ,cbpUnavailable: "CBP no disponible · sin estimación actual de carril"
+      ,cbpFreshnessPending: "Aún no se ha solicitado CBP en vivo."
+      ,cbpStaleDetail: "La fuente está desactualizada; se oculta el último valor numérico."
+      ,cbpUnavailableDetail: "No hay un valor actual de carril de CBP disponible."
+      ,cbpChecking: "Consultando estimaciones de carril de CBP..."
+      ,checkCbp: "Consultar carriles de CBP"
+      ,cbpPassengerStandard: "Pasajeros · estándar"
+      ,cbpPassengerSentri: "Pasajeros · SENTRI"
+      ,cbpPassengerReady: "Pasajeros · Ready Lane"
+      ,cbpPedestrianStandard: "Peatones · estándar"
+      ,cbpNorthboundScope: "La fuente de CBP cubre la entrada hacia el norte a Estados Unidos."
     }
   };
 
@@ -463,9 +511,17 @@
      ,roadwayTimestamp: document.getElementById("roadwayTimestamp")
      ,roadwayFreshness: document.getElementById("roadwayFreshness")
      ,roadwayCheckButton: document.getElementById("roadwayCheckButton")
-  };
+     ,cbpLaneCard: document.getElementById("cbpLaneCard")
+     ,cbpState: document.getElementById("cbpState")
+     ,cbpLaneMinutes: document.getElementById("cbpLaneMinutes")
+     ,cbpLaneName: document.getElementById("cbpLaneName")
+     ,cbpTimestamp: document.getElementById("cbpTimestamp")
+     ,cbpFreshness: document.getElementById("cbpFreshness")
+     ,cbpCheckButton: document.getElementById("cbpCheckButton")
+   };
 
   const roadwayState = { result: null, loading: false };
+  const cbpState = { result: null, loading: false };
 
   function text(key, replacements) {
     let value = translations[state.language][key] || key;
@@ -514,6 +570,7 @@
     renderCurrentData();
     renderLiveState();
     renderRoadwayContext();
+    renderCbpLaneEstimate();
   }
 
   function sourceTimestampValue(timestamp) {
@@ -569,6 +626,82 @@
     }
   }
 
+  function cbpLaneSelection() {
+    return selectedCrossing().modeKey === "pedestrian"
+      ? { key: "pedestrianStandard", label: "cbpPedestrianStandard" }
+      : { key: "passengerStandard", label: "cbpPassengerStandard" };
+  }
+
+  function renderCbpLaneEstimate() {
+    const selection = cbpLaneSelection();
+    const crossing = selectedCrossing();
+    elements.cbpLaneName.textContent = crossing.name + " · " + text(selection.label);
+    elements.cbpLaneCard.classList.remove("is-stale", "is-unavailable", "is-pending");
+    elements.cbpCheckButton.disabled = state.direction !== "north" || cbpState.loading;
+
+    if (state.direction !== "north") {
+      elements.cbpState.textContent = text("cbpNorthboundOnly");
+      elements.cbpLaneMinutes.textContent = text("cbpNoValue");
+      elements.cbpTimestamp.textContent = text("cbpNotChecked");
+      elements.cbpFreshness.textContent = text("cbpNorthboundScope");
+      elements.cbpLaneCard.classList.add("is-unavailable");
+      return;
+    }
+
+    if (!cbpState.result) {
+      elements.cbpState.textContent = text("cbpNotChecked");
+      elements.cbpLaneMinutes.textContent = text("cbpNoValue");
+      elements.cbpTimestamp.textContent = text("cbpNotChecked");
+      elements.cbpFreshness.textContent = text("cbpFreshnessPending");
+      return;
+    }
+
+    const port = cbpState.result.ports.find(function (item) { return item.crossing === crossing.id; });
+    const lane = port && port.lanes[selection.key];
+    const status = lane?.status;
+    const pending = lane?.operationalStatus === "Update Pending";
+    const stateKey = status === "fresh" && Number.isFinite(lane.delayMinutes)
+      ? "cbpFresh"
+      : status === "stale"
+        ? "cbpStale"
+        : pending
+          ? "cbpPending"
+          : "cbpUnavailable";
+    elements.cbpState.textContent = text(stateKey);
+    elements.cbpLaneMinutes.textContent = stateKey === "cbpFresh" ? text("roadwayMinutes", { minutes: lane.delayMinutes }) : text("cbpNoValue");
+    elements.cbpTimestamp.textContent = lane?.updateTime && cbpState.result.feedDate
+      ? cbpState.result.feedDate + " · " + lane.updateTime
+      : text("cbpNotChecked");
+    elements.cbpFreshness.textContent = stateKey === "cbpFresh"
+      ? text("cbpFresh")
+      : stateKey === "cbpStale"
+        ? text("cbpStaleDetail")
+        : stateKey === "cbpPending"
+          ? text("cbpPending")
+          : text("cbpUnavailableDetail");
+    elements.cbpLaneCard.classList.toggle("is-stale", stateKey === "cbpStale");
+    elements.cbpLaneCard.classList.toggle("is-pending", stateKey === "cbpPending");
+    elements.cbpLaneCard.classList.toggle("is-unavailable", stateKey === "cbpUnavailable");
+  }
+
+  async function checkCbpLanes() {
+    if (cbpState.loading || state.direction !== "north") return;
+    cbpState.loading = true;
+    elements.cbpCheckButton.disabled = true;
+    elements.cbpCheckButton.textContent = text("cbpChecking");
+    renderCbpLaneEstimate();
+    try {
+      const adapter = await import("./cbp-adapter.mjs");
+      cbpState.result = await adapter.loadCbpWaitTimes();
+    } catch {
+      cbpState.result = { status: "unknown", ports: [] };
+    } finally {
+      cbpState.loading = false;
+      elements.cbpCheckButton.textContent = text("checkCbp");
+      renderCbpLaneEstimate();
+    }
+  }
+
   function renderCurrentData() {
     const data = currentData();
     const crossing = selectedCrossing();
@@ -617,6 +750,7 @@
     renderCrossingCards();
     renderHistory(crossing);
     renderNotes(data.notes);
+    renderCbpLaneEstimate();
   }
 
   function confidenceLabel(value) {
@@ -879,6 +1013,7 @@
     showToast(text("notesViewed"));
   });
   elements.roadwayCheckButton.addEventListener("click", checkRoadwayContext);
+  elements.cbpCheckButton.addEventListener("click", checkCbpLanes);
 
   applyTranslations();
 })();

@@ -1,6 +1,6 @@
 # Temporary Execution Plan
 
-Status: completed; CBP XML source verification and a fail-closed read-only adapter are delivered without changing the traveler UI.
+Status: completed; CBP lane estimates have a separate, northbound-only presentation surface that preserves their lane-only meaning.
 
 Completed Story: As a maintainer, I can distinguish confirmed official roadway feeds from unverified customs estimates and know when roadway data is stale before integrating it into Celestan.
 
@@ -24,4 +24,13 @@ Completed Story: As a maintainer, I can normalize the officially linked CBP Bord
 
 Verification: `npm run check:cbp`, `npm run check:adapter`, `node --check cbp-adapter.mjs`, `node --check app.js`, `npm run check:browser`, and `git diff --check` pass.
 
-Next step: Define a separate presentation contract for CBP lane estimates; do not replace illustrative customs estimates until that contract distinguishes lane estimates from total crossing wait.
+Completed Story: As a traveler, I can inspect official CBP lane estimates separately from illustrative total crossing waits, with lane class, freshness, source, and northbound scope visible.
+
+1. Define a separate lane-only presentation contract. Complete.
+2. Add bilingual fresh, stale, pending, unavailable, and northbound-only states. Complete.
+3. Verify that CBP lane values never alter illustrative totals, roadway values, or recommendations. Complete.
+4. Update durable Project/Epic/Story state, commit, and push. Pending.
+
+Verification: `node --check app.js`, `node --check browser-check.mjs`, `npm run check:cbp`, `npm run check:adapter`, `npm run check:browser`, and `git diff --check` pass.
+
+Next step: Observe the presentation with a human traveler before selecting the next product Story; automated checks do not establish visual quality or real-world usefulness.
