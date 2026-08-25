@@ -129,6 +129,8 @@ try {
   assert.equal(await page.locator("#pulseWait").textContent(), "24");
   assert.equal(await page.locator("#pulseStartLabel").textContent(), "US");
   assert.equal(await page.locator("#pulseEndLabel").textContent(), "MX");
+  assert.equal(await page.locator("#cbpCheckButton").isDisabled(), true);
+  assert.equal(await page.locator("#cbpCheckButton").innerText(), "Northbound only");
 
   await page.locator('[data-crossing="tecate"]').click();
   assert.equal(await page.locator("#estimateCrossing").textContent(), "Tecate");

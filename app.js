@@ -158,6 +158,7 @@
       ,cbpPassengerReady: "Passenger · Ready Lane"
       ,cbpPedestrianStandard: "Pedestrian · standard"
       ,cbpNorthboundScope: "CBP feed covers northbound entry to the United States."
+      ,cbpNorthboundButton: "Northbound only"
     },
     es: {
       skipLink: "Saltar al contenido",
@@ -315,6 +316,7 @@
       ,cbpPassengerReady: "Pasajeros · Ready Lane"
       ,cbpPedestrianStandard: "Peatones · estándar"
       ,cbpNorthboundScope: "La fuente de CBP cubre la entrada hacia el norte a Estados Unidos."
+      ,cbpNorthboundButton: "Solo hacia el norte"
     }
   };
 
@@ -638,6 +640,9 @@
     elements.cbpLaneName.textContent = crossing.name + " · " + text(selection.label);
     elements.cbpLaneCard.classList.remove("is-stale", "is-unavailable", "is-pending");
     elements.cbpCheckButton.disabled = state.direction !== "north" || cbpState.loading;
+    elements.cbpCheckButton.textContent = cbpState.loading
+      ? text("cbpChecking")
+      : state.direction === "north" ? text("checkCbp") : text("cbpNorthboundButton");
 
     if (state.direction !== "north") {
       elements.cbpState.textContent = text("cbpNorthboundOnly");

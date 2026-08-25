@@ -33,4 +33,6 @@ Completed Story: As a traveler, I can inspect official CBP lane estimates separa
 
 Verification: `node --check app.js`, `node --check browser-check.mjs`, `npm run check:cbp`, `npm run check:adapter`, `npm run check:browser`, and `git diff --check` pass.
 
+Post-delivery correction: the southbound CBP control now visibly reads “Northbound only” and is disabled; the rendered browser check asserts this affordance.
+
 Next step: Observe the presentation with a human traveler before selecting the next product Story; automated checks do not establish visual quality or real-world usefulness.

@@ -899,6 +899,7 @@ main {
 }
 
 .cbp-check-button:hover:not(:disabled) { background: var(--orange-soft); }
+.cbp-check-button:disabled { cursor: not-allowed; opacity: 0.62; }
 .cbp-lane-card.is-stale .cbp-state,
 .cbp-lane-card.is-pending .cbp-state,
 .cbp-lane-card.is-unavailable .cbp-state { border-color: var(--orange); color: #9a4d24; }
