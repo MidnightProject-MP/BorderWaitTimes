@@ -29,7 +29,7 @@ Completed Story: As a traveler, I can inspect official CBP lane estimates separa
 1. Define a separate lane-only presentation contract. Complete.
 2. Add bilingual fresh, stale, pending, unavailable, and northbound-only states. Complete.
 3. Verify that CBP lane values never alter illustrative totals, roadway values, or recommendations. Complete.
-4. Update durable Project/Epic/Story state, commit, and push. Pending.
+4. Update durable Project/Epic/Story state, commit, and push. Complete.
 
 Verification: `node --check app.js`, `node --check browser-check.mjs`, `npm run check:cbp`, `npm run check:adapter`, `npm run check:browser`, and `git diff --check` pass.
 
