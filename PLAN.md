@@ -12,7 +12,7 @@ Why now: Live source inspection confirmed that every port carries a scoped `<dat
 2. Anchor lane timestamps only when valid root and port dates agree. Complete.
 3. Verify valid, missing, conflicting, impossible, and future date behavior across adapter, archive, and browser checks. Complete.
 4. Record the source evidence and durable Story state. Complete.
-5. Commit, push, and verify collection automation. In progress; implementation committed in `3df775b`.
+5. Commit, push, and verify collection automation. Complete.
 
 Boundaries:
 
@@ -23,4 +23,4 @@ Boundaries:
 
 Verification: all JavaScript syntax checks, `npm run check:cbp`, `npm run check:cbp-archive`, `npm run check:adapter`, `npm run check:browser`, live no-op collection, and `git diff --check` pass.
 
-Next step: Commit, push, and verify the scheduled collector against the stricter adapter. Further UX selection still requires traveler observation.
+Next step: Continue scheduled evidence collection. Further UX selection still requires traveler observation.
