@@ -21,6 +21,8 @@ Caltrans describes these feeds as free HTTPS JSON/CSV/XML services with frequent
 
 CBP's official help page links the mobile/RSS guide at `https://www.cbp.gov/document/forms/border-wait-times-mobile-and-rss-feed-help`, which identifies machine-readable Border Wait Times feeds. The XML feed was fetched successfully on 2026-08-25 and its response shape, target port records, lane fields, timezone-bearing update strings, and unavailable behavior were verified locally. The adapter uses only the XML feed; undocumented JSON endpoints remain unconfirmed.
 
+The live XML contains a root `last_updated_date` in `YYYY-M-D` form, an undocumented root `last_updated_time` without a timezone, and a scoped `date` in `M/D/YYYY` form inside every observed port. Lane records provide time and a fixed timezone abbreviation but no lane-specific date. The adapter therefore accepts a lane timestamp only when the root and port calendar dates are valid and agree. It does not use the root time as a timezone authority.
+
 ## Not Found
 
 - No official historical wait-time archive was found.
@@ -34,7 +36,7 @@ Because CBP provides a current feed but no official historical archive was found
 
 Each lane row preserves the CBP-derived source timestamp separately from Celestan's collection timestamp. Identity excludes collection time and includes source time plus reported values, so repeated polls deduplicate while same-minute source corrections remain distinct. Missing, malformed, unavailable, or future source timestamps are not archived; valid stale observations may be retained with their collection-time freshness state.
 
-The first live collection on 2026-08-25 exposed a feed-date inconsistency for San Ysidro: lane update text resolved into the future while other target ports resolved normally. Those ambiguous San Ysidro rows failed closed and were excluded rather than silently shifted to the prior day.
+The first live collection on 2026-08-25 exposed a feed-date inconsistency for San Ysidro: lane update text resolved into the future while other target ports resolved normally. Broader feed inspection found both slightly future rounded values and values many hours ahead, while official guidance defines no rollover rule. Those ambiguous rows fail closed and are excluded rather than silently shifted to the prior day.
 
 ## CBP Adapter Boundary
 
@@ -42,7 +44,7 @@ The smallest safe implementation slice is a read-only CBP adapter that:
 
 1. Fetches the officially linked XML feed.
 2. Selects the San Ysidro `250401`, Otay Mesa passenger `250601`, and Tecate `250501` records.
-3. Carries lane-level timezone-bearing update strings and calculates `fresh`, `stale`, or `unknown`.
+3. Requires valid, agreeing root and port dates, then carries lane-level timezone-bearing update strings and calculates `fresh`, `stale`, or `unknown`.
 4. Keeps standard, SENTRI, Ready, and pedestrian lanes distinct.
 5. Fails closed when the feed is old, malformed, unavailable, or semantically ambiguous.
 

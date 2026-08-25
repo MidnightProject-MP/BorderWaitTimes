@@ -7,7 +7,7 @@ import { normalizeCbpXml } from './cbp-adapter.mjs';
 
 const collectedAt = '2026-08-25T10:15:00.000Z';
 const now = Date.parse(collectedAt);
-const fixture = (delay = 60, updateTime = 'At 2:00 am PDT') => `<?xml version="1.0"?><border_wait_time><last_updated_date>2026-8-25</last_updated_date><port><port_number>250401</port_number><border>Mexican Border</border><port_name>San Ysidro</port_name><port_status>Open</port_status><passenger_vehicle_lanes><standard_lanes><operational_status>delay</operational_status><update_time>${updateTime}</update_time><delay_minutes>${delay}</delay_minutes><lanes_open>3</lanes_open></standard_lanes><ready_lanes><operational_status>Update Pending</operational_status><update_time></update_time><delay_minutes></delay_minutes><lanes_open></lanes_open></ready_lanes></passenger_vehicle_lanes></port></border_wait_time>`;
+const fixture = (delay = 60, updateTime = 'At 2:00 am PDT') => `<?xml version="1.0"?><border_wait_time><last_updated_date>2026-8-25</last_updated_date><port><port_number>250401</port_number><border>Mexican Border</border><port_name>San Ysidro</port_name><date>8/25/2026</date><port_status>Open</port_status><passenger_vehicle_lanes><standard_lanes><operational_status>delay</operational_status><update_time>${updateTime}</update_time><delay_minutes>${delay}</delay_minutes><lanes_open>3</lanes_open></standard_lanes><ready_lanes><operational_status>Update Pending</operational_status><update_time></update_time><delay_minutes></delay_minutes><lanes_open></lanes_open></ready_lanes></passenger_vehicle_lanes></port></border_wait_time>`;
 const response = (xml) => async () => ({ ok: true, text: async () => xml });
 
 const normalized = normalizeCbpXml(fixture(), { now });

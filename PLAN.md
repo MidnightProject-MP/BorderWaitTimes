@@ -4,24 +4,23 @@ Project: Celestan border intelligence network
 
 Epic: Phase 1, become the best place to see the San Diego/Tijuana border
 
-Completed Story: As a maintainer, I can accumulate an auditable history of official CBP lane observations without confusing collection time, source time, or total crossing time.
+Completed Story: As a maintainer, I can reject CBP lane timestamps unless the feed-level and port-scoped calendar dates are both valid and agree.
 
-Why now: CBP publishes a verified current feed but no official historical archive was found. Observations are perishable, this work compounds over time, and it can proceed independently of traveler observation of the current UI.
+Why now: Live source inspection confirmed that every port carries a scoped `<date>` while lane updates carry only a time and zone. The adapter currently ignores the port date and JavaScript can normalize impossible dates, weakening both live freshness and the observation archive.
 
-1. Extend the existing fail-closed adapter to retain validated source-reported values independently of display freshness. Complete.
-2. Add a deterministic, append-only, date-partitioned collector with content-based deduplication. Complete.
-3. Verify timestamp semantics, repeated polls, source corrections, stale observations, future timestamps, and unavailable input. Complete.
-4. Add bounded scheduled collection with explicit provenance and no traveler-facing integration. Complete.
-5. Seed the archive from a live CBP response, update durable state, commit, push, and verify scheduled automation. Complete.
+1. Parse and round-trip validate the observed feed and port date formats. Complete.
+2. Anchor lane timestamps only when valid root and port dates agree. Complete.
+3. Verify valid, missing, conflicting, impossible, and future date behavior across adapter, archive, and browser checks. Complete.
+4. Record the source evidence and durable Story state. Complete.
+5. Commit, push, and verify collection automation. Pending.
 
 Boundaries:
 
-- Archive only the three verified San Diego/Tijuana ports and four supported lane classes.
-- Treat each row as Celestan's observation of the CBP feed, not an official historical CBP dataset or a total crossing-time measurement.
-- Keep CBP source time distinct from collection time.
-- Never copy values forward, synthesize zeroes, or alter illustrative recommendations.
-- Human observation still gates further UX commitments, but not this independent evidence-building Story.
+- Do not infer previous-day rollover for future timestamps; CBP does not document that rule.
+- Do not use the undocumented root time as a universal cutoff or timezone authority.
+- Keep source values hidden whenever timestamp semantics remain ambiguous.
+- Do not change illustrative totals, recommendations, or the traveler-facing source boundary.
 
-Verification: all JavaScript syntax checks, `npm run check:cbp`, `npm run check:cbp-archive`, `npm run check:adapter`, `npm run check:browser`, live collection, and `git diff --check` pass. The first live run also confirmed that future source timestamps fail closed and are excluded from the archive.
+Verification: all JavaScript syntax checks, `npm run check:cbp`, `npm run check:cbp-archive`, `npm run check:adapter`, `npm run check:browser`, live no-op collection, and `git diff --check` pass.
 
-Next step: Keep collecting source observations while traveler observation of the reconciled lane-selection experience remains the next evidence required for further UX work.
+Next step: Commit, push, and verify the scheduled collector against the stricter adapter. Further UX selection still requires traveler observation.

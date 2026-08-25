@@ -22,6 +22,22 @@ function numeric(value) {
   return /^\d+$/.test(value || '') ? Number(value) : null;
 }
 
+function calendarDate(value, pattern, [yearIndex, monthIndex, dayIndex]) {
+  const match = value?.match(pattern);
+  if (!match) return null;
+  const [year, month, day] = [Number(match[yearIndex]), Number(match[monthIndex]), Number(match[dayIndex])];
+  const candidate = new Date(Date.UTC(year, month - 1, day));
+  if (candidate.getUTCFullYear() !== year || candidate.getUTCMonth() !== month - 1 || candidate.getUTCDate() !== day) return null;
+  return { year, month, day };
+}
+
+function matchingSourceDate(feedDate, portDate) {
+  const feed = calendarDate(feedDate, /^(\d{4})-(\d{1,2})-(\d{1,2})$/, [1, 2, 3]);
+  const port = calendarDate(portDate, /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, [3, 1, 2]);
+  if (!feed || !port || feed.year !== port.year || feed.month !== port.month || feed.day !== port.day) return null;
+  return `${feed.year}-${feed.month}-${feed.day}`;
+}
+
 function updateEpoch(date, updateTime) {
   const match = updateTime?.match(/^At\s+(Midnight|Noon|(\d{1,2})(?::(\d{2}))?\s*(am|pm))\s+([A-Z]{3})$/i);
   if (!match) return null;
@@ -32,9 +48,9 @@ function updateEpoch(date, updateTime) {
   const minute = match[1].toLowerCase() === 'midnight' || match[1].toLowerCase() === 'noon' ? 0 : Number(match[3] || 0);
   if (match[4]?.toLowerCase() === 'pm' && hour !== 12) hour += 12;
   if (match[4]?.toLowerCase() === 'am' && hour === 12) hour = 0;
-  const dateMatch = date?.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-  if (!dateMatch || hour > 23 || minute > 59) return null;
-  return Date.UTC(Number(dateMatch[1]), Number(dateMatch[2]) - 1, Number(dateMatch[3]), hour, minute) - offset * 60 * 60 * 1000;
+  const parsedDate = calendarDate(date, /^(\d{4})-(\d{1,2})-(\d{1,2})$/, [1, 2, 3]);
+  if (!parsedDate || hour > 23 || minute > 59) return null;
+  return Date.UTC(parsedDate.year, parsedDate.month - 1, parsedDate.day, hour, minute) - offset * 60 * 60 * 1000;
 }
 
 function freshness(epoch, now, maxAgeMs) {
@@ -73,14 +89,16 @@ export function normalizeCbpXml(xml, { now = Date.now(), maxAgeMs = DEFAULT_MAX_
     if (tag(portXml, 'border') !== 'Mexican Border' || !crossing) return [];
     const passenger = laneBlock(portXml, 'passenger_vehicle_lanes');
     const pedestrian = laneBlock(portXml, 'pedestrian_lanes');
+    const portDate = tag(portXml, 'date');
+    const sourceDate = matchingSourceDate(feedDate, portDate);
     const lanes = {
-      passengerStandard: passenger ? lane(laneBlock(passenger, 'standard_lanes') || '', feedDate, now, maxAgeMs) : null,
-      passengerSentri: passenger ? lane(laneBlock(passenger, 'NEXUS_SENTRI_lanes') || '', feedDate, now, maxAgeMs) : null,
-      passengerReady: passenger ? lane(laneBlock(passenger, 'ready_lanes') || '', feedDate, now, maxAgeMs) : null,
-      pedestrianStandard: pedestrian ? lane(laneBlock(pedestrian, 'standard_lanes') || '', feedDate, now, maxAgeMs) : null,
+      passengerStandard: passenger ? lane(laneBlock(passenger, 'standard_lanes') || '', sourceDate, now, maxAgeMs) : null,
+      passengerSentri: passenger ? lane(laneBlock(passenger, 'NEXUS_SENTRI_lanes') || '', sourceDate, now, maxAgeMs) : null,
+      passengerReady: passenger ? lane(laneBlock(passenger, 'ready_lanes') || '', sourceDate, now, maxAgeMs) : null,
+      pedestrianStandard: pedestrian ? lane(laneBlock(pedestrian, 'standard_lanes') || '', sourceDate, now, maxAgeMs) : null,
     };
     const statuses = Object.values(lanes).filter(Boolean).map(({ status }) => status);
-    return [{ portNumber, crossing, portName: tag(portXml, 'port_name'), crossingName: tag(portXml, 'crossing_name'), portStatus: tag(portXml, 'port_status'), lanes, status: statuses.includes('fresh') ? 'fresh' : statuses.includes('stale') ? 'stale' : 'unknown' }];
+    return [{ portNumber, crossing, portName: tag(portXml, 'port_name'), crossingName: tag(portXml, 'crossing_name'), portDate, portStatus: tag(portXml, 'port_status'), lanes, status: statuses.includes('fresh') ? 'fresh' : statuses.includes('stale') ? 'stale' : 'unknown' }];
   });
   return { status: ports.some((port) => port.status === 'fresh') ? 'fresh' : ports.some((port) => port.status === 'stale') ? 'stale' : 'unknown', feedDate, ports };
 }
