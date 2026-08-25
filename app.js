@@ -106,7 +106,34 @@
       notesViewed: "You are already looking at the latest border notes.",
       languageChanged: "Language changed to English.",
       selectedToast: "{crossing} is now your recommendation.",
-      demoOnly: "This prototype simulates the premium signal; no location was requested."
+       demoOnly: "This prototype simulates the premium signal; no location was requested."
+      ,roadwayKicker: "Roadway context"
+      ,roadwayTitle: "Approach, separate from customs wait"
+      ,roadwayTravelLabel: "I-5 BORDER travel time"
+      ,roadwayClosureLabel: "San Ysidro lane closures"
+      ,roadwaySourceLabel: "Source"
+      ,roadwayFeedType: "I-5 BORDER travel time / San Ysidro lane closures"
+      ,roadwayTimestampLabel: "Source timestamp"
+      ,roadwayNotChecked: "Not checked"
+      ,roadwayNoValue: "No current value"
+      ,roadwayNotAvailable: "Not available"
+      ,roadwaySegment: "Southbound roadway segment"
+      ,roadwayCheckForClosures: "Check for current closure context"
+      ,roadwayFreshnessPending: "No live roadway request has been made."
+      ,checkRoadway: "Check roadway context"
+      ,roadwayChecking: "Checking official roadway feeds..."
+      ,roadwayFresh: "Fresh official roadway context"
+      ,roadwayStale: "Stale roadway context"
+      ,roadwayUnavailable: "Roadway context unavailable"
+      ,roadwayFreshness: "Fresh from Caltrans District 11"
+      ,roadwayStaleDetail: "Source data is stale; no current roadway value is shown."
+      ,roadwayUnavailableDetail: "The official roadway feeds are unavailable; no current value is shown."
+      ,roadwayMinutes: "{minutes} min"
+      ,roadwayClosureNone: "No closures reported"
+      ,roadwayClosure: "{lanes} lanes closed · {work}"
+      ,roadwayClosureStale: "Closure data is stale"
+      ,roadwayClosureUnavailable: "Closure data unavailable"
+      ,roadwayTimestampValue: "{date} {time} UTC"
     },
     es: {
       skipLink: "Saltar al contenido",
@@ -212,7 +239,34 @@
       notesViewed: "Ya estás viendo las notas fronterizas más recientes.",
       languageChanged: "Idioma cambiado a español.",
       selectedToast: "{crossing} es ahora tu recomendación.",
-      demoOnly: "Este prototipo simula la señal premium; no se solicitó ubicación."
+       demoOnly: "Este prototipo simula la señal premium; no se solicitó ubicación."
+      ,roadwayKicker: "Contexto vial"
+      ,roadwayTitle: "Acceso, separado de la espera de aduana"
+      ,roadwayTravelLabel: "Tiempo de viaje I-5 BORDER"
+      ,roadwayClosureLabel: "Cierres de carril en San Ysidro"
+      ,roadwaySourceLabel: "Fuente"
+      ,roadwayFeedType: "Tiempo de viaje I-5 BORDER / cierres de carril en San Ysidro"
+      ,roadwayTimestampLabel: "Marca de tiempo de la fuente"
+      ,roadwayNotChecked: "Sin consultar"
+      ,roadwayNoValue: "Sin valor actual"
+      ,roadwayNotAvailable: "No disponible"
+      ,roadwaySegment: "Segmento vial hacia el sur"
+      ,roadwayCheckForClosures: "Consulta el contexto actual de cierres"
+      ,roadwayFreshnessPending: "Aún no se ha solicitado el acceso vial en vivo."
+      ,checkRoadway: "Consultar contexto vial"
+      ,roadwayChecking: "Consultando fuentes viales oficiales..."
+      ,roadwayFresh: "Contexto vial oficial reciente"
+      ,roadwayStale: "Contexto vial desactualizado"
+      ,roadwayUnavailable: "Contexto vial no disponible"
+      ,roadwayFreshness: "Reciente desde Caltrans District 11"
+      ,roadwayStaleDetail: "Los datos de la fuente están desactualizados; no se muestra un valor vial actual."
+      ,roadwayUnavailableDetail: "Las fuentes viales oficiales no están disponibles; no se muestra un valor actual."
+      ,roadwayMinutes: "{minutes} min"
+      ,roadwayClosureNone: "No se reportan cierres"
+      ,roadwayClosure: "{lanes} carriles cerrados · {work}"
+      ,roadwayClosureStale: "Datos de cierres desactualizados"
+      ,roadwayClosureUnavailable: "Datos de cierres no disponibles"
+      ,roadwayTimestampValue: "{date} {time} UTC"
     }
   };
 
@@ -399,8 +453,19 @@
     confirmConsent: document.getElementById("confirmConsent"),
     notesButton: document.getElementById("notesButton"),
     allNotesButton: document.getElementById("allNotesButton"),
-    toastRegion: document.getElementById("toastRegion")
+     toastRegion: document.getElementById("toastRegion")
+     ,roadwayContextCard: document.getElementById("roadwayContextCard")
+     ,roadwayState: document.getElementById("roadwayState")
+     ,roadwayMinutes: document.getElementById("roadwayMinutes")
+     ,roadwaySegment: document.getElementById("roadwaySegment")
+     ,roadwayClosureSummary: document.getElementById("roadwayClosureSummary")
+     ,roadwayClosureStatus: document.getElementById("roadwayClosureStatus")
+     ,roadwayTimestamp: document.getElementById("roadwayTimestamp")
+     ,roadwayFreshness: document.getElementById("roadwayFreshness")
+     ,roadwayCheckButton: document.getElementById("roadwayCheckButton")
   };
+
+  const roadwayState = { result: null, loading: false };
 
   function text(key, replacements) {
     let value = translations[state.language][key] || key;
@@ -448,6 +513,60 @@
     });
     renderCurrentData();
     renderLiveState();
+    renderRoadwayContext();
+  }
+
+  function sourceTimestampValue(timestamp) {
+    if (!timestamp || !timestamp.recordDate || !timestamp.recordTime) return null;
+    return text("roadwayTimestampValue", { date: timestamp.recordDate, time: timestamp.recordTime });
+  }
+
+  function closureSummary(closures) {
+    const fresh = closures.find(function (closure) { return closure.status === "fresh"; });
+    if (!fresh) return null;
+    if (!fresh.closureType && !fresh.work) return text("roadwayClosureNone");
+    const lanes = Array.isArray(fresh.lanesClosed) ? fresh.lanesClosed.join(", ") : (fresh.lanesClosed || "?");
+    return text("roadwayClosure", { lanes: lanes, work: fresh.work || fresh.closureType || "closure" });
+  }
+
+  function renderRoadwayContext() {
+    const result = roadwayState.result;
+    if (!result) return;
+    const travel = result.roadwayContext.travelTime;
+    const lanes = result.roadwayContext.laneClosures;
+    const fresh = travel.status === "fresh" && lanes.status !== "stale";
+    const stale = travel.status === "stale" || lanes.status === "stale";
+    const stateKey = fresh ? "roadwayFresh" : stale ? "roadwayStale" : "roadwayUnavailable";
+    elements.roadwayContextCard.classList.toggle("is-stale", stateKey === "roadwayStale");
+    elements.roadwayContextCard.classList.toggle("is-unavailable", stateKey === "roadwayUnavailable");
+    elements.roadwayState.textContent = text(stateKey);
+    elements.roadwayMinutes.textContent = travel.status === "fresh" ? text("roadwayMinutes", { minutes: travel.minutes }) : text("roadwayNoValue");
+    elements.roadwaySegment.textContent = travel.status === "fresh"
+      ? (state.language === "es" ? "I-5 BORDER hacia el sur" : travel.segment)
+      : text("roadwaySegment");
+    elements.roadwayClosureSummary.textContent = closureSummary(lanes.closures || []) || (lanes.status === "stale" ? text("roadwayClosureStale") : text("roadwayNotAvailable"));
+    elements.roadwayClosureStatus.textContent = lanes.status === "fresh" ? text("roadwayFreshness") : lanes.status === "stale" ? text("roadwayClosureStale") : text("roadwayClosureUnavailable");
+    elements.roadwayTimestamp.textContent = sourceTimestampValue(travel.sourceTimestamp) || sourceTimestampValue((lanes.closures || [])[0]?.sourceTimestamp) || text("roadwayNotChecked");
+    elements.roadwayFreshness.textContent = fresh ? text("roadwayFreshness") : stale ? text("roadwayStaleDetail") : text("roadwayUnavailableDetail");
+  }
+
+  async function checkRoadwayContext() {
+    if (roadwayState.loading) return;
+    roadwayState.loading = true;
+    elements.roadwayCheckButton.disabled = true;
+    elements.roadwayCheckButton.textContent = text("roadwayChecking");
+    try {
+      const adapter = await import("./caltrans-adapter.mjs");
+      roadwayState.result = await adapter.loadCaltransRoadwayContext();
+      renderRoadwayContext();
+    } catch {
+      roadwayState.result = { roadwayContext: { travelTime: { status: "unknown" }, laneClosures: { status: "unknown", closures: [] } } };
+      renderRoadwayContext();
+    } finally {
+      roadwayState.loading = false;
+      elements.roadwayCheckButton.disabled = false;
+      elements.roadwayCheckButton.textContent = text("checkRoadway");
+    }
   }
 
   function renderCurrentData() {
@@ -759,6 +878,7 @@
   elements.allNotesButton.addEventListener("click", function () {
     showToast(text("notesViewed"));
   });
+  elements.roadwayCheckButton.addEventListener("click", checkRoadwayContext);
 
   applyTranslations();
 })();

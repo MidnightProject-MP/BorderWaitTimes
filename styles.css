@@ -655,6 +655,142 @@ main {
   margin-top: 25px;
 }
 
+.roadway-context-section {
+  margin-top: 16px;
+}
+
+.roadway-context-card {
+  padding: 24px 27px 20px;
+  border: 1px solid rgba(117, 226, 218, 0.34);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(120deg, #12283d, #102033 70%, #172e3c);
+  box-shadow: 0 15px 34px rgba(0, 0, 0, 0.15);
+}
+
+.roadway-context-heading,
+.roadway-context-footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.roadway-context-heading h2 {
+  margin: 5px 0 0;
+  color: var(--paper-bright);
+  font-size: 1.28rem;
+  letter-spacing: -0.045em;
+}
+
+.roadway-state {
+  padding: 6px 8px;
+  border: 1px solid rgba(117, 226, 218, 0.35);
+  border-radius: 6px;
+  color: var(--cyan);
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.roadway-context-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  margin-top: 24px;
+  border: 1px solid rgba(158, 190, 211, 0.16);
+  background: rgba(158, 190, 211, 0.16);
+}
+
+.roadway-readout,
+.roadway-closure {
+  display: grid;
+  gap: 7px;
+  min-height: 112px;
+  padding: 17px 18px;
+  background: rgba(6, 12, 21, 0.38);
+}
+
+.roadway-readout strong,
+.roadway-closure strong {
+  color: var(--cyan);
+  font-size: 1.55rem;
+  letter-spacing: -0.055em;
+}
+
+.roadway-readout > span:last-child,
+.roadway-closure > span:last-child {
+  color: #8ea4b2;
+  font-family: var(--mono);
+  font-size: 0.56rem;
+}
+
+.roadway-provenance {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 17px 0 14px;
+  border-bottom: 1px solid rgba(158, 190, 211, 0.16);
+}
+
+.roadway-provenance > div:not(.roadway-timestamp) {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.roadway-provenance strong {
+  color: var(--paper-bright);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+}
+
+.roadway-provenance div > span:last-child {
+  color: #8ea4b2;
+  font-family: var(--mono);
+  font-size: 0.55rem;
+}
+
+.roadway-timestamp {
+  display: grid;
+  gap: 2px;
+  margin-left: auto;
+  text-align: right;
+}
+
+.roadway-timestamp strong {
+  color: var(--cyan);
+  font-size: 0.58rem;
+  white-space: nowrap;
+}
+
+.roadway-context-footer {
+  align-items: center;
+  padding-top: 14px;
+}
+
+.roadway-context-footer > span {
+  color: #8ea4b2;
+  font-family: var(--mono);
+  font-size: 0.55rem;
+}
+
+.roadway-check-button {
+  padding: 10px 13px;
+  border: 1px solid var(--orange);
+  border-radius: 7px;
+  background: var(--orange);
+  color: var(--ink);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.roadway-check-button:hover:not(:disabled) { background: var(--orange-soft); }
+.roadway-context-card.is-stale .roadway-state { border-color: var(--orange); color: var(--orange-soft); }
+.roadway-context-card.is-unavailable .roadway-state { border-color: rgba(255, 113, 70, 0.55); color: var(--orange-soft); }
+.roadway-context-card.is-stale .roadway-readout strong,
+.roadway-context-card.is-unavailable .roadway-readout strong { color: var(--orange-soft); }
+
 .paper-card,
 .dark-card {
   border-radius: var(--radius-lg);

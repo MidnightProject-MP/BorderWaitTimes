@@ -209,6 +209,48 @@
           </article>
         </section>
 
+        <section class="roadway-context-section" aria-labelledby="roadway-context-title">
+          <article class="roadway-context-card" id="roadwayContextCard">
+            <div class="roadway-context-heading">
+              <div>
+                <p class="card-kicker cyan-kicker" data-i18n="roadwayKicker">Roadway context</p>
+                <h2 id="roadway-context-title" data-i18n="roadwayTitle">Approach, separate from customs wait</h2>
+              </div>
+              <span class="roadway-state" id="roadwayState" data-i18n="roadwayNotChecked">Not checked</span>
+            </div>
+            <div class="roadway-context-body">
+              <div class="roadway-readout" aria-live="polite">
+                <span class="metric-label" data-i18n="roadwayTravelLabel">I-5 BORDER travel time</span>
+                <strong id="roadwayMinutes" data-i18n="roadwayNoValue">No current value</strong>
+                <span id="roadwaySegment" data-i18n="roadwaySegment">Southbound roadway segment</span>
+              </div>
+              <div class="roadway-closure" aria-live="polite">
+                <span class="metric-label" data-i18n="roadwayClosureLabel">San Ysidro lane closures</span>
+                <strong id="roadwayClosureSummary" data-i18n="roadwayNotAvailable">Not available</strong>
+                <span id="roadwayClosureStatus" data-i18n="roadwayCheckForClosures">Check for current closure context</span>
+              </div>
+            </div>
+            <div class="roadway-provenance">
+              <span class="source-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 20h16M6 20V9l6-5 6 5v11M9 20v-5h6v5M9 10h.01M15 10h.01" /></svg>
+              </span>
+              <div>
+                <span class="metric-label" data-i18n="roadwaySourceLabel">Source</span>
+                <strong>Caltrans District 11</strong>
+                <span data-i18n="roadwayFeedType">I-5 BORDER travel time / San Ysidro lane closures</span>
+              </div>
+              <div class="roadway-timestamp">
+                <span class="metric-label" data-i18n="roadwayTimestampLabel">Source timestamp</span>
+                <strong id="roadwayTimestamp" data-i18n="roadwayNotChecked">Not checked</strong>
+              </div>
+            </div>
+            <div class="roadway-context-footer">
+              <span id="roadwayFreshness" data-i18n="roadwayFreshnessPending">No live roadway request has been made.</span>
+              <button class="roadway-check-button" id="roadwayCheckButton" type="button" data-i18n="checkRoadway">Check roadway context</button>
+            </div>
+          </article>
+        </section>
+
         <section class="crossings-section" id="crossings" aria-labelledby="crossings-title">
           <div class="section-heading">
             <div>
