@@ -12,7 +12,7 @@ Why now: Live source inspection confirmed that every port carries a scoped `<dat
 2. Anchor lane timestamps only when valid root and port dates agree. Complete.
 3. Verify valid, missing, conflicting, impossible, and future date behavior across adapter, archive, and browser checks. Complete.
 4. Record the source evidence and durable Story state. Complete.
-5. Commit, push, and verify collection automation. Pending.
+5. Commit, push, and verify collection automation. In progress; implementation committed in `3df775b`.
 
 Boundaries:
 
