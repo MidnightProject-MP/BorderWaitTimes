@@ -1,13 +1,14 @@
 # Temporary Execution Plan
 
-Status: completed and pushed as `e6bea08`
+Status: active
 
 Completed Story: As a maintainer, I can distinguish confirmed official roadway feeds from unverified customs estimates and know when roadway data is stale before integrating it into Celestan.
 
-1. Record the source inventory and the exact confirmed Caltrans feed boundaries. Complete.
-2. Preserve the distinction between roadway approach context and border-processing wait time. Complete.
-3. Record stale-data behavior and the CBP endpoint verification prerequisite. Complete.
-4. Verify the documented endpoints and update durable Project/Epic/Story state. Complete.
-5. Commit and push the evidence boundary for the next implementation slice. Complete.
+Active Story: As a maintainer, I can run a fail-closed Caltrans adapter that exposes roadway context separately from border-processing wait time.
 
-Next Ready Story: As a maintainer, I can run a fail-closed Caltrans adapter that exposes roadway context separately from border-processing wait time.
+1. Normalize confirmed D11 travel-time and lane-closure payloads. Complete.
+2. Fail closed on stale, malformed, missing, future, or unavailable source data. Complete.
+3. Add deterministic adapter checks and preserve roadway/customs semantics. Complete.
+4. Update durable Project/Epic/Story state, commit, and push. Pending.
+
+Next Ready Story: As a traveler, I can see roadway approach context separately from customs wait, with freshness and source provenance visible.

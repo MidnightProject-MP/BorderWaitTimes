@@ -38,4 +38,8 @@ The smallest safe implementation slice is a read-only Caltrans adapter that:
 4. Exposes roadway context separately from the public border-processing estimate.
 5. Fails closed when the feed is old, malformed, unavailable, or semantically ambiguous.
 
-Until that adapter exists and is verified, the current UI remains explicitly illustrative and does not claim live official values.
+## Adapter Status
+
+`caltrans-adapter.mjs` now implements this boundary with independent source failure, timeout, timestamp validation, and `fresh`/`stale`/`unknown` states. `caltrans-adapter-check.mjs` verifies fresh, stale, malformed, missing-segment, and unavailable cases.
+
+The adapter is deliberately not wired into the traveler-facing UI yet. The UI remains explicitly illustrative until roadway context has a separate presentation surface and can never be mistaken for a customs wait estimate.
