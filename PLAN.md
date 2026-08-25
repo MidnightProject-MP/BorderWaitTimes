@@ -20,7 +20,7 @@ Completed Story: As a maintainer, I can normalize the officially linked CBP Bord
 1. Record current CBP evidence, feed URL, schema boundary, and timestamp limitations. Complete.
 2. Implement a read-only XML adapter for the San Diego Mexico ports and selected lane classes. Complete.
 3. Verify fresh, stale, malformed, missing-port, unavailable, and semantically ambiguous responses. Complete.
-4. Update durable Project/Epic/Story state, commit, and push. Pending.
+4. Update durable Project/Epic/Story state, commit, and push. Complete.
 
 Verification: `npm run check:cbp`, `npm run check:adapter`, `node --check cbp-adapter.mjs`, `node --check app.js`, `npm run check:browser`, and `git diff --check` pass.
 

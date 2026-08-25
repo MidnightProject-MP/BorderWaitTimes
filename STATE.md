@@ -9,4 +9,4 @@
 - Completed Story: As a maintainer, I can normalize the officially linked CBP Border Wait Times XML feed fail-closed without changing the illustrative traveler UI.
 - Status: The repository now has independently verified Caltrans roadway and CBP lane-estimate adapters. The CBP adapter is read-only and not wired into traveler-facing customs estimates; those estimates and the premium flow remain illustrative.
 - Verification: `npm run check:cbp`, `npm run check:adapter`, `node --check cbp-adapter.mjs`, `node --check app.js`, and `npm run check:browser` pass. CBP coverage includes timezone-bearing fresh timestamps, stale values without numeric output, pending lanes, target-port filtering, malformed input, and unavailable sources.
-- Delivery: GitHub account `MidnightProject-MP` is authenticated. Remote is `https://github.com/MidnightProject-MP/BorderWaitTimes.git`; local `main` is pushed and tracks `origin/main` at `8a5754e`.
+- Delivery: GitHub account `MidnightProject-MP` is authenticated. Remote is `https://github.com/MidnightProject-MP/BorderWaitTimes.git`; local `main` is pushed and tracks `origin/main` at `9fc974d`.
