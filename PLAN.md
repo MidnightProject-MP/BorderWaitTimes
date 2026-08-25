@@ -12,7 +12,7 @@ Why now: CBP publishes a verified current feed but no official historical archiv
 2. Add a deterministic, append-only, date-partitioned collector with content-based deduplication. Complete.
 3. Verify timestamp semantics, repeated polls, source corrections, stale observations, future timestamps, and unavailable input. Complete.
 4. Add bounded scheduled collection with explicit provenance and no traveler-facing integration. Complete.
-5. Seed the archive from a live CBP response and update durable Project/Epic/Story state. Complete.
+5. Seed the archive from a live CBP response, update durable state, commit, and push. In progress; implementation committed in `36bdebb` and push verification remains.
 
 Boundaries:
 
