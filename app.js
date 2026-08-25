@@ -1,122 +1,764 @@
-const data = {
-  north: [
-    { name: 'San Ysidro', location: 'San Diego ↗ Tijuana', wait: 38, lane: 'Ready Lane · SENTRI · General', freshness: '6 min ago', confidence: 'High', context: '12 min above usual' },
-    { name: 'Otay Mesa', location: 'San Diego ↗ Tijuana', wait: 26, lane: 'Ready Lane · SENTRI · General', freshness: '8 min ago', confidence: 'High', context: '4 min below usual', featured: true },
-    { name: 'Tecate', location: 'San Diego ↗ Tijuana', wait: 31, lane: 'General · Commercial', freshness: '14 min ago', confidence: 'Medium', context: 'Typical for this hour' }
-  ],
-  south: [
-    { name: 'San Ysidro', location: 'Tijuana ↗ San Diego', wait: 22, lane: 'Pedestrian · General · SENTRI', freshness: '7 min ago', confidence: 'High', context: '8 min below usual' },
-    { name: 'Otay Mesa', location: 'Tijuana ↗ San Diego', wait: 34, lane: 'General · SENTRI · Ready Lane', freshness: '9 min ago', confidence: 'High', context: 'Typical for this hour' },
-    { name: 'Tecate', location: 'Tijuana ↗ San Diego', wait: 18, lane: 'General · SENTRI', freshness: '16 min ago', confidence: 'Medium', context: '6 min below usual' }
-  ]
-};
+(function () {
+  "use strict";
 
-const translations = {
-  en: {
-    demo: 'Prototype data', eyebrow: 'SAN DIEGO ↔ TIJUANA / FIELD NOTE 01', title: 'Cross with<br><em>clarity.</em>', intro: 'A calmer read on the border. Compare official conditions, understand the signal, and choose your moment.', direction: 'YOUR DIRECTION', north: 'Northbound', south: 'Southbound', updated: 'Last checked 8 min ago', crossings: 'CROSSINGS<br>MONITORED', fastest: 'FASTEST<br>ESTIMATE', confidence: 'SIGNAL<br>CONFIDENCE', note: 'A measured moment,<br>not a promise.', read: 'READ THE BORDER', conditions: 'Current conditions', sources: 'Sources: official agencies + community signal', recommendation: 'OUR READ', signal: 'HIGH SIGNAL', context: 'CONTEXT', history: 'A lighter morning<br>than usual.', historical: 'Historical pattern, not a forecast.', alerts: 'ALERTS', alertTitle: 'Peak window approaching', alertCopy: 'Crossing times typically rise between 10:00–11:30 AM. If your schedule is flexible, leaving before 9:30 AM is the quieter move.', alertAction: 'Set a departure reminder', premium: 'PREMIUM FIELD MODE', crossNow: "I'm crossing now.", crossCopy: 'Get a personalized live estimate based on your route and pace. Your location is used only while you cross.', start: 'Start a crossing session', privacy: 'Private by default. Stops automatically.', prototype: 'Prototype / demo data only. Not an official source. Always check agency websites before travel.', modalTitle: 'A little context<br>before you go.', modalIntro: 'To personalize your crossing estimate, Celestan needs to use your location while you travel.', whyLocation: 'Location is used to understand your route and pace. It is not stored after your session.', anonymous: 'You can optionally contribute anonymous speed data to help the next traveler.', stops: 'Tracking stops automatically when you finish crossing. You can stop anytime.', optin: 'Contribute anonymous crossing data', consent: 'I understand — start privately', notApi: 'Demo interaction only. No location is collected in this prototype.', selected: 'Selected', reminder: 'Departure reminder set for 9:30 AM.', active: 'Crossing active · stop anytime', activeToast: 'Private crossing session active. Safe travels!', signalText: 'signal'
-  },
-  es: {
-    demo: 'Datos de prototipo', eyebrow: 'SAN DIEGO ↔ TIJUANA / NOTA DE CAMPO 01', title: 'Cruza con<br><em>claridad.</em>', intro: 'Una lectura más tranquila de la frontera. Compara las condiciones oficiales, entiende la señal y elige tu momento.', direction: 'TU DIRECCIÓN', north: 'Hacia el norte', south: 'Hacia el sur', updated: 'Última revisión hace 8 min', crossings: 'CRUCES<br>MONITOREADOS', fastest: 'ESTIMACIÓN<br>MÁS RÁPIDA', confidence: 'CONFIANZA<br>DE SEÑAL', note: 'Un momento medido,<br>no una promesa.', read: 'LEE LA FRONTERA', conditions: 'Condiciones actuales', sources: 'Fuentes: agencias oficiales + señal comunitaria', recommendation: 'NUESTRA LECTURA', signal: 'SEÑAL ALTA', context: 'CONTEXTO', history: 'Una mañana más<br>ligera de lo normal.', historical: 'Patrón histórico, no pronóstico.', alerts: 'ALERTAS', alertTitle: 'Se acerca la hora pico', alertCopy: 'Los tiempos suelen subir entre 10:00 y 11:30. Si tienes flexibilidad, salir antes de las 9:30 es la opción más tranquila.', alertAction: 'Crear recordatorio de salida', premium: 'MODO DE CAMPO PREMIUM', crossNow: 'Estoy cruzando.', crossCopy: 'Obtén una estimación personalizada según tu ruta y ritmo. Tu ubicación se usa solo mientras cruzas.', start: 'Iniciar sesión de cruce', privacy: 'Privado por defecto. Se detiene automáticamente.', prototype: 'Solo datos de prototipo. No es una fuente oficial. Consulta siempre los sitios de las agencias antes de viajar.', modalTitle: 'Un poco de contexto<br>antes de salir.', modalIntro: 'Para personalizar tu estimación, Celestan necesita usar tu ubicación mientras viajas.', whyLocation: 'La ubicación se usa para entender tu ruta y ritmo. No se guarda después de tu sesión.', anonymous: 'Puedes aportar datos anónimos de velocidad para ayudar al próximo viajero.', stops: 'El seguimiento se detiene al terminar el cruce. Puedes detenerlo cuando quieras.', optin: 'Aportar datos anónimos del cruce', consent: 'Entiendo — iniciar en privado', notApi: 'Solo interacción de demo. Este prototipo no recopila ubicación.', selected: 'Seleccionado', reminder: 'Recordatorio de salida programado para las 9:30.', active: 'Cruce activo · detener cuando quieras', activeToast: 'Sesión privada activa. Buen viaje!', signalText: 'señal'
+  const translations = {
+    en: {
+      skipLink: "Skip to content",
+      brandTagline: "border intelligence network",
+      navOverview: "Overview",
+      navCrossings: "Crossings",
+      navNotes: "Border notes",
+      prototypeBadge: "Prototype / demo data",
+      noAds: "No ads",
+      pulseEyebrow: "Border pulse / illustrative 08:30 PT",
+      heroTitleOne: "Know before",
+      heroTitleTwo: "you cross.",
+      heroSummary: "One clear read on the border: what is moving, what changed, and the least-friction way through.",
+      directionLabel: "I am going",
+      northbound: "Northbound",
+      southbound: "Southbound",
+      corridorPulse: "Corridor pulse",
+      illustrative: "illustrative",
+      publicEstimate: "Public estimate",
+      minutes: "min",
+      flowStatus: "Flow status",
+      flowSuffix: "flow",
+      currentRead: "Current read",
+       officialEstimate: "Illustrative estimate",
+      minutesLong: "minutes",
+      confidence: "Confidence",
+       basedOn: "Example provenance",
+      prototypeNote: "Illustrative prototype values · no live API connection",
+      quick: "quick",
+      watchIt: "watch it",
+      heavy: "heavy",
+      bestMove: "Best move",
+      useThisCrossing: "Use this crossing",
+      recommendationBased: "Recommendation uses wait, confidence, and approach stability.",
+      chooseCrossing: "Choose your crossing",
+      chooseCrossingHint: "Select a port to tune the recommendation.",
+      historicalContext: "Historical context",
+      sameDayMedian: "4-week same-day median",
+      today: "Today",
+      recentWeeks: "Recent weeks",
+      borderNotes: "Border notes",
+      viewAllNotes: "View all notes",
+      premiumKicker: "Celestan Live / premium layer",
+      premiumTag: "Premium",
+      premiumTitle: "Make your crossing a signal.",
+      premiumCopy: "Go from a public estimate to a personal one. Share a short, anonymous movement signal only while you are crossing.",
+      anonymous: "Anonymous",
+      autoStop: "Auto-stops",
+      optIn: "Opt-in only",
+      personalizedPreview: "Personalized preview",
+      previewSub: "Your live estimate appears here.",
+      previewStart: "Start to personalize",
+      startCrossing: "I'm crossing now",
+      liveDisclaimer: "Demo mode: no browser location is requested.",
+      footerDisclaimer: "Prototype interface. Estimates are illustrative and do not represent live border conditions.",
+      backToTop: "Back to top ↑",
+      consentKicker: "A clear yes, then a clear stop",
+      consentTitle: "Before you go.",
+      consentIntro: "Live mode can use a rough location signal to personalize this estimate. You decide when it starts and when it ends.",
+      transactional: "Transactional",
+      transactionalDetail: "Used for this crossing only, not a profile.",
+      anonymousDetail: "No name, account, or device trail is attached.",
+      autoStopDetail: "The signal ends when you stop, or after 90 minutes.",
+      consentCheck: "I understand and opt in to a temporary, anonymous location signal.",
+      dialogDemoNote: "Prototype note: this screen simulates consent and does not request browser location.",
+      notNow: "Not now",
+      allowStart: "Allow and start",
+      close: "Close",
+      notifications: "View border notes",
+      activeLive: "LIVE MODE / signal active",
+      inactiveLive: "Public estimates only",
+      flowModerate: "Moderate",
+      flowMoving: "Moving",
+      flowLight: "Light",
+      flowBuilding: "Building",
+      pedestrian: "Pedestrian",
+      vehicle: "Vehicle",
+      bus: "Bus",
+      selected: "Selected",
+      updated: "Updated {minutes} min ago",
+      aboveMedian: "above the usual Saturday window",
+      belowMedian: "below the usual Saturday window",
+      atMedian: "in line with the usual Saturday window",
+      historyCalm: "The queue is building, but not outside the recent range.",
+      historyBusy: "The queue is running warmer than recent Saturdays.",
+      historyCalmSouth: "The return flow is staying inside the recent range.",
+      historyBusySouth: "The return flow is running warmer than recent Saturdays.",
+      recommendationFor: "for {direction}",
+      fasterThan: "{minutes} min faster than {crossing}",
+      slowerThan: "{minutes} min slower than {crossing}",
+      keepSelected: "Keep {crossing} in view",
+      selectedCrossing: "{crossing} selected",
+      premiumActiveTitle: "I'm crossing now.",
+      premiumActiveCopy: "Your personal signal is on for this crossing. It is anonymous, transactional, and will stop automatically.",
+      liveActiveLabel: "LIVE MODE ACTIVE",
+      liveEstimate: "~{minutes} min to checkpoint",
+      liveEstimateSub: "Personalized demo estimate · {delta} min ahead of the public read",
+      stopCrossing: "Stop live crossing",
+      activeDisclaimer: "Simulated premium signal · auto-stop in 90 min · no browser location requested.",
+      liveStarted: "Live mode on. Your anonymous demo signal will auto-stop in 90 minutes.",
+      liveStopped: "Live mode stopped. No further signal is shared.",
+      consentRequired: "Tick the opt-in box to start a crossing signal.",
+      notesViewed: "You are already looking at the latest border notes.",
+      languageChanged: "Language changed to English.",
+      selectedToast: "{crossing} is now your recommendation.",
+      demoOnly: "This prototype simulates the premium signal; no location was requested."
+    },
+    es: {
+      skipLink: "Saltar al contenido",
+      brandTagline: "red de inteligencia fronteriza",
+      navOverview: "Resumen",
+      navCrossings: "Cruces",
+      navNotes: "Notas fronterizas",
+      prototypeBadge: "Prototipo / datos demo",
+      noAds: "Sin anuncios",
+      pulseEyebrow: "Pulso fronterizo / ilustrativo 08:30 PT",
+      heroTitleOne: "Cruza con",
+      heroTitleTwo: "claridad.",
+      heroSummary: "Una lectura clara de la frontera: qué avanza, qué cambió y cuál es el camino con menos fricción.",
+      directionLabel: "Voy hacia",
+      northbound: "Hacia el norte",
+      southbound: "Hacia el sur",
+      corridorPulse: "Pulso del corredor",
+      illustrative: "ilustrativo",
+      publicEstimate: "Estimación pública",
+      minutes: "min",
+      flowStatus: "Flujo",
+      flowSuffix: "flujo",
+      currentRead: "Lectura actual",
+       officialEstimate: "Estimación ilustrativa",
+      minutesLong: "minutos",
+      confidence: "Confianza",
+       basedOn: "Ejemplo de procedencia",
+      prototypeNote: "Valores ilustrativos de prototipo · sin conexión a API en vivo",
+      quick: "rápido",
+      watchIt: "vigilar",
+      heavy: "pesado",
+      bestMove: "Mejor opción",
+      useThisCrossing: "Usar este cruce",
+      recommendationBased: "La recomendación usa espera, confianza y estabilidad del acceso.",
+      chooseCrossing: "Elige tu cruce",
+      chooseCrossingHint: "Selecciona un puerto para ajustar la recomendación.",
+      historicalContext: "Contexto histórico",
+      sameDayMedian: "Mediana del mismo día · 4 semanas",
+      today: "Hoy",
+      recentWeeks: "Semanas recientes",
+      borderNotes: "Notas fronterizas",
+      viewAllNotes: "Ver todas las notas",
+      premiumKicker: "Celestan Live / capa premium",
+      premiumTag: "Premium",
+      premiumTitle: "Convierte tu cruce en una señal.",
+      premiumCopy: "Pasa de una estimación pública a una personal. Comparte una señal de movimiento breve y anónima solo mientras cruzas.",
+      anonymous: "Anónimo",
+      autoStop: "Se detiene solo",
+      optIn: "Solo con permiso",
+      personalizedPreview: "Vista personalizada",
+      previewSub: "Tu estimación en vivo aparecerá aquí.",
+      previewStart: "Empieza para personalizar",
+      startCrossing: "Estoy cruzando ahora",
+      liveDisclaimer: "Modo demo: no se solicita la ubicación del navegador.",
+      footerDisclaimer: "Interfaz de prototipo. Las estimaciones son ilustrativas y no representan condiciones fronterizas en vivo.",
+      backToTop: "Volver arriba ↑",
+      consentKicker: "Un sí claro, y luego un alto claro",
+      consentTitle: "Antes de salir.",
+      consentIntro: "El modo en vivo puede usar una señal de ubicación aproximada para personalizar esta estimación. Tú decides cuándo inicia y cuándo termina.",
+      transactional: "Transaccional",
+      transactionalDetail: "Se usa solo para este cruce, no para crear un perfil.",
+      anonymousDetail: "No se asocia ningún nombre, cuenta ni rastro del dispositivo.",
+      autoStopDetail: "La señal termina cuando la detienes o después de 90 minutos.",
+      consentCheck: "Entiendo y acepto una señal temporal y anónima de ubicación.",
+      dialogDemoNote: "Nota del prototipo: esta pantalla simula el permiso y no solicita la ubicación del navegador.",
+      notNow: "Ahora no",
+      allowStart: "Permitir y empezar",
+      close: "Cerrar",
+      notifications: "Ver notas fronterizas",
+      activeLive: "MODO EN VIVO / señal activa",
+      inactiveLive: "Solo estimaciones públicas",
+      flowModerate: "Moderado",
+      flowMoving: "Avanzando",
+      flowLight: "Ligero",
+      flowBuilding: "Aumentando",
+      pedestrian: "Peatón",
+      vehicle: "Vehículo",
+      bus: "Autobús",
+      selected: "Seleccionado",
+      updated: "Actualizado hace {minutes} min",
+      aboveMedian: "sobre la ventana habitual del sábado",
+      belowMedian: "bajo la ventana habitual del sábado",
+      atMedian: "en línea con la ventana habitual del sábado",
+      historyCalm: "La fila crece, pero sigue dentro del rango reciente.",
+      historyBusy: "La fila está más activa que los sábados recientes.",
+      historyCalmSouth: "El flujo de regreso se mantiene dentro del rango reciente.",
+      historyBusySouth: "El flujo de regreso está más activo que los sábados recientes.",
+      recommendationFor: "para {direction}",
+      fasterThan: "{minutes} min más rápido que {crossing}",
+      slowerThan: "{minutes} min más lento que {crossing}",
+      keepSelected: "Mantener {crossing} a la vista",
+      selectedCrossing: "{crossing} seleccionado",
+      premiumActiveTitle: "Estoy cruzando ahora.",
+      premiumActiveCopy: "Tu señal personal está activa para este cruce. Es anónima, transaccional y se detendrá automáticamente.",
+      liveActiveLabel: "MODO EN VIVO ACTIVO",
+      liveEstimate: "~{minutes} min al punto de control",
+      liveEstimateSub: "Estimación demo personalizada · {delta} min por delante de la lectura pública",
+      stopCrossing: "Detener cruce en vivo",
+      activeDisclaimer: "Señal premium simulada · se detiene en 90 min · no se solicitó ubicación.",
+      liveStarted: "Modo en vivo activo. Tu señal demo anónima se detendrá en 90 minutos.",
+      liveStopped: "Modo en vivo detenido. No se compartirá ninguna señal más.",
+      consentRequired: "Marca la casilla para iniciar una señal de cruce.",
+      notesViewed: "Ya estás viendo las notas fronterizas más recientes.",
+      languageChanged: "Idioma cambiado a español.",
+      selectedToast: "{crossing} es ahora tu recomendación.",
+      demoOnly: "Este prototipo simula la señal premium; no se solicitó ubicación."
+    }
+  };
+
+  const corridorData = {
+    north: {
+      directionKey: "northbound",
+      route: "MX → US",
+      routeDirection: "Tijuana → San Diego",
+      primaryId: "san-ysidro",
+      cards: [
+        {
+          id: "san-ysidro",
+          name: "San Ysidro",
+          place: "Tijuana → San Diego",
+          wait: 42,
+          modeKey: "pedestrian",
+          flowKey: "flowModerate",
+          confidence: 88,
+          updated: 6,
+          source: "CBP-style port operations bulletin",
+          sourceEs: "Boletín operativo de puerto estilo CBP",
+          median: 35,
+          history: [31, 37, 35, 39, 33, 36, 42],
+          recommendation: "A little above the Saturday norm; pedestrian flow is still predictable.",
+          recommendationEs: "Un poco sobre la norma del sábado; el flujo peatonal sigue siendo predecible."
+        },
+        {
+          id: "otay-mesa",
+          name: "Otay Mesa",
+          place: "Tijuana → Otay Mesa",
+          wait: 29,
+          modeKey: "vehicle",
+          flowKey: "flowMoving",
+          confidence: 82,
+          updated: 8,
+          source: "CBP-style lane operations bulletin",
+          sourceEs: "Boletín de operaciones de carril estilo CBP",
+          median: 38,
+          history: [42, 39, 36, 35, 31, 34, 29],
+          recommendation: "The cleanest vehicle approach in this read, with 13 fewer minutes than San Ysidro.",
+          recommendationEs: "El acceso vehicular más despejado en esta lectura, con 13 minutos menos que San Ysidro."
+        },
+        {
+          id: "tecate",
+          name: "Tecate",
+          place: "Tecate → Tecate",
+          wait: 18,
+          modeKey: "vehicle",
+          flowKey: "flowLight",
+          confidence: 75,
+          updated: 12,
+          source: "Illustrative municipal crossing report",
+          sourceEs: "Informe municipal ilustrativo del cruce",
+          median: 22,
+          history: [24, 20, 26, 21, 19, 23, 18],
+          recommendation: "Lightest queue, but the smaller port has less redundancy if conditions turn.",
+          recommendationEs: "La fila más ligera, pero el puerto pequeño tiene menos margen si cambia la situación."
+        }
+      ],
+      notes: [
+        { time: "08:12", type: "alert", title: "Vehicle queue building at San Ysidro", titleEs: "La fila vehicular crece en San Ysidro", body: "Expect a slower approach after 09:00 PT.", bodyEs: "Se espera un acceso más lento después de las 09:00 PT." },
+        { time: "07:58", type: "info", title: "Otay Mesa lanes moving evenly", titleEs: "Los carriles de Otay Mesa avanzan parejo", body: "A steady option for northbound vehicles this morning.", bodyEs: "Una opción estable para vehículos hacia el norte esta mañana." },
+        { time: "07:41", type: "info", title: "Pedestrian signal is stable", titleEs: "La señal peatonal es estable", body: "San Ysidro remains inside its recent range.", bodyEs: "San Ysidro se mantiene dentro de su rango reciente." }
+      ]
+    },
+    south: {
+      directionKey: "southbound",
+      route: "US → MX",
+      routeDirection: "San Diego → Tijuana",
+      primaryId: "otay-mesa",
+      cards: [
+        {
+          id: "san-ysidro",
+          name: "San Ysidro",
+          place: "San Diego → Tijuana",
+          wait: 31,
+          modeKey: "vehicle",
+          flowKey: "flowMoving",
+          confidence: 84,
+          updated: 7,
+          source: "ANAM-style lane operations bulletin",
+          sourceEs: "Boletín de operaciones de carril estilo ANAM",
+          median: 28,
+          history: [26, 29, 32, 27, 30, 28, 31],
+          recommendation: "The main southbound route is moving, with a small rise near the approach.",
+          recommendationEs: "La ruta principal hacia el sur avanza, con un pequeño aumento en el acceso."
+        },
+        {
+          id: "otay-mesa",
+          name: "Otay Mesa",
+          place: "Otay Mesa → Tijuana",
+          wait: 24,
+          modeKey: "vehicle",
+          flowKey: "flowLight",
+          confidence: 86,
+          updated: 5,
+          source: "ANAM-style lane operations bulletin",
+          sourceEs: "Boletín de operaciones de carril estilo ANAM",
+          median: 30,
+          history: [34, 31, 28, 29, 27, 26, 24],
+          recommendation: "The best balance of speed and confidence for a southbound vehicle crossing.",
+          recommendationEs: "El mejor equilibrio entre rapidez y confianza para cruzar en vehículo hacia el sur."
+        },
+        {
+          id: "tecate",
+          name: "Tecate",
+          place: "Tecate → Tecate",
+          wait: 11,
+          modeKey: "vehicle",
+          flowKey: "flowLight",
+          confidence: 72,
+          updated: 14,
+          source: "Illustrative municipal crossing report",
+          sourceEs: "Informe municipal ilustrativo del cruce",
+          median: 16,
+          history: [18, 16, 15, 17, 14, 13, 11],
+          recommendation: "The shortest read, with a less certain signal because fewer vehicles pass through.",
+          recommendationEs: "La lectura más corta, con una señal menos segura porque pasan menos vehículos."
+        }
+      ],
+      notes: [
+        { time: "08:18", type: "info", title: "Otay Mesa is the cleanest return", titleEs: "Otay Mesa es el regreso más despejado", body: "The approach is below its four-week median.", bodyEs: "El acceso está por debajo de su mediana de cuatro semanas." },
+        { time: "08:04", type: "alert", title: "San Ysidro approach warming up", titleEs: "El acceso de San Ysidro aumenta", body: "Add a little buffer if you are leaving after 09:00 PT.", bodyEs: "Agrega un margen si sales después de las 09:00 PT." },
+        { time: "07:47", type: "info", title: "Tecate remains light", titleEs: "Tecate sigue ligero", body: "Short queue, lower confidence due to thin volume.", bodyEs: "Fila corta, menor confianza por el poco volumen." }
+      ]
+    }
+  };
+
+  const state = {
+    language: "en",
+    direction: "north",
+    selectedId: "san-ysidro",
+    recommendationId: "otay-mesa",
+    live: false,
+    autoStopTimer: null,
+    previousFocus: null
+  };
+
+  const elements = {
+    languageToggle: document.getElementById("languageToggle"),
+    directionButtons: Array.from(document.querySelectorAll("[data-direction]")),
+     pulseRouteLabel: document.getElementById("pulseRouteLabel"),
+     pulseStartLabel: document.getElementById("pulseStartLabel"),
+     pulseEndLabel: document.getElementById("pulseEndLabel"),
+    pulseWait: document.getElementById("pulseWait"),
+    pulseStatus: document.getElementById("pulseStatus"),
+    pulseFootnote: document.getElementById("pulseFootnote"),
+    freshnessText: document.getElementById("freshnessText"),
+    mainWait: document.getElementById("mainWait"),
+    estimateCrossing: document.getElementById("estimateCrossing"),
+    estimateRoute: document.getElementById("estimateRoute"),
+    estimateStatus: document.getElementById("estimateStatus"),
+    meterFill: document.getElementById("meterFill"),
+    confidenceValue: document.getElementById("confidenceValue"),
+    confidenceRing: document.getElementById("confidenceRing"),
+    confidencePercent: document.getElementById("confidencePercent"),
+    estimateSource: document.getElementById("estimateSource"),
+    recommendationIndex: document.getElementById("recommendationIndex"),
+    recommendationTitle: document.getElementById("recommendation-title"),
+    recommendationCopy: document.getElementById("recommendationCopy"),
+    recommendationWait: document.getElementById("recommendationWait"),
+    recommendationDelta: document.getElementById("recommendationDelta"),
+    recommendationAction: document.getElementById("recommendationAction"),
+    crossingCards: document.getElementById("crossingCards"),
+    historyDelta: document.getElementById("historyDelta"),
+    historyDeltaCopy: document.getElementById("historyDeltaCopy"),
+    historyChart: document.getElementById("historyChart"),
+    historyFootnote: document.getElementById("historyFootnote"),
+    notesList: document.getElementById("notesList"),
+    notesCount: document.getElementById("notesCount"),
+    liveCard: document.getElementById("liveCard"),
+    liveTag: document.getElementById("liveTag"),
+    liveTitle: document.getElementById("live-title"),
+    liveCopy: document.getElementById("liveCopy"),
+    liveForecast: document.getElementById("liveForecast"),
+    liveForecastSub: document.getElementById("liveForecastSub"),
+    startCrossingButton: document.getElementById("startCrossingButton"),
+    startCrossingLabel: document.getElementById("startCrossingLabel"),
+    liveDisclaimer: document.getElementById("liveDisclaimer"),
+    consentDialog: document.getElementById("consentDialog"),
+    closeDialog: document.getElementById("closeDialog"),
+    cancelDialog: document.getElementById("cancelDialog"),
+    locationConsent: document.getElementById("locationConsent"),
+    confirmConsent: document.getElementById("confirmConsent"),
+    notesButton: document.getElementById("notesButton"),
+    allNotesButton: document.getElementById("allNotesButton"),
+    toastRegion: document.getElementById("toastRegion")
+  };
+
+  function text(key, replacements) {
+    let value = translations[state.language][key] || key;
+    if (replacements) {
+      Object.keys(replacements).forEach(function (replacementKey) {
+        value = value.replace("{" + replacementKey + "}", replacements[replacementKey]);
+      });
+    }
+    return value;
   }
-};
 
-let direction = 'north';
-let language = 'en';
-let active = false;
-let selectedIndex = 1;
-let lastFocusedElement;
+  function currentData() {
+    return corridorData[state.direction];
+  }
 
-const list = document.querySelector('#crossing-list');
-const modal = document.querySelector('#consent-modal');
-const toast = document.querySelector('#toast');
-const startButton = document.querySelector('#start-crossing');
+  function selectedCrossing() {
+    return currentData().cards.find(function (card) {
+      return card.id === state.selectedId;
+    }) || currentData().cards[0];
+  }
 
-function copy(key) {
-  return translations[language][key];
-}
+  function setTextContent(selector, key) {
+    const node = document.querySelector(selector);
+    if (node) {
+      node.textContent = text(key);
+    }
+  }
 
-function render() {
-  const crossings = data[direction];
-  list.innerHTML = crossings.map((item, index) => `<article class="crossing-card ${item.featured ? 'featured' : ''} ${selectedIndex === index ? 'selected' : ''}" data-index="${index}" tabindex="0" role="button" aria-pressed="${selectedIndex === index}"><span class="card-index">0${index + 1}</span><h3>${item.name}</h3><p class="location">${item.location}</p><div class="wait">${item.wait}<span> min</span></div><p class="lane">${item.lane}</p><div class="card-footer"><span>● ${item.freshness}</span><span class="confidence">${item.confidence} ${copy('signalText')}</span></div><p class="fine-print">${item.context}</p></article>`).join('');
-  list.querySelectorAll('.crossing-card').forEach(card => {
-    card.addEventListener('click', () => selectCrossing(Number(card.dataset.index)));
-    card.addEventListener('keydown', event => {
-      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectCrossing(Number(card.dataset.index)); }
+  function applyTranslations() {
+    document.documentElement.lang = state.language;
+    document.querySelectorAll("[data-i18n]").forEach(function (node) {
+      const key = node.getAttribute("data-i18n");
+      node.textContent = text(key);
+    });
+     elements.closeDialog.setAttribute("aria-label", text("close"));
+     elements.notesButton.setAttribute("aria-label", text("notifications"));
+     document.querySelector(".top-nav").setAttribute("aria-label", state.language === "es" ? "Navegación principal" : "Primary navigation");
+     document.querySelector(".direction-switch").setAttribute("aria-label", state.language === "es" ? "Elegir dirección" : "Choose direction");
+     document.querySelector(".dashboard-grid").setAttribute("aria-label", state.language === "es" ? "Resumen de la frontera actual" : "Current border overview");
+     document.querySelector(".context-grid").setAttribute("aria-label", state.language === "es" ? "Contexto fronterizo" : "Border context");
+     elements.languageToggle.setAttribute("aria-label", state.language === "en" ? "Cambiar idioma" : "Change language");
+    elements.languageToggle.setAttribute("aria-pressed", String(state.language === "es"));
+    document.querySelectorAll(".language-option").forEach(function (option) {
+      option.classList.toggle("is-active", option.textContent.trim().toLowerCase() === state.language);
+    });
+    renderCurrentData();
+    renderLiveState();
+  }
+
+  function renderCurrentData() {
+    const data = currentData();
+    const crossing = selectedCrossing();
+    const recommendation = data.cards.find(function (card) {
+      return card.id === state.recommendationId;
+    }) || data.cards.reduce(function (best, card) {
+      return card.wait < best.wait ? card : best;
+    }, data.cards[0]);
+    const recommendationIsSelected = recommendation.id === crossing.id;
+
+    state.selectedId = crossing.id;
+     elements.pulseStartLabel.textContent = state.direction === "north" ? "MX" : "US";
+     elements.pulseEndLabel.textContent = state.direction === "north" ? "US" : "MX";
+     elements.pulseRouteLabel.textContent = crossing.name;
+    elements.pulseWait.textContent = crossing.wait;
+    elements.pulseStatus.textContent = text(crossing.flowKey);
+    elements.pulseFootnote.textContent = text(crossing.modeKey) + " · " + crossing.place;
+
+    elements.freshnessText.textContent = text("updated", { minutes: crossing.updated });
+    elements.mainWait.textContent = crossing.wait;
+    elements.estimateCrossing.textContent = crossing.name;
+    elements.estimateRoute.textContent = text(crossing.modeKey) + " · " + crossing.place;
+    elements.estimateStatus.textContent = text(crossing.flowKey) + " " + text("flowSuffix");
+    elements.meterFill.style.width = Math.min(94, Math.max(18, crossing.wait * 1.55)) + "%";
+    elements.confidenceValue.textContent = confidenceLabel(crossing.confidence) + " · " + crossing.confidence + "%";
+    elements.confidencePercent.textContent = crossing.confidence;
+    elements.confidenceRing.setAttribute("aria-label", text("confidence") + " " + crossing.confidence + "%");
+     elements.estimateSource.textContent = (state.language === "es" ? "Ilustrativo · " : "Illustrative · ") + (state.language === "es" ? crossing.sourceEs : crossing.source);
+
+    elements.recommendationIndex.textContent = String(data.cards.findIndex(function (card) {
+      return card.id === recommendation.id;
+    }) + 1).padStart(2, "0") + " / 03";
+    elements.recommendationTitle.textContent = recommendationIsSelected ? text("keepSelected", { crossing: crossing.name }) : recommendation.name;
+    elements.recommendationCopy.textContent = state.language === "es" ? recommendation.recommendationEs : recommendation.recommendation;
+    elements.recommendationWait.innerHTML = recommendation.wait + "<span> " + text("minutes") + "</span>";
+    const delta = Math.abs(recommendation.wait - crossing.wait);
+    if (recommendationIsSelected || delta === 0) {
+      elements.recommendationDelta.textContent = text("selectedCrossing", { crossing: recommendation.name });
+    } else if (recommendation.wait < crossing.wait) {
+      elements.recommendationDelta.textContent = text("fasterThan", { minutes: delta, crossing: crossing.name });
+    } else {
+      elements.recommendationDelta.textContent = text("slowerThan", { minutes: delta, crossing: crossing.name });
+    }
+    elements.recommendationAction.dataset.target = recommendation.id;
+
+    renderCrossingCards();
+    renderHistory(crossing);
+    renderNotes(data.notes);
+  }
+
+  function confidenceLabel(value) {
+    if (value >= 84) {
+      return state.language === "es" ? "Alta" : "High";
+    }
+    if (value >= 77) {
+      return state.language === "es" ? "Media" : "Medium";
+    }
+    return state.language === "es" ? "Orientativa" : "Directional";
+  }
+
+  function modeIcon(modeKey) {
+    if (modeKey === "pedestrian") {
+      return '<svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.2" /><path d="m10 9 2 2 3-1M12 11l-1 5-3 3M12 11l3 5 3 1M11 16l-1 4M14 16l2 4" /></svg>';
+    }
+    if (modeKey === "bus") {
+      return '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 17V7c0-2 2-3 7-3s7 1 7 3v10M4 17h16M7 8h10M7 20v-3M17 20v-3M7 12h.01M17 12h.01" /></svg>';
+    }
+    return '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 16h14l-1-6H6l-1 6ZM8 16a2 2 0 1 0-4 0M20 16a2 2 0 1 0-4 0M7 10l1-3h7l2 3" /></svg>';
+  }
+
+  function renderCrossingCards() {
+    const data = currentData();
+    elements.crossingCards.innerHTML = data.cards.map(function (card, index) {
+      const isSelected = card.id === state.selectedId;
+      const meterWidth = Math.min(94, Math.max(18, card.wait * 1.55));
+      return '<button class="crossing-card' + (isSelected ? " is-selected" : "") + '" type="button" data-crossing="' + card.id + '" aria-pressed="' + isSelected + '">' +
+        '<span class="crossing-card-top"><span class="crossing-index">0' + (index + 1) + '</span><span class="crossing-state">' + text(card.flowKey) + '</span></span>' +
+        '<span class="crossing-name">' + card.name + '</span>' +
+        '<span class="crossing-place">' + card.place + '</span>' +
+        '<span class="crossing-metric"><strong>' + card.wait + '</strong><span>' + text("minutes") + '</span></span>' +
+        '<span class="crossing-meter" aria-hidden="true"><span style="width:' + meterWidth + '%"></span></span>' +
+        '<span class="crossing-card-bottom"><span class="crossing-mode">' + modeIcon(card.modeKey) + '<span>' + text(card.modeKey) + '</span></span><span class="selected-check">✓ ' + text("selected") + '</span></span>' +
+        '</button>';
+    }).join("");
+
+    elements.crossingCards.querySelectorAll("[data-crossing]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        endLiveForContextChange();
+        state.selectedId = button.dataset.crossing;
+        state.recommendationId = button.dataset.crossing;
+        renderCurrentData();
+        showToast(text("selectedToast", { crossing: selectedCrossing().name }));
+      });
+    });
+  }
+
+  function renderHistory(crossing) {
+    const delta = crossing.wait - crossing.median;
+    const sign = delta > 0 ? "+" : "";
+    elements.historyDelta.textContent = sign + delta + " " + text("minutes");
+    if (delta > 0) {
+      elements.historyDeltaCopy.textContent = text("aboveMedian");
+    } else if (delta < 0) {
+      elements.historyDeltaCopy.textContent = text("belowMedian");
+    } else {
+      elements.historyDeltaCopy.textContent = text("atMedian");
+    }
+    const max = Math.max.apply(null, crossing.history.concat([crossing.wait]));
+    const days = state.language === "es" ? ["L", "M", "X", "J", "V", "S", "D"] : ["M", "T", "W", "T", "F", "S", "S"];
+    elements.historyChart.setAttribute("aria-label", text("historicalContext") + ": " + crossing.wait + " " + text("minutes") + ", " + text("sameDayMedian") + " " + crossing.median + " " + text("minutes"));
+    elements.historyChart.innerHTML = crossing.history.map(function (value, index) {
+      const isCurrent = index === crossing.history.length - 1;
+      const height = Math.max(12, Math.round((value / max) * 84));
+      return '<span class="chart-column"><span class="chart-bar' + (isCurrent ? " is-current" : "") + '" style="height:' + height + '%" data-value="' + value + '"></span><small>' + days[index] + '</small></span>';
+    }).join("");
+    const historyKey = state.direction === "south" ? (delta > 0 ? "historyBusySouth" : "historyCalmSouth") : (delta > 0 ? "historyBusy" : "historyCalm");
+    elements.historyFootnote.textContent = text(historyKey);
+  }
+
+  function renderNotes(notes) {
+    elements.notesCount.textContent = notes.length;
+    elements.notesList.innerHTML = notes.map(function (note) {
+      const title = state.language === "es" ? note.titleEs : note.title;
+      const body = state.language === "es" ? note.bodyEs : note.body;
+      return '<div class="note-item"><span class="note-time">' + note.time + '</span><div class="note-body' + (note.type === "alert" ? " is-alert" : "") + '"><strong>' + title + '</strong><p>' + body + '</p></div></div>';
+    }).join("");
+  }
+
+  function renderLiveState() {
+    const crossing = selectedCrossing();
+    const liveMinutes = Math.max(6, crossing.wait - (state.direction === "north" ? 8 : 6));
+    const liveDelta = Math.max(1, crossing.wait - liveMinutes);
+    elements.liveCard.classList.toggle("is-live", state.live);
+    elements.startCrossingButton.setAttribute("aria-pressed", String(state.live));
+    if (state.live) {
+      elements.liveTag.textContent = text("liveActiveLabel");
+      elements.liveTitle.textContent = text("premiumActiveTitle");
+      elements.liveCopy.textContent = text("premiumActiveCopy");
+      elements.liveForecast.textContent = text("liveEstimate", { minutes: liveMinutes });
+      elements.liveForecastSub.textContent = text("liveEstimateSub", { delta: liveDelta });
+      elements.startCrossingLabel.textContent = text("stopCrossing");
+      elements.liveDisclaimer.textContent = text("activeDisclaimer");
+    } else {
+      elements.liveTag.textContent = text("premiumTag");
+      elements.liveTitle.textContent = text("premiumTitle");
+      elements.liveCopy.textContent = text("premiumCopy");
+      elements.liveForecast.textContent = text("previewStart");
+      elements.liveForecastSub.textContent = text("previewSub");
+      elements.startCrossingLabel.textContent = text("startCrossing");
+      elements.liveDisclaimer.textContent = text("liveDisclaimer");
+    }
+  }
+
+  function setDirection(direction) {
+    if (!corridorData[direction]) {
+      return;
+    }
+    endLiveForContextChange();
+    state.direction = direction;
+    state.selectedId = corridorData[direction].primaryId;
+    state.recommendationId = corridorData[direction].cards.reduce(function (best, card) {
+      return card.wait < best.wait ? card : best;
+    }, corridorData[direction].cards[0]).id;
+    elements.directionButtons.forEach(function (button) {
+      const active = button.dataset.direction === direction;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+    renderCurrentData();
+    renderLiveState();
+  }
+
+  function endLiveForContextChange() {
+    if (!state.live) {
+      return;
+    }
+    state.live = false;
+    if (state.autoStopTimer) {
+      window.clearTimeout(state.autoStopTimer);
+      state.autoStopTimer = null;
+    }
+    renderLiveState();
+  }
+
+  function setLanguage() {
+    state.language = state.language === "en" ? "es" : "en";
+    applyTranslations();
+    showToast(text("languageChanged"));
+  }
+
+  function openConsent() {
+    if (state.live) {
+      stopCrossing();
+      return;
+    }
+    state.previousFocus = document.activeElement;
+    elements.locationConsent.checked = false;
+    elements.confirmConsent.disabled = true;
+    if (typeof elements.consentDialog.showModal === "function") {
+      elements.consentDialog.showModal();
+    } else {
+      elements.consentDialog.setAttribute("open", "");
+    }
+    window.setTimeout(function () {
+      elements.locationConsent.focus();
+    }, 0);
+  }
+
+  function closeConsent() {
+    if (elements.consentDialog.open) {
+      elements.consentDialog.close();
+    } else {
+      elements.consentDialog.removeAttribute("open");
+    }
+    if (state.previousFocus && typeof state.previousFocus.focus === "function") {
+      state.previousFocus.focus();
+    }
+  }
+
+  function confirmCrossing() {
+    if (!elements.locationConsent.checked) {
+      showToast(text("consentRequired"), "warning");
+      return;
+    }
+    closeConsent();
+    state.live = true;
+    renderLiveState();
+    showToast(text("liveStarted"));
+    if (state.autoStopTimer) {
+      window.clearTimeout(state.autoStopTimer);
+    }
+    state.autoStopTimer = window.setTimeout(function () {
+      if (state.live) {
+        state.live = false;
+        renderLiveState();
+        showToast(text("liveStopped"), "warning");
+      }
+    }, 90 * 60 * 1000);
+  }
+
+  function stopCrossing() {
+    state.live = false;
+    if (state.autoStopTimer) {
+      window.clearTimeout(state.autoStopTimer);
+      state.autoStopTimer = null;
+    }
+    renderLiveState();
+    showToast(text("liveStopped"), "warning");
+  }
+
+  function showToast(message, variant) {
+    const toast = document.createElement("div");
+    toast.className = "toast" + (variant === "warning" ? " is-warning" : "");
+    toast.textContent = message;
+    elements.toastRegion.appendChild(toast);
+    window.setTimeout(function () {
+      toast.classList.add("is-leaving");
+      window.setTimeout(function () {
+        toast.remove();
+      }, 190);
+    }, 4200);
+  }
+
+  function scrollToSection(id) {
+    const section = document.getElementById(id);
+    if (!section) {
+      return;
+    }
+    const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    section.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+  }
+
+  elements.languageToggle.addEventListener("click", setLanguage);
+  elements.directionButtons.forEach(function (button) {
+    button.addEventListener("click", function () {
+      setDirection(button.dataset.direction);
     });
   });
-  updateRecommendation();
-}
-
-function selectCrossing(index) {
-  selectedIndex = index;
-  render();
-  document.querySelector('.crossing-card.selected')?.focus();
-}
-
-function updateRecommendation() {
-  const selected = data[direction][selectedIndex];
-  const title = direction === 'north' ? (language === 'es' ? `${selected.name} es tu mejor opción al norte.` : `${selected.name} is your cleanest northbound bet.`) : (language === 'es' ? `${selected.name} es tu mejor opción al sur.` : `${selected.name} is your cleanest southbound bet.`);
-  document.querySelector('#recommendation-title').textContent = title;
-  document.querySelector('#recommendation-copy').textContent = language === 'es' ? `Su estimación de ${selected.wait} minutos tiene una señal de alta confianza ahora.` : `Its ${selected.wait}-minute estimate has a high-confidence signal right now.`;
-}
-
-function applyLanguage() {
-  document.documentElement.lang = language;
-  document.querySelectorAll('[data-i18n]').forEach(element => {
-    const value = copy(element.dataset.i18n);
-    if (value) element.innerHTML = value;
+  elements.startCrossingButton.addEventListener("click", openConsent);
+  elements.closeDialog.addEventListener("click", closeConsent);
+  elements.cancelDialog.addEventListener("click", closeConsent);
+  elements.locationConsent.addEventListener("change", function () {
+    elements.confirmConsent.disabled = !elements.locationConsent.checked;
   });
-  document.querySelector('.lang-toggle').innerHTML = language === 'en' ? '<b>EN</b><span>/</span><span>ES</span>' : '<span>EN</span><span>/</span><b>ES</b>';
-  render();
-  updateSessionButton();
-}
+  elements.confirmConsent.addEventListener("click", confirmCrossing);
+  elements.consentDialog.addEventListener("cancel", function (event) {
+    event.preventDefault();
+    closeConsent();
+  });
+  elements.recommendationAction.addEventListener("click", function () {
+    const target = elements.recommendationAction.dataset.target;
+    if (target && target !== state.selectedId) {
+      endLiveForContextChange();
+      state.selectedId = target;
+      state.recommendationId = target;
+      renderCurrentData();
+      showToast(text("selectedToast", { crossing: selectedCrossing().name }));
+    } else {
+      scrollToSection("crossings");
+      showToast(text("selectedCrossing", { crossing: selectedCrossing().name }));
+    }
+  });
+  elements.notesButton.addEventListener("click", function () {
+    scrollToSection("notes");
+    showToast(text("notesViewed"));
+  });
+  elements.allNotesButton.addEventListener("click", function () {
+    showToast(text("notesViewed"));
+  });
 
-function updateSessionButton() {
-  if (!active) return;
-  startButton.innerHTML = `<span>${copy('active')}</span><span>◉</span>`;
-}
-
-function showToast(message) {
-  toast.textContent = message;
-  toast.classList.add('show');
-  window.setTimeout(() => toast.classList.remove('show'), 4500);
-}
-
-document.querySelectorAll('.direction-btn').forEach(button => button.addEventListener('click', () => {
-  direction = button.dataset.direction;
-  selectedIndex = direction === 'north' ? 1 : 0;
-  document.querySelectorAll('.direction-btn').forEach(item => item.classList.toggle('active', item === button));
-  render();
-}));
-
-document.querySelector('.lang-toggle').addEventListener('click', () => {
-  language = language === 'en' ? 'es' : 'en';
-  applyLanguage();
-});
-
-startButton.addEventListener('click', () => {
-  if (active) { active = false; startButton.innerHTML = `<span>${copy('start')}</span><span>→</span>`; showToast(language === 'es' ? 'Sesión detenida.' : 'Crossing session stopped.'); return; }
-  lastFocusedElement = document.activeElement;
-  modal.hidden = false;
-  document.querySelector('#consent-action').focus();
-});
-
-function closeModal() {
-  modal.hidden = true;
-  lastFocusedElement?.focus();
-}
-
-document.querySelector('#close-modal').addEventListener('click', closeModal);
-modal.addEventListener('click', event => { if (event.target === modal) closeModal(); });
-document.querySelector('#consent-action').addEventListener('click', () => {
-  active = true;
-  closeModal();
-  startButton.style.background = 'var(--cyan)';
-  startButton.style.color = 'var(--navy)';
-  updateSessionButton();
-  showToast(copy('activeToast'));
-});
-document.querySelector('#alert-action').addEventListener('click', () => showToast(copy('reminder')));
-document.addEventListener('keydown', event => { if (event.key === 'Escape' && !modal.hidden) closeModal(); });
-
-render();
+  applyTranslations();
+})();

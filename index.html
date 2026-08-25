@@ -1,61 +1,347 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Celestan is a prototype for comparing San Diego and Tijuana crossing conditions.">
-  <title>Celestan | Border intelligence</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <header class="topbar">
-    <a class="brand" href="#top" aria-label="Celestan home"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>celestan<span class="dot">.</span></span></a>
-    <div class="top-actions"><span class="demo-chip"><span class="pulse-dot"></span><span data-i18n="demo">Prototype data</span></span><button class="lang-toggle" type="button" aria-label="Switch language"><b>EN</b><span>/</span><span>ES</span></button></div>
-  </header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Celestan border intelligence network prototype for calmer crossings."
+    />
+    <title>Celestan / Border intelligence</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content" data-i18n="skipLink">Skip to content</a>
 
-  <main id="top">
-    <section class="hero shell">
-      <div class="eyebrow"><span class="eyebrow-line"></span><span data-i18n="eyebrow">SAN DIEGO ↔ TIJUANA / FIELD NOTE 01</span></div>
-      <div class="hero-grid">
-        <div>
-          <h1 data-i18n="title">Cross with<br><em>clarity.</em></h1>
-          <p class="hero-copy" data-i18n="intro">A calmer read on the border. Compare official conditions, understand the signal, and choose your moment.</p>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#overview" aria-label="Celestan home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 36 36" role="img">
+              <path d="M5 8.5h26M5 18h26M5 27.5h26" />
+              <path class="brand-route" d="M8 27.5c4.5 0 4.5-19 10-19s5.5 19 10 19" />
+              <circle cx="8" cy="27.5" r="2.25" />
+              <circle cx="28" cy="27.5" r="2.25" />
+            </svg>
+          </span>
+          <span class="brand-text">
+            <strong>celestan</strong>
+            <span data-i18n="brandTagline">border intelligence network</span>
+          </span>
+        </a>
+
+        <nav class="top-nav" aria-label="Primary navigation">
+          <a href="#overview" class="nav-link is-active" data-i18n="navOverview">Overview</a>
+          <a href="#crossings" class="nav-link" data-i18n="navCrossings">Crossings</a>
+          <a href="#notes" class="nav-link" data-i18n="navNotes">Border notes</a>
+        </nav>
+
+        <div class="top-actions">
+          <span class="prototype-badge">
+            <span class="prototype-dot" aria-hidden="true"></span>
+            <span data-i18n="prototypeBadge">Prototype / demo data</span>
+          </span>
+          <span class="no-ads-mark" data-i18n="noAds">No ads</span>
+          <button
+            class="language-toggle"
+            id="languageToggle"
+            type="button"
+            aria-label="Change language"
+            aria-pressed="false"
+          >
+            <span class="language-option is-active">EN</span>
+            <span class="language-divider" aria-hidden="true">/</span>
+            <span class="language-option">ES</span>
+          </button>
+          <button class="icon-button" id="notesButton" type="button" aria-label="View border notes">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />
+            </svg>
+            <span class="notification-dot" aria-hidden="true"></span>
+          </button>
         </div>
-        <div class="route-panel">
-          <div class="route-label"><span data-i18n="direction">YOUR DIRECTION</span><span class="route-arrow">↗</span></div>
-          <div class="segmented" role="group" aria-label="Crossing direction"><button class="direction-btn active" data-direction="north" type="button"><span data-i18n="north">Northbound</span><small>→ SAN DIEGO</small></button><button class="direction-btn" data-direction="south" type="button"><span data-i18n="south">Southbound</span><small>→ TIJUANA</small></button></div>
-          <p class="updated"><span class="fresh-icon"></span><span data-i18n="updated">Last checked 8 min ago</span> <span class="muted">· 08:42 PT</span></p>
+      </header>
+
+      <main id="main-content">
+        <section class="command-center" id="overview" aria-labelledby="page-title">
+          <div class="command-copy">
+            <p class="eyebrow">
+              <span class="eyebrow-mark" aria-hidden="true"></span>
+              <span data-i18n="pulseEyebrow">Border pulse / illustrative 08:30 PT</span>
+            </p>
+            <h1 id="page-title">
+              <span data-i18n="heroTitleOne">Know before</span><br />
+              <em data-i18n="heroTitleTwo">you cross.</em>
+            </h1>
+            <p class="hero-summary" data-i18n="heroSummary">
+              One clear read on the border: what is moving, what changed, and the least-friction way through.
+            </p>
+
+            <div class="direction-control">
+              <span class="control-label" data-i18n="directionLabel">I am going</span>
+              <div class="direction-switch" role="group" aria-label="Choose direction">
+                <button class="direction-button is-active" type="button" data-direction="north" aria-pressed="true">
+                  <span data-i18n="northbound">Northbound</span>
+                  <small><span>MX</span><span class="direction-arrow" aria-hidden="true">→</span><span>US</span></small>
+                </button>
+                <button class="direction-button" type="button" data-direction="south" aria-pressed="false">
+                  <span data-i18n="southbound">Southbound</span>
+                  <small><span>US</span><span class="direction-arrow" aria-hidden="true">→</span><span>MX</span></small>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <section class="pulse-panel" role="region" aria-labelledby="pulse-title">
+            <div class="pulse-panel-top">
+              <span class="panel-number">01</span>
+               <span class="panel-label" id="pulse-title" data-i18n="corridorPulse">Corridor pulse</span>
+              <span class="panel-state"><span class="pulse-live-dot" aria-hidden="true"></span><span data-i18n="illustrative">illustrative</span></span>
+            </div>
+            <div class="pulse-route" aria-hidden="true">
+              <div class="pulse-grid"></div>
+               <span class="route-node route-node-start" id="pulseStartLabel">MX</span>
+               <span class="route-node route-node-end" id="pulseEndLabel">US</span>
+              <svg viewBox="0 0 520 220" preserveAspectRatio="none">
+                <path class="route-line route-line-back" d="M0 165 C85 165 94 40 184 59 S295 215 365 141 S433 48 520 58" />
+                <path class="route-line" d="M0 165 C85 165 94 40 184 59 S295 215 365 141 S433 48 520 58" />
+                <circle class="route-beacon" cx="365" cy="141" r="7" />
+              </svg>
+              <span class="route-crossing-label" id="pulseRouteLabel">San Ysidro</span>
+            </div>
+            <div class="pulse-readout">
+              <div>
+                <span class="readout-label" data-i18n="publicEstimate">Public estimate</span>
+                <strong><span id="pulseWait">42</span><small data-i18n="minutes">min</small></strong>
+              </div>
+              <div class="pulse-side-readout">
+                <span class="readout-label" data-i18n="flowStatus">Flow status</span>
+                <strong id="pulseStatus">Moderate</strong>
+              </div>
+            </div>
+            <p class="pulse-footnote" id="pulseFootnote">Pedestrian · Tijuana → San Diego</p>
+          </section>
+        </section>
+
+        <section class="dashboard-grid" aria-label="Current border overview">
+          <article class="estimate-card paper-card" aria-labelledby="estimate-title">
+            <div class="card-heading-row">
+              <div>
+                <p class="card-kicker dark-kicker" data-i18n="currentRead">Current read</p>
+                <h2 id="estimate-title" data-i18n="officialEstimate">Illustrative estimate</h2>
+              </div>
+              <span class="freshness-chip">
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M20 11a8 8 0 1 0 2 5.3M20 5v6h-6" />
+                </svg>
+                <span id="freshnessText">Updated 6 min ago</span>
+              </span>
+            </div>
+
+            <div class="estimate-main">
+              <div class="estimate-number" aria-live="polite">
+                <span id="mainWait">42</span><small data-i18n="minutesLong">minutes</small>
+              </div>
+              <div class="estimate-context">
+                <strong id="estimateCrossing">San Ysidro</strong>
+                <span id="estimateRoute">Pedestrian · Tijuana → San Diego</span>
+                <span class="estimate-status"><span class="status-dot" aria-hidden="true"></span><span id="estimateStatus">Moderate flow</span></span>
+              </div>
+            </div>
+
+            <div class="wait-meter" aria-hidden="true">
+              <div class="meter-line"><span id="meterFill"></span></div>
+              <div class="meter-labels">
+                <span data-i18n="quick">quick</span>
+                <span data-i18n="watchIt">watch it</span>
+                <span data-i18n="heavy">heavy</span>
+              </div>
+            </div>
+
+            <div class="confidence-row">
+              <div class="confidence-copy">
+                <span class="metric-label" data-i18n="confidence">Confidence</span>
+                <strong id="confidenceValue">High · 88%</strong>
+              </div>
+              <div class="confidence-ring" id="confidenceRing" aria-label="Confidence 88 percent">
+                <span id="confidencePercent">88</span><small>%</small>
+              </div>
+            </div>
+
+            <div class="estimate-source">
+              <span class="source-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 20h16M6 20V9l6-5 6 5v11M9 20v-5h6v5M9 10h.01M15 10h.01" /></svg>
+              </span>
+              <div>
+                <span class="metric-label" data-i18n="basedOn">Based on</span>
+                <strong id="estimateSource">CBP-style port operations bulletin</strong>
+              </div>
+               <span class="source-check" aria-hidden="true">~</span>
+            </div>
+            <p class="prototype-note" data-i18n="prototypeNote">Illustrative prototype values · no live API connection</p>
+          </article>
+
+          <article class="recommendation-card dark-card" aria-labelledby="recommendation-title">
+            <div class="recommendation-top">
+              <p class="card-kicker orange-kicker" data-i18n="bestMove">Best move</p>
+              <span class="recommendation-index" id="recommendationIndex">01 / 03</span>
+            </div>
+            <div class="recommendation-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48">
+                <path d="M8 35c8-1 9-19 16-19 7 0 7 14 16 14" />
+                <path d="m32 22 8 8-10 1" />
+                <circle cx="8" cy="35" r="3" />
+              </svg>
+            </div>
+            <h2 id="recommendation-title">Try Otay Mesa</h2>
+            <p class="recommendation-copy" id="recommendationCopy">A shorter vehicle queue right now, with a steadier approach from the east.</p>
+            <div class="recommendation-stat">
+              <strong id="recommendationWait">29<span> min</span></strong>
+              <span id="recommendationDelta">13 min faster than San Ysidro</span>
+            </div>
+            <button class="text-button" id="recommendationAction" type="button">
+              <span data-i18n="useThisCrossing">Use this crossing</span>
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h13m-5-5 5 5-5 5" /></svg>
+            </button>
+            <div class="recommendation-footer">
+              <span data-i18n="recommendationBased">Recommendation uses wait, confidence, and approach stability.</span>
+            </div>
+          </article>
+        </section>
+
+        <section class="crossings-section" id="crossings" aria-labelledby="crossings-title">
+          <div class="section-heading">
+            <div>
+              <p class="section-number">02</p>
+              <h2 id="crossings-title" data-i18n="chooseCrossing">Choose your crossing</h2>
+            </div>
+            <p data-i18n="chooseCrossingHint">Select a port to tune the recommendation.</p>
+          </div>
+          <div class="crossing-grid" id="crossingCards"></div>
+        </section>
+
+        <section class="context-grid" id="notes" aria-label="Border context">
+          <article class="history-card paper-card" aria-labelledby="history-title">
+            <div class="card-heading-row compact-heading">
+              <div>
+                <p class="card-kicker dark-kicker">03</p>
+                <h2 id="history-title" data-i18n="historicalContext">Historical context</h2>
+              </div>
+              <span class="context-period" data-i18n="sameDayMedian">4-week same-day median</span>
+            </div>
+            <div class="history-summary">
+              <strong id="historyDelta">+7 min</strong>
+              <span id="historyDeltaCopy">above the usual Saturday window</span>
+            </div>
+            <div class="chart" id="historyChart" role="img" aria-label="Wait time compared with recent weeks"></div>
+            <div class="chart-legend">
+              <span><i class="legend-current" aria-hidden="true"></i><span data-i18n="today">Today</span></span>
+              <span><i class="legend-history" aria-hidden="true"></i><span data-i18n="recentWeeks">Recent weeks</span></span>
+            </div>
+            <p class="history-footnote" id="historyFootnote">The queue is building, but not outside the recent range.</p>
+          </article>
+
+          <article class="notes-card dark-card" aria-labelledby="notes-title">
+            <div class="card-heading-row compact-heading">
+              <div>
+                <p class="card-kicker cyan-kicker">04</p>
+                <h2 id="notes-title" data-i18n="borderNotes">Border notes</h2>
+              </div>
+              <span class="notes-count" id="notesCount">3</span>
+            </div>
+            <div class="notes-list" id="notesList"></div>
+            <button class="notes-link" id="allNotesButton" type="button">
+              <span data-i18n="viewAllNotes">View all notes</span>
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h13m-5-5 5 5-5 5" /></svg>
+            </button>
+          </article>
+        </section>
+
+        <section class="live-section" aria-labelledby="live-title">
+          <article class="live-card" id="liveCard">
+            <div class="live-card-grid" aria-hidden="true"></div>
+            <div class="live-card-main">
+              <div class="live-card-heading">
+                <p class="card-kicker cyan-kicker">
+                  <span class="live-orb"></span>
+                  <span data-i18n="premiumKicker">Celestan Live / premium layer</span>
+                </p>
+                <span class="premium-tag" id="liveTag" data-i18n="premiumTag">Premium</span>
+              </div>
+              <h2 id="live-title" data-i18n="premiumTitle">Make your crossing a signal.</h2>
+              <p class="live-copy" id="liveCopy" data-i18n="premiumCopy">
+                Go from a public estimate to a personal one. Share a short, anonymous movement signal only while you are crossing.
+              </p>
+              <div class="privacy-points">
+                <span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.8 2.8 8.5 7 10 4.2-1.5 7-5.2 7-10V6l-7-3Z" /><path d="m9 12 2 2 4-4" /></svg><span data-i18n="anonymous">Anonymous</span></span>
+                <span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 4v8l5 3M21 12a9 9 0 1 1-2.64-6.36" /></svg><span data-i18n="autoStop">Auto-stops</span></span>
+                <span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h16M12 4v16" /></svg><span data-i18n="optIn">Opt-in only</span></span>
+              </div>
+            </div>
+            <div class="live-card-side">
+              <div class="live-forecast" aria-live="polite">
+                <span class="forecast-label" data-i18n="personalizedPreview">Personalized preview</span>
+                <strong id="liveForecast">Start to personalize</strong>
+                <span id="liveForecastSub" data-i18n="previewSub">Your live estimate appears here.</span>
+              </div>
+              <button class="live-action" id="startCrossingButton" type="button">
+                <span id="startCrossingLabel" data-i18n="startCrossing">I'm crossing now</span>
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h13m-5-5 5 5-5 5" /></svg>
+              </button>
+              <p class="live-disclaimer" id="liveDisclaimer" data-i18n="liveDisclaimer">Demo mode: no browser location is requested.</p>
+            </div>
+          </article>
+        </section>
+
+        <footer class="site-footer">
+          <span class="footer-brand">celestan / 2025</span>
+          <span data-i18n="footerDisclaimer">Prototype interface. Estimates are illustrative and do not represent live border conditions.</span>
+          <a href="#overview" data-i18n="backToTop">Back to top ↑</a>
+        </footer>
+      </main>
+    </div>
+
+    <dialog class="consent-dialog" id="consentDialog" aria-modal="true" aria-labelledby="consent-title">
+      <div class="dialog-inner">
+        <button class="dialog-close" id="closeDialog" type="button" aria-label="Close">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" /></svg>
+        </button>
+        <p class="card-kicker orange-kicker" data-i18n="consentKicker">A clear yes, then a clear stop</p>
+        <h2 id="consent-title" data-i18n="consentTitle">Before you go.</h2>
+        <p class="dialog-intro" data-i18n="consentIntro">
+          Live mode can use a rough location signal to personalize this estimate. You decide when it starts and when it ends.
+        </p>
+        <div class="consent-list">
+          <div class="consent-item">
+            <span class="consent-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h16M12 4v16" /></svg></span>
+            <span><strong data-i18n="transactional">Transactional</strong><small data-i18n="transactionalDetail">Used for this crossing only, not a profile.</small></span>
+          </div>
+          <div class="consent-item">
+            <span class="consent-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.8 2.8 8.5 7 10 4.2-1.5 7-5.2 7-10V6l-7-3Z" /><path d="m9 12 2 2 4-4" /></svg></span>
+            <span><strong data-i18n="anonymous">Anonymous</strong><small data-i18n="anonymousDetail">No name, account, or device trail is attached.</small></span>
+          </div>
+          <div class="consent-item">
+            <span class="consent-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v8l5 3M21 12a9 9 0 1 1-2.64-6.36" /></svg></span>
+            <span><strong data-i18n="autoStop">Auto-stops</strong><small data-i18n="autoStopDetail">The signal ends when you stop, or after 90 minutes.</small></span>
+          </div>
+        </div>
+        <label class="consent-check">
+          <input id="locationConsent" type="checkbox" />
+          <span class="custom-checkbox" aria-hidden="true"></span>
+          <span data-i18n="consentCheck">I understand and opt in to a temporary, anonymous location signal.</span>
+        </label>
+        <p class="dialog-demo-note" data-i18n="dialogDemoNote">Prototype note: this screen simulates consent and does not request browser location.</p>
+        <div class="dialog-actions">
+          <button class="button-secondary" id="cancelDialog" type="button" data-i18n="notNow">Not now</button>
+          <button class="button-primary" id="confirmConsent" type="button" disabled data-i18n="allowStart">Allow and start</button>
         </div>
       </div>
-    </section>
+    </dialog>
 
-    <section class="shell signal-strip" aria-label="Border conditions summary">
-      <div><span class="signal-number">03</span><span class="signal-label" data-i18n="crossings">CROSSINGS<br>MONITORED</span></div>
-      <div><span class="signal-number orange">26<span class="unit">m</span></span><span class="signal-label" data-i18n="fastest">FASTEST<br>ESTIMATE</span></div>
-      <div><span class="signal-number cyan">87<span class="unit">%</span></span><span class="signal-label" data-i18n="confidence">SIGNAL<br>CONFIDENCE</span></div>
-      <div class="signal-note"><span class="mini-bars"><i></i><i></i><i></i><i></i><i></i></span><span data-i18n="note">A measured moment,<br>not a promise.</span></div>
-    </section>
-
-    <section class="shell crossings-section">
-      <div class="section-heading"><div><p class="kicker" data-i18n="read">READ THE BORDER</p><h2 data-i18n="conditions">Current conditions</h2></div><span class="source-note" data-i18n="sources">Sources: official agencies + community signal</span></div>
-      <div class="crossing-grid" id="crossing-list"></div>
-    </section>
-
-    <section class="shell recommendation">
-      <div class="rec-icon" aria-hidden="true">✦</div><div class="rec-copy"><p class="kicker" data-i18n="recommendation">OUR READ</p><h2 id="recommendation-title">Otay Mesa is your cleanest northbound bet.</h2><p id="recommendation-copy">Its general lanes are moving 12 minutes faster than San Ysidro right now, with a high-confidence signal.</p></div><div class="rec-tag"><span class="pulse-dot"></span><span data-i18n="signal">HIGH SIGNAL</span></div>
-    </section>
-
-    <section class="shell lower-grid">
-      <article class="context-card"><div class="card-top"><p class="kicker" data-i18n="context">CONTEXT</p><span class="orange-label">7 DAY VIEW</span></div><h3 data-i18n="history">A lighter morning<br>than usual.</h3><div class="chart" aria-label="Seven day crossing trend"><span style="height:44%"></span><span style="height:60%"></span><span style="height:52%"></span><span style="height:78%"></span><span style="height:62%"></span><span style="height:37%"></span><span class="today" style="height:29%"></span></div><div class="chart-labels"><span>MON</span><span>WED</span><span>FRI</span><span>TODAY</span></div><p class="fine-print" data-i18n="historical">Historical pattern, not a forecast.</p></article>
-      <article class="alert-card"><div class="card-top"><p class="kicker" data-i18n="alerts">ALERTS</p><span class="alert-count">01</span></div><div class="alert-marker">!</div><h3 data-i18n="alertTitle">Peak window approaching</h3><p data-i18n="alertCopy">Crossing times typically rise between 10:00–11:30 AM. If your schedule is flexible, leaving before 9:30 AM is the quieter move.</p><button class="text-button" id="alert-action" type="button"><span data-i18n="alertAction">Set a departure reminder</span> <span>↗</span></button></article>
-    </section>
-
-    <section class="shell crossing-cta" id="crossing-card"><div class="cta-grid"><div class="cta-symbol" aria-hidden="true"><span>◉</span><i></i><i></i></div><div><p class="kicker cyan-text" data-i18n="premium">PREMIUM FIELD MODE</p><h2 data-i18n="crossNow">I'm crossing now.</h2><p data-i18n="crossCopy">Get a personalized live estimate based on your route and pace. Your location is used only while you cross.</p><button class="primary-button" id="start-crossing" type="button"><span data-i18n="start">Start a crossing session</span><span>→</span></button><p class="privacy-micro"><span>⌁</span> <span data-i18n="privacy">Private by default. Stops automatically.</span></p></div><div class="premium-badge">PREMIUM<br><span>FIELD MODE</span></div></div></section>
-    <p class="prototype-footnote shell"><span data-i18n="prototype">Prototype / demo data only. Not an official source. Always check agency websites before travel.</span></p>
-  </main>
-
-  <div class="modal-backdrop" id="consent-modal" hidden><section class="consent-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button class="modal-close" id="close-modal" type="button" aria-label="Close">×</button><div class="modal-symbol">⌁</div><p class="kicker cyan-text">PRIVATE FIELD MODE</p><h2 id="modal-title" data-i18n="modalTitle">A little context<br>before you go.</h2><p data-i18n="modalIntro">To personalize your crossing estimate, Borderline needs to use your location while you travel.</p><div class="consent-points"><div><b>01</b><span data-i18n="whyLocation">Location is used to understand your route and pace. It is not stored after your session.</span></div><div><b>02</b><span data-i18n="anonymous">You can optionally contribute anonymous speed data to help the next traveler.</span></div><div><b>03</b><span data-i18n="stops">Tracking stops automatically when you finish crossing. You can stop anytime.</span></div></div><label class="check-row"><input type="checkbox" id="anonymous-optin"><span class="fake-check"></span><span data-i18n="optin">Contribute anonymous crossing data</span></label><button class="primary-button full" id="consent-action" type="button"><span data-i18n="consent">I understand — start privately</span> <span>→</span></button><p class="modal-fine" data-i18n="notApi">Demo interaction only. No location is collected in this prototype.</p></section></div>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="app.js"></script>
-</body>
+    <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+    <noscript>
+      <div class="no-script-message">Celestan needs JavaScript enabled for the direction switch and live-mode prototype.</div>
+    </noscript>
+    <script src="app.js"></script>
+  </body>
 </html>

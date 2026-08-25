@@ -3,6 +3,6 @@
 - Project: Celestan border intelligence network
 - Epic: Phase 1, become the best place to see the San Diego/Tijuana border
 - Active Story: As a traveler, I can quickly compare current-looking official crossing conditions and start an explicit privacy-preserving crossing session.
-- Status: Story implemented as a self-contained responsive prototype. Crossing cards are selectable, direction and language controls update the read, and the crossing consent flow can enter and leave an active state.
-- Verification: `node --check app.js` passed. Required local files exist and the asset scan found no external URLs, images, or iframe dependencies. Browser rendering and interaction are not verified because no browser runner is installed in this workspace.
-- Delivery: Local git repository will be initialized and committed. No remote is configured, so push requires a repository URL and is currently blocked.
+- Status: Story implemented as a self-contained responsive prototype. Crossing cards are selectable, direction and language controls update the read, and the crossing consent flow can enter and leave an active state without silently changing its selected crossing.
+- Verification: `node --check app.js` and `node --check browser-check.mjs` pass. `npm run check:browser` passes in Playwright Chromium across direction switching, route endpoint reversal, selection, language switching, consent, live mode, and context-change stop behavior. A screenshot is generated under ignored `artifacts/` for visual inspection. Values remain illustrative and no browser location is requested.
+- Delivery: GitHub account `MidnightProject-MP` is authenticated and the intended remote is `MidnightProject-MP/Celestan`. The current local work is ready to commit and push after the remote branch relationship is reconciled.

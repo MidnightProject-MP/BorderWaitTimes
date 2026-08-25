@@ -1,0 +1,12 @@
+{
+  "name": "celestan-border-intelligence",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Celestan border intelligence prototype",
+  "scripts": {
+    "check:browser": "node browser-check.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.55.0"
+  }
+}
