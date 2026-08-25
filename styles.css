@@ -313,8 +313,63 @@ dialog:focus-visible {
 }
 
 main {
+  display: flex;
+  flex-direction: column;
   padding-top: 30px;
 }
+
+.command-center { order: 1; }
+.dashboard-grid { order: 2; }
+.crossings-section { order: 3; }
+.live-section { order: 4; }
+.evidence-disclosure { order: 5; }
+.site-footer { order: 6; }
+
+.evidence-disclosure {
+  margin-top: 16px;
+  border: 1px solid rgba(117, 226, 218, 0.28);
+  border-radius: var(--radius-lg);
+  background: rgba(14, 31, 49, 0.72);
+}
+
+.evidence-disclosure > summary {
+  display: flex;
+  min-height: 66px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 17px 22px;
+  color: var(--paper-bright);
+  cursor: pointer;
+  font-weight: 800;
+  list-style: none;
+}
+
+.evidence-disclosure > summary::-webkit-details-marker { display: none; }
+
+.evidence-disclosure > summary::after {
+  color: var(--cyan);
+  content: "+";
+  font-family: var(--mono);
+  font-size: 1.15rem;
+}
+
+.evidence-disclosure[open] > summary::after { content: "−"; }
+
+.evidence-disclosure > summary small {
+  margin-left: auto;
+  color: #8fa6b6;
+  font-family: var(--mono);
+  font-size: 0.57rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.evidence-disclosure > .roadway-context-section { margin-top: 0; }
+.evidence-disclosure > .roadway-context-section,
+.evidence-disclosure > .cbp-lane-section,
+.evidence-disclosure > .context-grid { margin-right: 16px; margin-left: 16px; }
+.evidence-disclosure > .context-grid { margin-bottom: 16px; }
 
 .command-center {
   display: grid;
@@ -1285,6 +1340,15 @@ main {
   font-size: 0.57rem;
 }
 
+.recommendation-meta {
+  display: grid;
+  gap: 3px;
+  color: #7890a2;
+  font-family: var(--mono);
+  font-size: 0.53rem;
+  text-align: right;
+}
+
 .recommendation-icon {
   display: grid;
   width: 53px;
@@ -1311,6 +1375,15 @@ main {
   z-index: 1;
   max-width: 310px;
   font-size: 1.8rem;
+}
+
+.recommendation-route {
+  position: relative;
+  z-index: 1;
+  margin: 7px 0 0;
+  color: var(--cyan);
+  font-family: var(--mono);
+  font-size: 0.56rem;
 }
 
 .recommendation-copy {
@@ -2387,7 +2460,7 @@ main {
   }
 
   .topbar {
-    min-height: 74px;
+    min-height: 64px;
     gap: 15px;
   }
 
@@ -2404,30 +2477,26 @@ main {
   }
 
   main {
-    padding-top: 19px;
+    padding-top: 8px;
   }
 
   .command-center {
     display: block;
     min-height: 0;
-    padding: 24px 2px 29px;
+    padding: 8px 0 10px;
+    border-bottom: 0;
   }
 
-  .command-copy h1 {
-    margin-top: 17px;
-    font-size: clamp(3.25rem, 16vw, 5.5rem);
-  }
-
-  .hero-summary {
-    max-width: 500px;
-    font-size: 0.83rem;
-  }
+  .command-copy > .eyebrow,
+  .command-copy > h1,
+  .command-copy > .hero-summary,
+  .pulse-panel { display: none; }
 
   .direction-control {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 9px;
-    margin-top: 24px;
+    align-items: center;
+    flex-direction: row;
+    gap: 12px;
+    margin-top: 0;
   }
 
   .direction-switch {
@@ -2438,19 +2507,17 @@ main {
     flex: 1;
   }
 
-  .pulse-panel {
-    min-height: 280px;
-    margin-top: 29px;
-  }
-
   .dashboard-grid,
   .context-grid {
     grid-template-columns: 1fr;
   }
 
   .dashboard-grid {
-    margin-top: 17px;
+    display: block;
+    margin-top: 0;
   }
+
+  .estimate-card { display: none; }
 
   .estimate-card,
   .recommendation-card {
@@ -2492,33 +2559,84 @@ main {
   }
 
   .recommendation-card {
-    padding: 22px 20px 21px;
+    min-height: 0;
+    padding: 17px 18px 16px;
+    border-radius: var(--radius-lg);
   }
 
-  .recommendation-icon {
-    margin-top: 29px;
+  .recommendation-icon,
+  .recommendation-footer { display: none; }
+
+  .recommendation-card h2 {
+    margin-top: 11px;
+    font-size: 1.75rem;
   }
 
-  .recommendation-footer {
-    position: static;
-    margin-top: 22px;
+  .recommendation-copy {
+    max-width: none;
+    margin-top: 6px;
+    font-size: 0.72rem;
+    line-height: 1.45;
+  }
+
+  .recommendation-stat {
+    margin-top: 11px;
+  }
+
+  .recommendation-stat strong { font-size: 1.55rem; }
+
+  .text-button {
+    margin-top: 10px;
+    font-size: 0.66rem;
   }
 
   .crossings-section {
-    padding-top: 38px;
+    padding-top: 12px;
+  }
+
+  .section-heading {
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .section-heading .section-number,
+  .section-heading > p { display: none; }
+
+  .section-heading h2 {
+    margin-top: 0;
+    font-size: 0.86rem;
   }
 
   .crossing-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
   }
 
   .crossing-card {
-    min-height: 0;
+    min-height: 96px;
+    padding: 11px 10px 10px;
   }
 
   .crossing-name {
-    margin-top: 21px;
+    margin-top: 10px;
+    font-size: 0.83rem;
   }
+
+  .crossing-index,
+  .crossing-place,
+  .crossing-meter,
+  .crossing-card-bottom { display: none; }
+
+  .crossing-state { font-size: 0.46rem; }
+
+  .crossing-metric {
+    margin-top: 12px;
+    gap: 4px;
+  }
+
+  .crossing-metric strong { font-size: 1.45rem; }
+
+  .live-section { margin-top: 11px; }
 
   .context-grid {
     margin-top: 13px;
@@ -2532,12 +2650,17 @@ main {
 
   .live-card {
     display: block;
+    min-height: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
   }
 
-  .live-card-main {
-    border-right: 0;
-    border-bottom: 1px solid rgba(117, 226, 218, 0.16);
-  }
+  .live-card-main,
+  .live-forecast,
+  .live-disclaimer,
+  .live-card-grid,
+  .live-card::before { display: none; }
 
   .live-card-main,
   .live-card-side {
@@ -2546,16 +2669,25 @@ main {
 
   .live-card-side {
     display: block;
+    padding: 0;
   }
 
-  .live-card-grid {
-    inset: 44% 0 0;
+  .live-action {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 0;
   }
 
-  .live-card::before {
-    top: 39%;
-    left: 37%;
+  .evidence-disclosure {
+    margin-top: 13px;
   }
+
+  .evidence-disclosure > summary {
+    min-height: 56px;
+    padding: 13px 15px;
+  }
+
+  .evidence-disclosure > summary small { display: none; }
 
   .site-footer {
     grid-template-columns: 1fr auto;

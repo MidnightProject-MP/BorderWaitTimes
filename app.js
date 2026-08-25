@@ -32,11 +32,14 @@
       quick: "quick",
       watchIt: "watch it",
       heavy: "heavy",
-      bestMove: "Best move",
+      bestMove: "Best move · illustrative",
+      takeCrossing: "Take {crossing}",
       useThisCrossing: "Use this crossing",
       recommendationBased: "Recommendation uses wait, confidence, and approach stability.",
-      chooseCrossing: "Choose your crossing",
-      chooseCrossingHint: "Select a port to tune the recommendation.",
+      chooseCrossing: "Compare crossings",
+      chooseCrossingHint: "Tap an alternative to make it your choice.",
+      evidenceTitle: "Evidence & context",
+      evidenceHint: "Official lane and roadway reads, history, and border notes",
       historicalContext: "Historical context",
       sameDayMedian: "4-week same-day median",
       today: "Today",
@@ -198,11 +201,14 @@
       quick: "rápido",
       watchIt: "vigilar",
       heavy: "pesado",
-      bestMove: "Mejor opción",
+      bestMove: "Mejor opción · ilustrativa",
+      takeCrossing: "Toma {crossing}",
       useThisCrossing: "Usar este cruce",
       recommendationBased: "La recomendación usa espera, confianza y estabilidad del acceso.",
-      chooseCrossing: "Elige tu cruce",
-      chooseCrossingHint: "Selecciona un puerto para ajustar la recomendación.",
+      chooseCrossing: "Compara cruces",
+      chooseCrossingHint: "Toca una alternativa para elegirla.",
+      evidenceTitle: "Evidencia y contexto",
+      evidenceHint: "Lecturas oficiales de carril y acceso, historial y notas fronterizas",
       historicalContext: "Contexto histórico",
       sameDayMedian: "Mediana del mismo día · 4 semanas",
       today: "Hoy",
@@ -491,7 +497,9 @@
     confidencePercent: document.getElementById("confidencePercent"),
     estimateSource: document.getElementById("estimateSource"),
     recommendationIndex: document.getElementById("recommendationIndex"),
+    recommendationFreshness: document.getElementById("recommendationFreshness"),
     recommendationTitle: document.getElementById("recommendation-title"),
+    recommendationRoute: document.getElementById("recommendationRoute"),
     recommendationCopy: document.getElementById("recommendationCopy"),
     recommendationWait: document.getElementById("recommendationWait"),
     recommendationDelta: document.getElementById("recommendationDelta"),
@@ -807,7 +815,9 @@
     elements.recommendationIndex.textContent = String(data.cards.findIndex(function (card) {
       return card.id === recommendation.id;
     }) + 1).padStart(2, "0") + " / 03";
-    elements.recommendationTitle.textContent = recommendationIsSelected ? text("keepSelected", { crossing: crossing.name }) : recommendation.name;
+    elements.recommendationTitle.textContent = recommendationIsSelected ? text("keepSelected", { crossing: crossing.name }) : text("takeCrossing", { crossing: recommendation.name });
+    elements.recommendationRoute.textContent = text(recommendation.modeKey) + " · " + recommendation.place;
+    elements.recommendationFreshness.textContent = text("updated", { minutes: recommendation.updated });
     elements.recommendationCopy.textContent = state.language === "es" ? recommendation.recommendationEs : recommendation.recommendation;
     elements.recommendationWait.innerHTML = recommendation.wait + "<span> " + text("minutes") + "</span>";
     const delta = Math.abs(recommendation.wait - crossing.wait);
@@ -971,6 +981,11 @@
       stopCrossing();
       return;
     }
+    if (state.recommendationId !== state.selectedId) {
+      state.selectedId = state.recommendationId;
+      renderCurrentData();
+      renderLiveState();
+    }
     state.previousFocus = document.activeElement;
     elements.locationConsent.checked = false;
     elements.confirmConsent.disabled = true;
@@ -1044,6 +1059,8 @@
     if (!section) {
       return;
     }
+    const disclosure = section.closest("details");
+    if (disclosure) disclosure.open = true;
     const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     section.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
   }

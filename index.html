@@ -183,8 +183,11 @@
 
           <article class="recommendation-card dark-card" aria-labelledby="recommendation-title">
             <div class="recommendation-top">
-              <p class="card-kicker orange-kicker" data-i18n="bestMove">Best move</p>
-              <span class="recommendation-index" id="recommendationIndex">01 / 03</span>
+              <p class="card-kicker orange-kicker" data-i18n="bestMove">Best move · illustrative</p>
+              <div class="recommendation-meta">
+                <span id="recommendationFreshness">Updated 8 min ago</span>
+                <span class="recommendation-index" id="recommendationIndex">01 / 03</span>
+              </div>
             </div>
             <div class="recommendation-icon" aria-hidden="true">
               <svg viewBox="0 0 48 48">
@@ -194,6 +197,7 @@
               </svg>
             </div>
             <h2 id="recommendation-title">Try Otay Mesa</h2>
+            <p class="recommendation-route" id="recommendationRoute">Vehicle · Tijuana → Otay Mesa</p>
             <p class="recommendation-copy" id="recommendationCopy">A shorter vehicle queue right now, with a steadier approach from the east.</p>
             <div class="recommendation-stat">
               <strong id="recommendationWait">29<span> min</span></strong>
@@ -208,6 +212,23 @@
             </div>
           </article>
         </section>
+
+        <section class="crossings-section" id="crossings" aria-labelledby="crossings-title">
+          <div class="section-heading">
+            <div>
+              <p class="section-number">02</p>
+              <h2 id="crossings-title" data-i18n="chooseCrossing">Compare crossings</h2>
+            </div>
+            <p data-i18n="chooseCrossingHint">Tap an alternative to make it your choice.</p>
+          </div>
+          <div class="crossing-grid" id="crossingCards"></div>
+        </section>
+
+        <details class="evidence-disclosure" id="evidenceDetails">
+          <summary>
+            <span data-i18n="evidenceTitle">Evidence &amp; context</span>
+            <small data-i18n="evidenceHint">Official lane and roadway reads, history, and border notes</small>
+          </summary>
 
         <section class="roadway-context-section" aria-labelledby="roadway-context-title">
           <article class="roadway-context-card" id="roadwayContextCard">
@@ -294,17 +315,6 @@
           </article>
         </section>
 
-        <section class="crossings-section" id="crossings" aria-labelledby="crossings-title">
-          <div class="section-heading">
-            <div>
-              <p class="section-number">02</p>
-              <h2 id="crossings-title" data-i18n="chooseCrossing">Choose your crossing</h2>
-            </div>
-            <p data-i18n="chooseCrossingHint">Select a port to tune the recommendation.</p>
-          </div>
-          <div class="crossing-grid" id="crossingCards"></div>
-        </section>
-
         <section class="context-grid" id="notes" aria-label="Border context">
           <article class="history-card paper-card" aria-labelledby="history-title">
             <div class="card-heading-row compact-heading">
@@ -341,6 +351,7 @@
             </button>
           </article>
         </section>
+        </details>
 
         <section class="live-section" aria-labelledby="live-title">
           <article class="live-card" id="liveCard">

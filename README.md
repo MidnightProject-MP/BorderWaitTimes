@@ -32,6 +32,8 @@ The current static prototype includes:
 - User-triggered CBP lane estimates with Standard, Ready, SENTRI, and pedestrian selection
 - Explicit operating state and lanes-open metadata when the selected CBP lane is fresh and usable
 - Responsive layouts, keyboard focus states, a skip link, reduced-motion support, and local-only assets
+- A mobile-first primary journey that keeps direction, recommendation, crossing comparison, and the crossing-session action within a 390 x 844 first viewport
+- Progressive disclosure for official roadway and lane reads, history, and border notes
 
 Total crossing waits, recommendations, confidence, history, and premium estimates remain illustrative. The separate Caltrans and CBP surfaces request official feeds only after a traveler explicitly checks them; those values retain source-specific meaning and must not be interpreted as total crossing time.
 
@@ -79,4 +81,4 @@ The product should request location only at the point a traveler starts a crossi
 
 ## Next Evidence
 
-The next evidence required for further UX work is human observation of the reconciled CBP lane selector. In parallel, the observation archive can accumulate without changing the UI or claiming that lane estimates equal total border-processing wait. Rendered browser checks establish interaction integrity; they do not establish visual quality or real-world usefulness without human observation.
+The next evidence required is traveler observation of the simplified first-viewport decision journey: whether direction, recommendation, alternatives, and the crossing-session action are understandable at a glance without opening secondary evidence. In parallel, the observation archive can accumulate without claiming that lane estimates equal total border-processing wait.

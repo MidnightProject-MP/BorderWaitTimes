@@ -104,6 +104,8 @@ try {
   assert.match(await page.title(), /Celestan/);
   assert.equal(await page.locator("#pulseWait").textContent(), "42");
   assert.equal(roadwayRequests, 0);
+  assert.equal(await page.locator(".evidence-disclosure").getAttribute("open"), null);
+  await page.locator(".evidence-disclosure").evaluate(node => { node.open = true; });
   assert.match(await page.locator("#roadwayContextCard").innerText(), /Roadway context/i);
   assert.match(await page.locator("#roadwayMinutes").innerText(), /No current value/);
 
@@ -275,10 +277,28 @@ try {
   const mobilePage = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await mobilePage.goto(appUrl);
   assert.equal(await mobilePage.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
-  const cbpCardBox = await mobilePage.locator("#cbpLaneCard").boundingBox();
-  const cbpSelectBox = await mobilePage.locator("#cbpLaneSelect").boundingBox();
-  assert.ok(cbpCardBox && cbpSelectBox && cbpSelectBox.x >= cbpCardBox.x && cbpSelectBox.x + cbpSelectBox.width <= cbpCardBox.x + cbpCardBox.width, "CBP lane selector should fit its mobile card");
+  for (const selector of [".direction-switch", ".recommendation-card", "#crossingCards", "#startCrossingButton"]) {
+    const box = await mobilePage.locator(selector).boundingBox();
+    assert.ok(box && box.y >= 0 && box.y + box.height <= 844, `${selector} should fit in the first mobile viewport`);
+  }
+  assert.match(await mobilePage.locator("#recommendation-title").innerText(), /Take Otay Mesa/);
+  assert.match(await mobilePage.locator("#recommendationDelta").innerText(), /faster than San Ysidro/);
+  assert.equal(await mobilePage.locator("#crossingCards [data-crossing]").count(), 3);
+  assert.equal(await mobilePage.locator(".evidence-disclosure").getAttribute("open"), null);
+  assert.equal(await mobilePage.locator(".pulse-panel").isVisible(), false);
+  assert.equal(await mobilePage.locator(".estimate-card").isVisible(), false);
+  assert.match(await mobilePage.locator(".recommendation-top").innerText(), /illustrative/i);
+  await mkdir(path.join(root, "artifacts"), { recursive: true });
+  await mobilePage.screenshot({ path: path.join(root, "artifacts", "mobile-browser-check.png"), fullPage: true });
+  await mobilePage.locator("#languageToggle").click();
+  assert.match(await mobilePage.locator("#recommendation-title").innerText(), /Toma Otay Mesa/);
+  for (const selector of [".direction-switch", ".recommendation-card", "#crossingCards", "#startCrossingButton"]) {
+    const box = await mobilePage.locator(selector).boundingBox();
+    assert.ok(box && box.y + box.height <= 844, `${selector} should fit in the first Spanish mobile viewport`);
+  }
+  await mobilePage.locator("#languageToggle").click();
   await mobilePage.locator("#startCrossingButton").click();
+  assert.equal(await mobilePage.locator('[data-crossing="otay-mesa"]').getAttribute("aria-pressed"), "true");
   const dialogBox = await mobilePage.locator("#consentDialog").boundingBox();
   assert.ok(dialogBox && dialogBox.height <= 844, "consent dialog should fit a mobile viewport");
   await mobilePage.close();
