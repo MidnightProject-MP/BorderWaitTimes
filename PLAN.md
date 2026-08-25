@@ -1,6 +1,6 @@
 # Temporary Execution Plan
 
-Status: completed; CBP lane estimates have a separate, northbound-only presentation surface that preserves their lane-only meaning.
+Status: completed; the strongest legacy product idea was reimplemented safely in Celestan and the dormant legacy tree was removed.
 
 Completed Story: As a maintainer, I can distinguish confirmed official roadway feeds from unverified customs estimates and know when roadway data is stale before integrating it into Celestan.
 
@@ -35,4 +35,14 @@ Verification: `node --check app.js`, `node --check browser-check.mjs`, `npm run 
 
 Post-delivery correction: the southbound CBP control now visibly reads “Northbound only” and is disabled; the rendered browser check asserts this affordance.
 
-Next step: Observe the presentation with a human traveler before selecting the next product Story; automated checks do not establish visual quality or real-world usefulness.
+Completed Story: As a northbound traveler, I can choose an applicable CBP lane class and see its official delay, operating state, and lanes open without changing Celestan's illustrative total-crossing estimate.
+
+1. Assess the legacy feature set and reject unsafe or unsupported implementation choices. Complete.
+2. Add a bilingual CBP lane selector plus fail-closed operating state and lanes-open metadata. Complete.
+3. Verify lane changes reuse one request and never alter illustrative totals, recommendations, history, or roadway context. Complete.
+4. Delete the dormant legacy `js/`, `css/`, and `images/` trees. Complete.
+5. Inspect the rendered result, update durable state, commit, and push. Complete.
+
+Verification: all JavaScript syntax checks, `npm run check:cbp`, `npm run check:adapter`, `npm run check:browser`, mobile selector bounds, and `git diff --check` pass.
+
+Next step: Observe the reconciled lane-selection experience with travelers before selecting another product Story.

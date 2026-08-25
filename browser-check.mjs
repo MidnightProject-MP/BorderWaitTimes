@@ -32,6 +32,10 @@ let roadwayStale = false;
 let roadwayRequests = 0;
 let cbpAvailable = true;
 let cbpStale = false;
+let cbpClosed = false;
+let cbpUnknownPort = false;
+let cbpSlow = false;
+let cbpRequests = 0;
 const sourceNow = new Date();
 const sourceTimestamp = {
   recordDate: sourceNow.toISOString().slice(0, 10),
@@ -46,6 +50,8 @@ const cbpDate = `${cbpPdtNow.getUTCFullYear()}-${cbpPdtNow.getUTCMonth() + 1}-${
 const cbpUpdate = `At ${cbpHour}:${String(cbpPdtNow.getUTCMinutes()).padStart(2, "0")} ${cbpMeridiem} PDT`;
 const cbpFixture = `<?xml version="1.0"?><border_wait_time><last_updated_date>${cbpDate}</last_updated_date><port><port_number>250401</port_number><border>Mexican Border</border><port_name>San Ysidro</port_name><crossing_name></crossing_name><port_status>Open</port_status><passenger_vehicle_lanes><standard_lanes><operational_status>delay</operational_status><update_time>${cbpUpdate}</update_time><delay_minutes>60</delay_minutes><lanes_open>3</lanes_open></standard_lanes><NEXUS_SENTRI_lanes><operational_status>delay</operational_status><update_time>${cbpUpdate}</update_time><delay_minutes>10</delay_minutes><lanes_open>4</lanes_open></NEXUS_SENTRI_lanes><ready_lanes><operational_status>Update Pending</operational_status><update_time></update_time><delay_minutes></delay_minutes><lanes_open></lanes_open></ready_lanes></passenger_vehicle_lanes><pedestrian_lanes><standard_lanes><operational_status>no delay</operational_status><update_time>${cbpUpdate}</update_time><delay_minutes>5</delay_minutes><lanes_open>12</lanes_open></standard_lanes></pedestrian_lanes></port></border_wait_time>`;
 const cbpStaleFixture = cbpFixture.replace(new RegExp(cbpDate, "g"), "2020-1-1");
+const cbpClosedFixture = cbpFixture.replace("<port_status>Open</port_status>", "<port_status>Closed</port_status>");
+const cbpUnknownPortFixture = cbpFixture.replace("<port_status>Open</port_status>", "<port_status>Unexpected</port_status>");
 const travelFixture = {
   data: [{ tt: {
     index: "130-1122544-1118326-BORDER",
@@ -83,8 +89,11 @@ await page.route("**/lcsStatusD11.json", async route => {
   return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fixture) });
 });
 await page.route("**/xml/bwt.xml", async route => {
+  cbpRequests += 1;
+  if (cbpSlow) await new Promise(resolve => setTimeout(resolve, 100));
   if (!cbpAvailable) return route.fulfill({ status: 503, body: "unavailable" });
-  return route.fulfill({ status: 200, contentType: "application/xml", body: cbpStale ? cbpStaleFixture : cbpFixture });
+  const fixture = cbpClosed ? cbpClosedFixture : cbpUnknownPort ? cbpUnknownPortFixture : cbpStale ? cbpStaleFixture : cbpFixture;
+  return route.fulfill({ status: 200, contentType: "application/xml", body: fixture });
 });
 
 try {
@@ -109,27 +118,116 @@ try {
 
   await page.locator("#cbpCheckButton").click();
   await page.waitForFunction(() => document.querySelector("#cbpLaneMinutes").textContent.includes("5"));
+  assert.equal(cbpRequests, 1);
   assert.match(await page.locator("#cbpState").innerText(), /Fresh from CBP/i);
+  assert.equal(await page.locator("#cbpLaneSelect").inputValue(), "pedestrianStandard");
+  assert.match(await page.locator("#cbpLanesOpen").innerText(), /12 lanes open/i);
   assert.match(await page.locator("#cbpLaneCard").innerText(), /not the total time to cross/i);
   assert.equal(await page.locator("#mainWait").textContent(), "42");
   assert.equal(await page.locator("#pulseWait").textContent(), "42");
+
+  await page.locator("#cbpLaneSelect").selectOption("passengerStandard");
+  assert.equal(cbpRequests, 1);
+  assert.match(await page.locator("#cbpLaneMinutes").innerText(), /60 min/i);
+  assert.match(await page.locator("#cbpLanesOpen").innerText(), /3 lanes open/i);
+
+  await page.locator("#cbpLaneSelect").selectOption("passengerSentri");
+  assert.equal(cbpRequests, 1);
+  assert.match(await page.locator("#cbpLaneMinutes").innerText(), /10 min/i);
+  assert.match(await page.locator("#cbpLanesOpen").innerText(), /4 lanes open/i);
+
+  await page.evaluate(() => {
+    window.originalDateNow = Date.now;
+    window.originalSetTimeout = window.setTimeout;
+    const current = Date.now();
+    window.setTimeout = (callback, delay, ...args) => window.originalSetTimeout(() => {
+      if (delay > 5 * 60 * 1000) Date.now = () => current + 2 * 60 * 60 * 1000;
+      callback(...args);
+    }, delay > 5 * 60 * 1000 ? 50 : delay);
+  });
+  await page.locator("#cbpLaneSelect").selectOption("passengerStandard");
+  await page.waitForFunction(() => document.querySelector("#cbpState").textContent.includes("Stale"));
+  assert.match(await page.locator("#cbpState").innerText(), /stale/i);
+  assert.doesNotMatch(await page.locator("#cbpLaneMinutes").innerText(), /\d/);
+  assert.doesNotMatch(await page.locator("#cbpLanesOpen").innerText(), /\d/);
+  await page.evaluate(() => {
+    Date.now = window.originalDateNow;
+    window.setTimeout = window.originalSetTimeout;
+  });
+  await page.locator("#cbpLaneSelect").selectOption("passengerSentri");
+
+  await page.locator("#cbpLaneSelect").selectOption("passengerReady");
+  assert.equal(cbpRequests, 1);
+  assert.match(await page.locator("#cbpState").innerText(), /pending/i);
+  assert.doesNotMatch(await page.locator("#cbpLaneMinutes").innerText(), /\d/);
+  assert.doesNotMatch(await page.locator("#cbpLanesOpen").innerText(), /\d/);
+
+  await page.locator('[data-crossing="otay-mesa"]').click();
+  assert.equal(await page.locator("#cbpLaneSelect").inputValue(), "passengerReady");
+  assert.equal(cbpRequests, 1);
+  await page.locator('[data-crossing="san-ysidro"]').click();
+  await page.locator("#cbpLaneSelect").selectOption("passengerStandard");
+
+  cbpClosed = true;
+  await page.locator("#cbpCheckButton").click();
+  await page.waitForFunction(() => document.querySelector("#cbpState").textContent.includes("Closed"));
+  assert.doesNotMatch(await page.locator("#cbpLaneMinutes").innerText(), /\d/);
+  assert.doesNotMatch(await page.locator("#cbpLanesOpen").innerText(), /\d/);
+
+  await page.evaluate(() => {
+    window.closedDateNow = Date.now;
+    window.closedSetTimeout = window.setTimeout;
+    const current = Date.now();
+    window.setTimeout = (callback, delay, ...args) => window.closedSetTimeout(() => {
+      if (delay > 5 * 60 * 1000) Date.now = () => current + 2 * 60 * 60 * 1000;
+      callback(...args);
+    }, delay > 5 * 60 * 1000 ? 50 : delay);
+  });
+  await page.locator("#cbpLaneSelect").selectOption("passengerSentri");
+  await page.waitForFunction(() => document.querySelector("#cbpState").textContent.includes("Stale"));
+  assert.doesNotMatch(await page.locator("#cbpLaneMinutes").innerText(), /\d/);
+  assert.doesNotMatch(await page.locator("#cbpLanesOpen").innerText(), /\d/);
+  await page.evaluate(() => {
+    Date.now = window.closedDateNow;
+    window.setTimeout = window.closedSetTimeout;
+  });
+
+  cbpClosed = false;
+  cbpUnknownPort = true;
+  await page.locator("#cbpCheckButton").click();
+  await page.waitForFunction(() => document.querySelector("#cbpState").textContent.includes("unavailable"));
+  assert.doesNotMatch(await page.locator("#cbpLaneMinutes").innerText(), /\d/);
+  assert.doesNotMatch(await page.locator("#cbpLanesOpen").innerText(), /\d/);
+
+  cbpUnknownPort = false;
+  cbpSlow = true;
+  const refresh = page.locator("#cbpCheckButton").click();
+  await page.waitForFunction(() => document.querySelector("#cbpState").textContent.includes("Checking"));
+  assert.doesNotMatch(await page.locator("#cbpLaneMinutes").innerText(), /\d/);
+  assert.doesNotMatch(await page.locator("#cbpLanesOpen").innerText(), /\d/);
+  await refresh;
+  await page.waitForFunction(() => document.querySelector("#cbpState").textContent.includes("Fresh"));
+  cbpSlow = false;
 
   cbpStale = true;
   await page.locator("#cbpCheckButton").click();
   await page.waitForFunction(() => document.querySelector("#cbpState").textContent.includes("Stale"));
   assert.equal(await page.locator("#cbpLaneMinutes").textContent(), "No current lane estimate");
+  assert.doesNotMatch(await page.locator("#cbpLanesOpen").innerText(), /\d/);
 
   cbpStale = false;
   cbpAvailable = false;
   await page.locator("#cbpCheckButton").click();
   await page.waitForFunction(() => document.querySelector("#cbpState").textContent.includes("unavailable"));
   assert.equal(await page.locator("#cbpLaneMinutes").textContent(), "No current lane estimate");
+  assert.doesNotMatch(await page.locator("#cbpLanesOpen").innerText(), /\d/);
 
   await page.locator('[data-direction="south"]').click();
   assert.equal(await page.locator("#pulseWait").textContent(), "24");
   assert.equal(await page.locator("#pulseStartLabel").textContent(), "US");
   assert.equal(await page.locator("#pulseEndLabel").textContent(), "MX");
   assert.equal(await page.locator("#cbpCheckButton").isDisabled(), true);
+  assert.equal(await page.locator("#cbpLaneSelect").isDisabled(), true);
   assert.equal(await page.locator("#cbpCheckButton").innerText(), "Northbound only");
 
   await page.locator('[data-crossing="tecate"]').click();
@@ -138,6 +236,8 @@ try {
   await page.locator("#languageToggle").click();
   assert.equal(await page.locator("#page-title").innerText(), "Cruza con\nclaridad.");
   assert.equal(await page.locator("#roadwayCheckButton").innerText(), "Consultar contexto vial");
+  assert.equal(await page.locator("#cbpLaneSelect").inputValue(), "passengerSentri");
+  assert.equal(await page.locator('#cbpLaneSelect option[value="passengerSentri"]').innerText(), "Pasajeros · SENTRI");
   assert.match(await page.locator("#cbpLaneCard").innerText(), /Estimaciones de carril de CBP/i);
   assert.match(await page.locator("#roadwayContextCard").innerText(), /Contexto vial/i);
   await page.locator("#languageToggle").click();
@@ -174,6 +274,9 @@ try {
   const mobilePage = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await mobilePage.goto(appUrl);
   assert.equal(await mobilePage.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
+  const cbpCardBox = await mobilePage.locator("#cbpLaneCard").boundingBox();
+  const cbpSelectBox = await mobilePage.locator("#cbpLaneSelect").boundingBox();
+  assert.ok(cbpCardBox && cbpSelectBox && cbpSelectBox.x >= cbpCardBox.x && cbpSelectBox.x + cbpSelectBox.width <= cbpCardBox.x + cbpCardBox.width, "CBP lane selector should fit its mobile card");
   await mobilePage.locator("#startCrossingButton").click();
   const dialogBox = await mobilePage.locator("#consentDialog").boundingBox();
   assert.ok(dialogBox && dialogBox.height <= 844, "consent dialog should fit a mobile viewport");

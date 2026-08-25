@@ -261,11 +261,21 @@
               </div>
               <span class="cbp-state" id="cbpState" data-i18n="cbpNotChecked">Not checked</span>
             </div>
+            <div class="cbp-lane-control">
+              <label for="cbpLaneSelect" data-i18n="cbpLaneLabel">CBP lane</label>
+              <select id="cbpLaneSelect">
+                <option value="pedestrianStandard" data-i18n="cbpPedestrianStandard">Pedestrian · standard</option>
+                <option value="passengerStandard" data-i18n="cbpPassengerStandard">Passenger · standard</option>
+                <option value="passengerReady" data-i18n="cbpPassengerReady">Passenger · Ready Lane</option>
+                <option value="passengerSentri" data-i18n="cbpPassengerSentri">Passenger · SENTRI</option>
+              </select>
+            </div>
             <div class="cbp-lane-body">
-              <div class="cbp-lane-readout" aria-labelledby="cbp-lane-value-label">
+              <div class="cbp-lane-readout" role="status" aria-live="polite" aria-atomic="true" aria-labelledby="cbp-lane-value-label">
                 <span class="metric-label" id="cbp-lane-value-label" data-i18n="cbpPortLabel">Port and lane</span>
-                <strong id="cbpLaneMinutes" aria-live="polite" data-i18n="cbpNoValue">No current lane estimate</strong>
+                <strong id="cbpLaneMinutes" data-i18n="cbpNoValue">No current lane estimate</strong>
                 <span id="cbpLaneName">San Ysidro · Pedestrian · standard</span>
+                <span class="cbp-lane-detail"><span id="cbpOperatingStatus" data-i18n="cbpOperatingUnknown">Operating state unavailable</span><span aria-hidden="true">·</span><span id="cbpLanesOpen" data-i18n="cbpLanesUnknown">Lanes open unavailable</span></span>
               </div>
               <div class="cbp-lane-source">
                 <span class="metric-label" data-i18n="cbpSourceLabel">Source</span>

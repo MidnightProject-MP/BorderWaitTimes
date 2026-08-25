@@ -73,6 +73,7 @@ a {
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
+select:focus-visible,
 dialog:focus-visible {
   outline: 3px solid var(--cyan);
   outline-offset: 4px;
@@ -824,6 +825,35 @@ main {
   font-size: 0.59rem;
 }
 
+.cbp-lane-control {
+  display: grid;
+  grid-template-columns: auto minmax(190px, 280px);
+  align-items: center;
+  justify-content: end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.cbp-lane-control label {
+  color: #6d645e;
+  font-family: var(--mono);
+  font-size: 0.59rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cbp-lane-control select {
+  width: 100%;
+  padding: 9px 32px 9px 11px;
+  border: 1px solid rgba(31, 95, 104, 0.28);
+  border-radius: 7px;
+  background: #f4efe7;
+  color: var(--ink-paper);
+  font: 700 0.68rem var(--mono);
+}
+
+.cbp-lane-control select:disabled { cursor: not-allowed; opacity: 0.62; }
+
 .cbp-state {
   padding: 6px 8px;
   border: 1px solid rgba(31, 95, 104, 0.28);
@@ -864,6 +894,12 @@ main {
   color: #6d645e;
   font-family: var(--mono);
   font-size: 0.56rem;
+}
+
+.cbp-lane-detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
 .cbp-lane-source strong {
@@ -2431,6 +2467,11 @@ main {
 
   .cbp-lane-body {
     grid-template-columns: 1fr;
+  }
+
+  .cbp-lane-control {
+    grid-template-columns: 1fr;
+    justify-content: stretch;
   }
 
   .cbp-lane-footer {

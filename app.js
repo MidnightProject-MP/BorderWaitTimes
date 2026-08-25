@@ -159,6 +159,14 @@
       ,cbpPedestrianStandard: "Pedestrian · standard"
       ,cbpNorthboundScope: "CBP feed covers northbound entry to the United States."
       ,cbpNorthboundButton: "Northbound only"
+      ,cbpLaneLabel: "CBP lane"
+      ,cbpClosed: "Closed · no lane estimate"
+      ,cbpOperatingDelay: "Delay reported"
+      ,cbpOperatingNoDelay: "No delay reported"
+      ,cbpOperatingClosed: "Closed"
+      ,cbpOperatingUnknown: "Operating state unavailable"
+      ,cbpLanesOpen: "{lanes} lanes open"
+      ,cbpLanesUnknown: "Lanes open unavailable"
     },
     es: {
       skipLink: "Saltar al contenido",
@@ -317,6 +325,14 @@
       ,cbpPedestrianStandard: "Peatones · estándar"
       ,cbpNorthboundScope: "La fuente de CBP cubre la entrada hacia el norte a Estados Unidos."
       ,cbpNorthboundButton: "Solo hacia el norte"
+      ,cbpLaneLabel: "Carril de CBP"
+      ,cbpClosed: "Cerrado · sin estimación de carril"
+      ,cbpOperatingDelay: "Demora reportada"
+      ,cbpOperatingNoDelay: "Sin demora reportada"
+      ,cbpOperatingClosed: "Cerrado"
+      ,cbpOperatingUnknown: "Estado operativo no disponible"
+      ,cbpLanesOpen: "{lanes} carriles abiertos"
+      ,cbpLanesUnknown: "Carriles abiertos no disponibles"
     }
   };
 
@@ -520,10 +536,13 @@
      ,cbpTimestamp: document.getElementById("cbpTimestamp")
      ,cbpFreshness: document.getElementById("cbpFreshness")
      ,cbpCheckButton: document.getElementById("cbpCheckButton")
+     ,cbpLaneSelect: document.getElementById("cbpLaneSelect")
+     ,cbpOperatingStatus: document.getElementById("cbpOperatingStatus")
+     ,cbpLanesOpen: document.getElementById("cbpLanesOpen")
    };
 
   const roadwayState = { result: null, loading: false };
-  const cbpState = { result: null, loading: false };
+  const cbpState = { result: null, loading: false, maxAgeMs: null, selectedLane: "pedestrianStandard", expiryTimer: null };
 
   function text(key, replacements) {
     let value = translations[state.language][key] || key;
@@ -629,17 +648,27 @@
   }
 
   function cbpLaneSelection() {
-    return selectedCrossing().modeKey === "pedestrian"
-      ? { key: "pedestrianStandard", label: "cbpPedestrianStandard" }
-      : { key: "passengerStandard", label: "cbpPassengerStandard" };
+    const labels = {
+      pedestrianStandard: "cbpPedestrianStandard",
+      passengerStandard: "cbpPassengerStandard",
+      passengerReady: "cbpPassengerReady",
+      passengerSentri: "cbpPassengerSentri"
+    };
+    return { key: cbpState.selectedLane, label: labels[cbpState.selectedLane] };
   }
 
   function renderCbpLaneEstimate() {
+    if (cbpState.expiryTimer) {
+      clearTimeout(cbpState.expiryTimer);
+      cbpState.expiryTimer = null;
+    }
     const selection = cbpLaneSelection();
     const crossing = selectedCrossing();
     elements.cbpLaneName.textContent = crossing.name + " · " + text(selection.label);
+    elements.cbpLaneSelect.value = selection.key;
     elements.cbpLaneCard.classList.remove("is-stale", "is-unavailable", "is-pending");
     elements.cbpCheckButton.disabled = state.direction !== "north" || cbpState.loading;
+    elements.cbpLaneSelect.disabled = state.direction !== "north" || cbpState.loading;
     elements.cbpCheckButton.textContent = cbpState.loading
       ? text("cbpChecking")
       : state.direction === "north" ? text("checkCbp") : text("cbpNorthboundButton");
@@ -649,7 +678,20 @@
       elements.cbpLaneMinutes.textContent = text("cbpNoValue");
       elements.cbpTimestamp.textContent = text("cbpNotChecked");
       elements.cbpFreshness.textContent = text("cbpNorthboundScope");
+      elements.cbpOperatingStatus.textContent = text("cbpOperatingUnknown");
+      elements.cbpLanesOpen.textContent = text("cbpLanesUnknown");
       elements.cbpLaneCard.classList.add("is-unavailable");
+      return;
+    }
+
+    if (cbpState.loading) {
+      elements.cbpState.textContent = text("cbpChecking");
+      elements.cbpLaneMinutes.textContent = text("cbpNoValue");
+      elements.cbpTimestamp.textContent = text("cbpNotChecked");
+      elements.cbpFreshness.textContent = text("cbpChecking");
+      elements.cbpOperatingStatus.textContent = text("cbpOperatingUnknown");
+      elements.cbpLanesOpen.textContent = text("cbpLanesUnknown");
+      elements.cbpLaneCard.classList.add("is-pending");
       return;
     }
 
@@ -658,22 +700,43 @@
       elements.cbpLaneMinutes.textContent = text("cbpNoValue");
       elements.cbpTimestamp.textContent = text("cbpNotChecked");
       elements.cbpFreshness.textContent = text("cbpFreshnessPending");
+      elements.cbpOperatingStatus.textContent = text("cbpOperatingUnknown");
+      elements.cbpLanesOpen.textContent = text("cbpLanesUnknown");
       return;
     }
 
     const port = cbpState.result.ports.find(function (item) { return item.crossing === crossing.id; });
     const lane = port && port.lanes[selection.key];
     const status = lane?.status;
+    const age = Date.now() - lane?.sourceEpoch;
+    const freshNow = status === "fresh" && Number.isFinite(age) && age >= 0 && age <= cbpState.maxAgeMs;
     const pending = lane?.operationalStatus === "Update Pending";
-    const stateKey = status === "fresh" && Number.isFinite(lane.delayMinutes)
-      ? "cbpFresh"
-      : status === "stale"
+    const portOpen = port?.portStatus?.toLowerCase() === "open";
+    const closed = port?.portStatus?.toLowerCase() === "closed" || ["closed", "lanes closed"].includes(lane?.operationalStatus?.toLowerCase());
+    const usable = ["delay", "no delay"].includes(lane?.operationalStatus?.toLowerCase());
+    const stateKey = status === "stale" || status === "fresh" && !freshNow
         ? "cbpStale"
-        : pending
+        : status !== "fresh" && pending
           ? "cbpPending"
-          : "cbpUnavailable";
+          : status !== "fresh"
+            ? "cbpUnavailable"
+            : closed
+              ? "cbpClosed"
+              : portOpen && usable && Number.isFinite(lane.delayMinutes)
+                ? "cbpFresh"
+                : "cbpUnavailable";
     elements.cbpState.textContent = text(stateKey);
     elements.cbpLaneMinutes.textContent = stateKey === "cbpFresh" ? text("roadwayMinutes", { minutes: lane.delayMinutes }) : text("cbpNoValue");
+    elements.cbpOperatingStatus.textContent = stateKey === "cbpClosed"
+      ? text("cbpOperatingClosed")
+      : stateKey === "cbpFresh" && lane.operationalStatus.toLowerCase() === "delay"
+        ? text("cbpOperatingDelay")
+        : stateKey === "cbpFresh"
+          ? text("cbpOperatingNoDelay")
+          : text("cbpOperatingUnknown");
+    elements.cbpLanesOpen.textContent = stateKey === "cbpFresh" && Number.isFinite(lane.lanesOpen)
+      ? text("cbpLanesOpen", { lanes: lane.lanesOpen })
+      : text("cbpLanesUnknown");
     elements.cbpTimestamp.textContent = lane?.updateTime && cbpState.result.feedDate
       ? cbpState.result.feedDate + " · " + lane.updateTime
       : text("cbpNotChecked");
@@ -686,7 +749,11 @@
           : text("cbpUnavailableDetail");
     elements.cbpLaneCard.classList.toggle("is-stale", stateKey === "cbpStale");
     elements.cbpLaneCard.classList.toggle("is-pending", stateKey === "cbpPending");
-    elements.cbpLaneCard.classList.toggle("is-unavailable", stateKey === "cbpUnavailable");
+    elements.cbpLaneCard.classList.toggle("is-unavailable", stateKey === "cbpUnavailable" || stateKey === "cbpClosed");
+    if (stateKey === "cbpFresh" || stateKey === "cbpClosed") {
+      const expiryDelay = lane.sourceEpoch + cbpState.maxAgeMs - Date.now() + 1;
+      cbpState.expiryTimer = setTimeout(renderCbpLaneEstimate, expiryDelay);
+    }
   }
 
   async function checkCbpLanes() {
@@ -698,6 +765,7 @@
     try {
       const adapter = await import("./cbp-adapter.mjs");
       cbpState.result = await adapter.loadCbpWaitTimes();
+      cbpState.maxAgeMs = adapter.DEFAULT_MAX_AGE_MS;
     } catch {
       cbpState.result = { status: "unknown", ports: [] };
     } finally {
@@ -1019,6 +1087,10 @@
   });
   elements.roadwayCheckButton.addEventListener("click", checkRoadwayContext);
   elements.cbpCheckButton.addEventListener("click", checkCbpLanes);
+  elements.cbpLaneSelect.addEventListener("change", function () {
+    cbpState.selectedLane = elements.cbpLaneSelect.value;
+    renderCbpLaneEstimate();
+  });
 
   applyTranslations();
 })();

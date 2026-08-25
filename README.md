@@ -14,9 +14,9 @@ The longer arc is deliberately different from a dashboard full of charts:
 
 The free experience should remain useful without premium features, advertising, or location permission. Premium field mode is a future product direction, not a claim that this prototype currently collects location or connects to live agency feeds.
 
-## Current Story
+## Delivered Experience
 
-**As a traveler, I can compare illustrative crossing conditions, choose a recommended port, and start an explicit privacy-preserving crossing session.**
+Celestan combines an illustrative decision prototype with explicitly requested official roadway and CBP lane context.
 
 The current static prototype includes:
 
@@ -28,13 +28,16 @@ The current static prototype includes:
 - Border notes and a lightweight reminder interaction
 - A premium live-mode consent dialog with opt-in, anonymous, transactional, and auto-stop language
 - A simulated live estimate that never requests browser location
+- User-triggered Caltrans roadway approach context with source freshness
+- User-triggered CBP lane estimates with Standard, Ready, SENTRI, and pedestrian selection
+- Explicit operating state and lanes-open metadata when the selected CBP lane is fresh and usable
 - Responsive layouts, keyboard focus states, a skip link, reduced-motion support, and local-only assets
 
-All values in the current UI are illustrative prototype data. They are not live CBP, Caltrans, ANAM, or municipal feeds and must not be used as travel advice.
+Total crossing waits, recommendations, confidence, history, and premium estimates remain illustrative. The separate Caltrans and CBP surfaces request official feeds only after a traveler explicitly checks them; those values retain source-specific meaning and must not be interpreted as total crossing time.
 
 ## Run Locally
 
-The prototype is a static site and can be opened directly through `index.html`. For browser inspection and consistent local serving, use:
+The prototype uses static files, but its official-feed adapters are ES modules and should be served over HTTP. For browser inspection and consistent local serving, use:
 
 ```bash
 npm install
@@ -61,7 +64,9 @@ npm run check:browser
 - `caltrans-adapter-check.mjs` verifies freshness, malformed input, missing segments, and unavailable sources.
 - `cbp-adapter-check.mjs` verifies freshness, pending lanes, malformed input, target-port selection, and unavailable sources.
 - The CBP presentation surface is northbound-only and explicitly labels lane estimates as separate from total crossing time.
+- The superseded BorderWaitTimes implementation was assessed and removed; its useful lane-selection concept was reimplemented against Celestan's verified adapter rather than preserving unsafe legacy parsing.
 - `SOURCES.md` records confirmed official feed boundaries, stale-data evidence, and the next adapter contract.
+- `LEGACY-ASSESSMENT.md` records which BorderWaitTimes ideas were adopted, deferred, or rejected before the old runtime tree was removed.
 - `STATE.md` records durable project, epic, story, verification, and delivery state.
 - `PLAN.md` is the temporary execution plan for the current work cycle.
 
@@ -71,4 +76,4 @@ The product should request location only at the point a traveler starts a crossi
 
 ## Next Evidence
 
-The next justified product work is human observation of the CBP presentation surface before selecting another product Story. The CBP adapter preserves lane classes and timestamps, and the UI does not claim that a lane estimate equals total border-processing wait. Rendered browser checks establish interaction integrity; they do not establish visual quality or real-world usefulness without human observation.
+The next justified product work is human observation of the reconciled CBP lane selector before selecting another product Story. The adapter preserves lane classes and timestamps, and the UI does not claim that a lane estimate equals total border-processing wait. Rendered browser checks establish interaction integrity; they do not establish visual quality or real-world usefulness without human observation.
