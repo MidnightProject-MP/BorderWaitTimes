@@ -56,6 +56,7 @@ npm run check:browser
 - `styles.css` contains the visual system and responsive behavior; there are no external font, image, or CSS dependencies.
 - `app.js` owns the local prototype state: direction, language, selected crossing, recommendation, consent, and simulated live mode.
 - `browser-check.mjs` provides a small rendered smoke test for the product's critical path.
+- `SOURCES.md` records confirmed official feed boundaries, stale-data evidence, and the next adapter contract.
 - `STATE.md` records durable project, epic, story, verification, and delivery state.
 - `PLAN.md` is the temporary execution plan for the current work cycle.
 
@@ -65,4 +66,4 @@ The product should request location only at the point a traveler starts a crossi
 
 ## Next Evidence
 
-The next justified product work is not more UI breadth. It is evidence: validate source availability and freshness, compare official estimates with observed crossings, and test whether travelers understand the recommendation and privacy contract under real crossing-time pressure. Rendered browser checks establish interaction integrity; they do not establish visual quality or real-world usefulness without human observation.
+The next justified product work is not more UI breadth. It is a fail-closed Caltrans D11 adapter for roadway context, followed by CBP endpoint verification before any customs estimate is shown as live. The adapter must preserve source timestamps and keep roadway travel time separate from border-processing wait. Rendered browser checks establish interaction integrity; they do not establish visual quality or real-world usefulness without human observation.

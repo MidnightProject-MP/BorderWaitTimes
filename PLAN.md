@@ -1,9 +1,11 @@
 # Temporary Execution Plan
 
-Status: completed and pushed to `MidnightProject-MP/BorderWaitTimes` on `main`.
+Status: active
 
-1. Reconcile the README and durable state with the current Celestan prototype and product mandate.
-2. Add a reproducible local browser inspection command using Playwright Chromium.
-3. Exercise direction switching, crossing selection, language switching, consent, live mode, and stop behavior in the browser.
-4. Fix concrete failures found by static or rendered verification without undoing concurrent product work.
-5. Configure the `MidnightProject-MP/BorderWaitTimes` remote, commit the completed work, and push it.
+Story: As a maintainer, I can distinguish confirmed official roadway feeds from unverified customs estimates and know when roadway data is stale before integrating it into Celestan.
+
+1. Record the source inventory and the exact confirmed Caltrans feed boundaries.
+2. Preserve the distinction between roadway approach context and border-processing wait time.
+3. Record stale-data behavior and the CBP endpoint verification prerequisite.
+4. Verify the documented endpoints and update durable Project/Epic/Story state.
+5. Commit and push the evidence boundary for the next implementation slice.
