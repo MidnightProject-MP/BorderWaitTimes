@@ -12,7 +12,7 @@ Why now: Traveler feedback establishes that the current experience feels like a 
 2. Put direction, recommendation, compact crossing comparison, and the dominant crossing action first on mobile. Complete.
 3. Progressively disclose roadway, CBP lane, history, and notes without implying they power illustrative totals. Complete.
 4. Verify the primary journey inside a 390 x 844 viewport, plus bilingual, desktop, source, and consent behavior. Complete.
-5. Update durable state, commit, push, and inspect the rendered result. In progress; implementation committed in `0e0602b`.
+5. Update durable state, commit, push, and inspect the rendered result. Complete.
 
 Constraints:
 
@@ -24,4 +24,4 @@ Constraints:
 
 Verification: the rendered 390 x 844 experience keeps direction, recommendation, freshness, route/mode, comparison, all crossing choices, and the crossing-session action in the first viewport in English and Spanish. `npm run check:browser`, all adapter checks, JavaScript syntax checks, and `git diff --check` pass.
 
-Next step: Commit, push, and deliver the corrected primary experience for traveler observation.
+Next step: Observe whether travelers can make the crossing decision from the first viewport without opening secondary evidence.
