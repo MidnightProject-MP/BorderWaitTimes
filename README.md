@@ -57,7 +57,9 @@ npm run check:browser
 - `app.js` owns the local prototype state: direction, language, selected crossing, recommendation, consent, and simulated live mode.
 - `browser-check.mjs` provides a small rendered smoke test for the product's critical path.
 - `caltrans-adapter.mjs` normalizes confirmed Caltrans roadway feeds without conflating them with customs wait time.
+- `cbp-adapter.mjs` normalizes the officially linked CBP XML lane estimates without changing the illustrative UI.
 - `caltrans-adapter-check.mjs` verifies freshness, malformed input, missing segments, and unavailable sources.
+- `cbp-adapter-check.mjs` verifies freshness, pending lanes, malformed input, target-port selection, and unavailable sources.
 - `SOURCES.md` records confirmed official feed boundaries, stale-data evidence, and the next adapter contract.
 - `STATE.md` records durable project, epic, story, verification, and delivery state.
 - `PLAN.md` is the temporary execution plan for the current work cycle.
@@ -68,4 +70,4 @@ The product should request location only at the point a traveler starts a crossi
 
 ## Next Evidence
 
-The next justified product work is a separate roadway-context presentation surface for the adapter output, followed by CBP endpoint verification before any customs estimate is shown as live. The adapter preserves source timestamps and keeps roadway travel time separate from border-processing wait. Rendered browser checks establish interaction integrity; they do not establish visual quality or real-world usefulness without human observation.
+The next justified product work is to define a separate presentation contract for CBP lane estimates before any customs estimate is shown as live. The CBP adapter preserves lane classes and timestamps but does not claim that a lane estimate equals total border-processing wait. Rendered browser checks establish interaction integrity; they do not establish visual quality or real-world usefulness without human observation.

@@ -1,6 +1,6 @@
 # Temporary Execution Plan
 
-Status: completed; roadway presentation is implemented and verified locally.
+Status: completed; CBP XML source verification and a fail-closed read-only adapter are delivered without changing the traveler UI.
 
 Completed Story: As a maintainer, I can distinguish confirmed official roadway feeds from unverified customs estimates and know when roadway data is stale before integrating it into Celestan.
 
@@ -15,4 +15,13 @@ Completed Story: As a traveler, I can see roadway approach context separately fr
 
 Verification: `node --check app.js`, `node --check browser-check.mjs`, `npm run check:adapter`, `npm run check:browser`, and `git diff --check` pass. Browser coverage includes explicit request timing, official Caltrans fixtures, fresh/stale/unavailable rendering, bilingual switching, customs-value separation, consent flow, and mobile layout.
 
-Next step: Reconstruct the roadmap from `README.md`, `STATE.md`, and repository history before selecting the next justified Story.
+Completed Story: As a maintainer, I can normalize the officially linked CBP Border Wait Times XML feed fail-closed, without changing the illustrative traveler UI.
+
+1. Record current CBP evidence, feed URL, schema boundary, and timestamp limitations. Complete.
+2. Implement a read-only XML adapter for the San Diego Mexico ports and selected lane classes. Complete.
+3. Verify fresh, stale, malformed, missing-port, unavailable, and semantically ambiguous responses. Complete.
+4. Update durable Project/Epic/Story state, commit, and push. Pending.
+
+Verification: `npm run check:cbp`, `npm run check:adapter`, `node --check cbp-adapter.mjs`, `node --check app.js`, `npm run check:browser`, and `git diff --check` pass.
+
+Next step: Define a separate presentation contract for CBP lane estimates; do not replace illustrative customs estimates until that contract distinguishes lane estimates from total crossing wait.

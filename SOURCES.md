@@ -12,14 +12,14 @@ Evidence gathered for the Celestan Phase 1 baseline on 2026-08-24. This file rec
 
 Caltrans describes these feeds as free HTTPS JSON/CSV/XML services with frequent updates. Every adapter must validate the record timestamp itself. A sample travel-time response returned records from 2022, so an old payload must become `stale` or `unknown`, never a fresh-looking estimate.
 
-## Official But Unverified For Ingestion
+## Confirmed For Read-Only Ingestion
 
 | Source | URL | Current conclusion |
 | --- | --- | --- |
-| CBP Border Wait Times | `https://bwt.cbp.gov/` | Official public application for northbound passenger, commercial, and pedestrian estimates with lane/program distinctions. The machine-readable endpoint was not independently confirmed in this environment. |
+| CBP Border Wait Times XML | `https://bwt.cbp.gov/xml/bwt.xml` | Officially linked XML feed for northbound passenger, commercial, and pedestrian lane estimates. Global date/time and lane update times are supplied; lane update times include timezone abbreviations. |
 | CBP advisories and wait times | `https://www.cbp.gov/travel/advisories-wait-times` | Official provenance page. Useful as a source link, not an ingestion contract. |
 
-CBP wait-time data must not be represented as live in Celestan until a permitted endpoint, response shape, timestamp semantics, and failure behavior are verified. No commonly cited JSON or RSS URL is treated as confirmed by this inventory.
+CBP's official help page links the mobile/RSS guide at `https://www.cbp.gov/document/forms/border-wait-times-mobile-and-rss-feed-help`, which identifies machine-readable Border Wait Times feeds. The XML feed was fetched successfully on 2026-08-25 and its response shape, target port records, lane fields, timezone-bearing update strings, and unavailable behavior were verified locally. The adapter uses only the XML feed; undocumented JSON endpoints remain unconfirmed.
 
 ## Not Found
 
@@ -28,18 +28,20 @@ CBP wait-time data must not be represented as live in Celestan until a permitted
 - No official municipal Tijuana crossing-condition feed was found.
 - Caltrans provides U.S.-side roadway context, not Mexico-to-U.S. customs processing time.
 
-## Next Adapter Boundary
+## CBP Adapter Boundary
 
-The smallest safe implementation slice is a read-only Caltrans adapter that:
+The smallest safe implementation slice is a read-only CBP adapter that:
 
-1. Fetches the D11 travel-time and lane-closure feeds.
-2. Selects the I-5 `BORDER` travel-time segment and San Ysidro-area closures.
-3. Carries source timestamps and calculates `fresh`, `stale`, or `unknown`.
-4. Exposes roadway context separately from the public border-processing estimate.
+1. Fetches the officially linked XML feed.
+2. Selects the San Ysidro `250401`, Otay Mesa passenger `250601`, and Tecate `250501` records.
+3. Carries lane-level timezone-bearing update strings and calculates `fresh`, `stale`, or `unknown`.
+4. Keeps standard, SENTRI, Ready, and pedestrian lanes distinct.
 5. Fails closed when the feed is old, malformed, unavailable, or semantically ambiguous.
 
 ## Adapter Status
 
 `caltrans-adapter.mjs` now implements this boundary with independent source failure, timeout, timestamp validation, and `fresh`/`stale`/`unknown` states. `caltrans-adapter-check.mjs` verifies fresh, stale, malformed, missing-segment, and unavailable cases.
 
-The adapter is deliberately not wired into the traveler-facing UI yet. The UI remains explicitly illustrative until roadway context has a separate presentation surface and can never be mistaken for a customs wait estimate.
+`cbp-adapter.mjs` implements the read-only XML boundary with target-port selection, lane-level timestamp parsing, and fail-closed freshness. `cbp-adapter-check.mjs` verifies fresh, stale, pending, malformed, missing-target, and unavailable cases.
+
+Neither adapter changes the traveler-facing customs estimates. The UI remains explicitly illustrative until a separate product story establishes how official customs data can be presented without confusing lane estimates with total crossing time.
