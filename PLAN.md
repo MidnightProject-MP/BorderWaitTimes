@@ -22,8 +22,9 @@ Completed Story: As a maintainer, I can query descriptive timing context by port
 Completed Story: As a maintainer, I can select synthetic or official timing history explicitly without silently mixing sources or falling back across them.
 Completed Story: As a maintainer, I can measure official history cadence, gaps, freshness, and subject coverage before migrating timing inputs.
 Completed Story: As a maintainer, I can record an independent official collection snapshot and reassess timing coverage without treating deduplicated polls as new history.
+Completed Story: As a maintainer, I can record another independently collected official snapshot and reassess whether any timing subject meets its declared coverage boundary.
 
-Why now: The latest collection produced fresh closure context but no new CBP history and a stale roadway travel-time observation. The archive and readiness report must preserve those independent outcomes without overstating coverage.
+Why now: The latest collection produced fresh closure context but no new CBP history and a stale roadway travel-time observation. Another scheduled snapshot is justified to measure whether source-observed coverage is accumulating without overstating deduplicated polls or roadway context.
 
 1. Report per-subject official summary and provenance. Complete.
 2. Measure source-time cadence and largest observed gaps. Complete.
