@@ -20,6 +20,6 @@ Constraints:
 - Optimize interventions for remaining decision flexibility.
 - Do not begin the next product build until evidence selects the journey state to deepen.
 
-Verification: `PRODUCT-VISION.md` records the Plan/Watch/Go/Commit/Cross/Learn model, current proof, future hypotheses, and evidence sequence without adding implementation scope. Existing browser, adapter, archive, syntax, and whitespace checks remain the implementation baseline.
+Verification: `PRODUCT-VISION.md` records the Plan/Watch/Go/Commit/Cross/Learn model, current proof, future hypotheses, and evidence sequence without adding implementation scope. `npm run verify:cbp-archive` passes with 87 rows across 2 partitions. Existing browser, adapter, archive, syntax, and whitespace checks remain the implementation baseline.
 
 Next step: Put the Plan wedge in front of frequent crossers and compare followed, changed, and already-decided responses before selecting another journey state.
