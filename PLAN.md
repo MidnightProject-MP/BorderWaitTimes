@@ -19,14 +19,15 @@ Completed Story: As a maintainer, I can distinguish source collection success fr
 Completed Story: As a maintainer, I can distinguish fresh, degraded, and unusable source quality from transport success in the collection result.
 Completed Story: As a maintainer, I can exercise the timing layer with clearly labeled synthetic history without mixing it into official source archives.
 Completed Story: As a maintainer, I can query descriptive timing context by port, lane, and time bucket with explicit coverage status.
+Completed Story: As a maintainer, I can select synthetic or official timing history explicitly without silently mixing sources or falling back across them.
 
-Why now: The synthetic timing fixture now provides realistic temporal shape, but no service exposes a reusable timing-context response. The next layer should return descriptive history, coverage, and ranking inputs without introducing forecast semantics.
+Why now: Synthetic timing context is now queryable, while official history remains sparse. The migration boundary must make the dataset choice explicit and refuse silent fallback or mixed-source timing results.
 
-1. Query a specific port/lane/time bucket from synthetic history. Complete.
-2. Return descriptive median/range and coverage metadata. Complete.
-3. Compare relevant ports without mixing domains or unsupported data. Complete.
-4. Fail closed or report insufficiency for invalid and under-covered queries. Complete.
-5. Update durable state, commit, push, and provide the testable build. Complete.
+1. Select synthetic or official observations through an explicit mode. Complete.
+2. Preserve dataset provenance in the timing response. Complete.
+3. Prevent mixed-source input and silent fallback. Complete.
+4. Report official insufficiency without substituting synthetic values. Complete.
+5. Update durable state, commit, push, and provide the testable build. In progress.
 
 Constraints:
 
@@ -48,8 +49,9 @@ Constraints:
 - Do not collapse mixed observations into a fresh source claim.
 - Keep synthetic fixtures in a separate archive and never include them in official history readers.
 - Label synthetic values as illustrative development data at the row and dataset level.
+- Never fall back from official timing data to synthetic timing data silently.
 - Arrival-by and departure-window design remain discovery hypotheses.
 
-Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract, source archive checks, unified history checks, summary/coverage checks, collection orchestration checks, live collection run, illustrative dataset checks, and timing-context checks pass legacy CBP mapping, canonical Caltrans mapping, deterministic ordering, domain separation, corruption rejection, null preservation, descriptive min/max/median, freshness counts, coverage windows, declared sample/day/span/value thresholds, invalid-input handling, all-success, partial-failure, total-failure, stale-source, synthetic provenance, synthetic coverage, time-bucket ranking, and under-covered query cases. Current official archives contain 101 CBP rows across 2 partitions and 3 Caltrans rows across 1 partition; the synthetic archive contains 1,008 explicitly illustrative rows across 28 partitions.
+Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract, source archive checks, unified history checks, summary/coverage checks, collection orchestration checks, live collection run, illustrative dataset checks, timing-context checks, and timing-data checks pass legacy CBP mapping, canonical Caltrans mapping, deterministic ordering, domain separation, corruption rejection, null preservation, descriptive min/max/median, freshness counts, coverage windows, declared sample/day/span/value thresholds, invalid-input handling, all-success, partial-failure, total-failure, stale-source, synthetic provenance, synthetic coverage, time-bucket ranking, under-covered query cases, explicit dataset provenance, mixed-source rejection, and no-fallback official insufficiency. Current official archives contain 101 CBP rows across 2 partitions and 3 Caltrans rows across 1 partition; the synthetic archive contains 1,008 explicitly illustrative rows across 28 partitions.
 
-Next step: Deliver the descriptive timing-context service, then advance to official-history migration when coverage supports it.
+Next step: Commit the explicit timing dataset gate, then advance official history only when coverage supports it.
