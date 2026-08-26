@@ -4,23 +4,23 @@ Project: Celestan border intelligence network
 
 Epic: Phase 1, become the best place to see the San Diego/Tijuana border
 
-Completed Story: As a maintainer, I can verify the committed CBP observation archive's integrity so accumulated history remains trustworthy over time.
+Active Story: As a product owner, I can explore materially different border-product framings before narrowing implementation around the current dashboard.
 
-Why now: Scheduled collection is operating independently and the archive now spans multiple UTC partitions. Existing checks validated collector logic against fixtures only; nothing guarded the committed dataset itself against schema drift, identity tampering, or partition errors.
+Why now: The current decision wedge is delivered and operational, but the product opportunity remains materially open. The next high-value work is strategic discovery, not another polish or data-panel Story.
 
-1. Export the shared observation identity function so verification cannot drift from collection. Complete.
-2. Add a deterministic verifier for the committed archive: schema, enums, timestamps, partition agreement, identity recomputation, and cross-partition uniqueness. Complete.
-3. Verify the verifier against valid and deliberately corrupted archives, and confirm it accepts the real archive. Complete.
-4. Gate scheduled collection on verification and record the boundary. Complete.
-5. Update durable state, commit, push, and verify the workflow. Complete.
+1. Inspect current product, source, archive, and privacy boundaries. Complete.
+2. Generate a small set of materially different product framings grounded in border-specific realities. Complete.
+3. State the strongest disconfirming risk and smallest evidence test for each framing. Complete.
+4. Record a working direction without converting hypotheses into a feature backlog. Complete.
+5. Update durable state and deliver the discovery artifact. In progress.
 
 Constraints:
 
-- Verification must read only the committed archive; it never mutates data.
-- A violation must fail visibly before collection appends new rows.
-- Do not change the observation schema, identity rules, or traveler-facing behavior.
-- Traveler observation of the simplified first viewport still gates further UX Stories.
+- Explore broadly; implement narrowly.
+- Treat each framing as a hypothesis, not a roadmap commitment.
+- Do not claim forecast quality from 36 observations across two partitions.
+- Do not change the traveler-facing product until an evidence test selects a direction.
 
-Verification: `npm run verify:cbp-archive` accepts the live committed archive (30 rows across 2 partitions). Fixture coverage confirms detection of tampered values, duplicate identities, invalid partitions, out-of-partition collection, observed-after-collected rows, unsupported enums, schema drift, and mismatched identity hashes. `npm run check:cbp`, `npm run check:cbp-archive`, `npm run check:adapter`, `npm run check:browser`, all JavaScript syntax checks, and `git diff --check` pass.
+Verification: `OPPORTUNITY.md` contains four competing framings, risks, and smallest evidence tests. `npm run verify:cbp-archive` accepts the live archive (36 rows across 2 partitions). Existing adapter, archive, browser, syntax, and whitespace checks remain the implementation baseline.
 
-Next step: Wait for traveler feedback on the simplified first-viewport decision journey; do not start another UX Story without evidence.
+Next step: Run the smallest evidence test for the current decision wedge with frequent crossers before selecting a larger product direction.

@@ -75,6 +75,7 @@ npm run check:browser
 - `LEGACY-ASSESSMENT.md` records which BorderWaitTimes ideas were adopted, deferred, or rejected before the old runtime tree was removed.
 - `STATE.md` records durable project, epic, story, verification, and delivery state.
 - `PLAN.md` is the temporary execution plan for the current work cycle.
+- `OPPORTUNITY.md` records competing product framings and evidence tests without turning discovery into a feature backlog.
 
 ## Privacy Boundary
 
@@ -82,4 +83,4 @@ The product should request location only at the point a traveler starts a crossi
 
 ## Next Evidence
 
-The next evidence required is traveler observation of the simplified first-viewport decision journey: whether direction, recommendation, alternatives, and the crossing-session action are understandable at a glance without opening secondary evidence. In parallel, the observation archive can accumulate without claiming that lane estimates equal total border-processing wait.
+The next evidence required is traveler observation of the simplified first-viewport decision journey: whether direction, recommendation, alternatives, and the crossing-session action are understandable at a glance without opening secondary evidence. That evidence should also test whether the current decision wedge changes behavior for frequent crossers before Celestan narrows around a larger product framing.
