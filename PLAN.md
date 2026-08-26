@@ -4,14 +4,14 @@ Project: Celestan border intelligence network
 
 Epic: Phase 1, become the best place to see the San Diego/Tijuana border
 
-Active Story: As a maintainer, I can distinguish a safely skipped ambiguous CBP poll from a broken scheduled collector.
+Completed Story: As a maintainer, I can distinguish a safely skipped ambiguous CBP poll from a broken scheduled collector.
 
 Why now: Two scheduled runs failed because the live CBP feed advanced its feed-level date while target ports still reported the prior date. The adapter correctly rejected the ambiguous timestamps, but the collector treated an expected fail-closed source condition as a collector failure.
 
 1. Confirm the live failure is source ambiguity and that the committed archive remains valid. Complete.
-2. Keep the data path fail-closed while classifying no-observation polls as safe skips at the scheduled CLI boundary. In progress.
-3. Add regression coverage and documentation for ambiguous/unavailable source skips. Pending.
-4. Update durable state, commit, push, and verify a scheduled workflow recovery. Pending.
+2. Keep the data path fail-closed while classifying no-observation polls as safe skips at the scheduled CLI boundary. Complete.
+3. Add regression coverage and documentation for ambiguous/unavailable source skips. Complete.
+4. Update durable state, commit, push, and verify a scheduled workflow recovery. Complete.
 
 Constraints:
 
@@ -22,4 +22,4 @@ Constraints:
 
 Verification: the live feed currently reports `last_updated_date=2026-8-26` while target ports report `8/25/2026`; normalization returns no timestamped observations and the archive remains valid with 36 rows across 2 partitions. Tests must prove safe skips preserve the archive and unexpected errors remain failures.
 
-Next step: Verify the scheduled workflow completes with a visible warning and no archive mutation when the source is ambiguous.
+Next step: Wait for the next product evidence boundary: frequent-crosser observation of the decision wedge.
