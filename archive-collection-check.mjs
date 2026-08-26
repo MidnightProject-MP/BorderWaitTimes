@@ -1,5 +1,10 @@
 import assert from 'node:assert/strict';
-import { collectArchives } from './archive-collector.mjs';
+import { classifySourceQuality, collectArchives } from './archive-collector.mjs';
+
+assert.equal(classifySourceQuality({ fresh: 2, stale: 0, unknown: 0 }), 'fresh');
+assert.equal(classifySourceQuality({ fresh: 1, stale: 1, unknown: 0 }), 'degraded');
+assert.equal(classifySourceQuality({ fresh: 0, stale: 2, unknown: 0 }), 'unusable');
+assert.equal(classifySourceQuality({ fresh: 0, stale: 0, unknown: 0 }), 'unusable');
 
 const calls = [];
 const successful = await collectArchives({
@@ -11,6 +16,8 @@ assert.equal(successful.ok, true);
 assert.deepEqual(Object.keys(successful.sources).sort(), ['caltrans', 'cbp']);
 assert.equal(successful.sources.cbp.result.added, 4);
 assert.equal(successful.sources.caltrans.result.freshness.stale, 1);
+assert.equal(successful.sources.cbp.quality, 'fresh');
+assert.equal(successful.sources.caltrans.quality, 'degraded');
 assert.equal(calls.length, 2);
 assert.ok(calls.every(([, options]) => options.now === 1000));
 

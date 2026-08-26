@@ -3,6 +3,15 @@ import { resolve } from 'node:path';
 import { collectCbpArchive } from './cbp-archive-collector.mjs';
 import { collectCaltransArchive } from './caltrans-archive-collector.mjs';
 
+export function classifySourceQuality(freshness = {}) {
+  const fresh = Number(freshness.fresh) || 0;
+  const stale = Number(freshness.stale) || 0;
+  const unknown = Number(freshness.unknown) || 0;
+  if (fresh === 0) return 'unusable';
+  if (stale > 0 || unknown > 0) return 'degraded';
+  return 'fresh';
+}
+
 export async function collectArchives({
   now = Date.now(),
   cbpArchiveRoot,
@@ -16,7 +25,8 @@ export async function collectArchives({
   ];
   const settled = await Promise.all(jobs.map(async ([source, run]) => {
     try {
-      return [source, { status: 'collected', result: await run() }];
+      const result = await run();
+      return [source, { status: 'collected', quality: classifySourceQuality(result.freshness), result }];
     } catch (error) {
       return [source, { status: 'failed', error: { code: error.code || 'UNKNOWN', message: error.message } }];
     }
@@ -31,7 +41,7 @@ if (invokedPath === fileURLToPath(import.meta.url)) {
   for (const [source, result] of Object.entries(outcome.sources)) {
     if (result.status === 'collected') {
       const freshness = result.result.freshness || {};
-      console.log(`${source} collection complete: ${result.result.added} added from ${result.result.observed} observations (fresh ${freshness.fresh || 0}, stale ${freshness.stale || 0}, unknown ${freshness.unknown || 0})`);
+      console.log(`${source} collection complete: ${result.result.added} added from ${result.result.observed} observations (quality ${result.quality}; fresh ${freshness.fresh || 0}, stale ${freshness.stale || 0}, unknown ${freshness.unknown || 0})`);
     }
     else console.error(`${source} collection failed: ${result.error.code}: ${result.error.message}`);
   }
