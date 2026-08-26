@@ -3,6 +3,7 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { CBP_XML_URL, loadCbpWaitTimes } from './cbp-adapter.mjs';
+import { validateObservation } from './observation-contract.mjs';
 
 const SOURCE = 'cbp-border-wait-times-xml';
 const LANE_KEYS = ['passengerStandard', 'passengerSentri', 'passengerReady', 'pedestrianStandard'];
@@ -51,6 +52,22 @@ export function projectCbpObservations(result, { collectedAt }) {
       delayMinutes: lane.reportedDelayMinutes,
       lanesOpen: lane.reportedLanesOpen,
     };
+    const contractErrors = validateObservation({
+      schemaVersion: 1,
+      source: SOURCE,
+      sourceUrl: CBP_XML_URL,
+      observationType: 'border_lane_wait',
+      subject: `${port.crossing}:${laneKey}`,
+      direction: 'northbound',
+      lane: laneKey,
+      sourceObservedAt: observation.sourceObservedAt,
+      collectedAt: observation.collectedAt,
+      status: observation.collectedFreshness,
+      value: observation.delayMinutes,
+      unit: observation.delayMinutes === null ? null : 'minutes',
+      metadata: { portStatus: observation.portStatus, operationalStatus: observation.operationalStatus, lanesOpen: observation.lanesOpen },
+    });
+    if (contractErrors.length) throw new TypeError(`Invalid CBP observation: ${contractErrors.join(', ')}`);
     return [{ observationId: observationId(observation), ...observation }];
   }));
 }
