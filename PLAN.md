@@ -16,7 +16,7 @@ Why now: The source-specific adapters now preserve trustworthy CBP and Caltrans 
 2. Validate CBP archive rows through the shared contract without changing their public shape. Complete.
 3. Project Caltrans roadway travel-time and closure results through the same contract. Complete.
 4. Verify fail-closed handling for malformed, stale, unknown, and synthetic observations. Complete.
-5. Update durable state, commit, push, and provide the testable build. In progress.
+5. Update durable state, commit, push, and provide the testable build. Complete.
 
 Constraints:
 
@@ -34,4 +34,4 @@ Constraints:
 
 Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract passes CBP and Caltrans fixtures, including stale, unknown, malformed, timestamp, unit, and collection-time cases. `npm run verify:cbp-archive` passes with 89 rows across 2 partitions.
 
-Next step: Deliver the completed observation-contract Story, then select the next timing/data Story from the remaining source gaps.
+Next step: Select the next timing/data Story from the remaining source gaps.
