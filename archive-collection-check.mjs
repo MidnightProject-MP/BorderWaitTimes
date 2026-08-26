@@ -4,12 +4,13 @@ import { collectArchives } from './archive-collector.mjs';
 const calls = [];
 const successful = await collectArchives({
   now: 1000,
-  collectCbp: async (options) => { calls.push(['cbp', options]); return { added: 4, observed: 4 }; },
-  collectCaltrans: async (options) => { calls.push(['caltrans', options]); return { added: 2, observed: 2 }; },
+  collectCbp: async (options) => { calls.push(['cbp', options]); return { added: 4, observed: 4, freshness: { fresh: 4, stale: 0, unknown: 0 } }; },
+  collectCaltrans: async (options) => { calls.push(['caltrans', options]); return { added: 2, observed: 2, freshness: { fresh: 1, stale: 1, unknown: 0 } }; },
 });
 assert.equal(successful.ok, true);
 assert.deepEqual(Object.keys(successful.sources).sort(), ['caltrans', 'cbp']);
 assert.equal(successful.sources.cbp.result.added, 4);
+assert.equal(successful.sources.caltrans.result.freshness.stale, 1);
 assert.equal(calls.length, 2);
 assert.ok(calls.every(([, options]) => options.now === 1000));
 

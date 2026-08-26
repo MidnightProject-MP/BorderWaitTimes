@@ -9,6 +9,13 @@ const SOURCE = 'cbp-border-wait-times-xml';
 const LANE_KEYS = ['passengerStandard', 'passengerSentri', 'passengerReady', 'pedestrianStandard'];
 const DEFAULT_ARCHIVE_ROOT = fileURLToPath(new URL('./data/cbp', import.meta.url));
 
+function freshnessCounts(observations) {
+  return observations.reduce((counts, observation) => {
+    counts[observation.collectedFreshness] = (counts[observation.collectedFreshness] || 0) + 1;
+    return counts;
+  }, { fresh: 0, stale: 0, unknown: 0 });
+}
+
 export function observationId(observation) {
   const identity = {
     schemaVersion: observation.schemaVersion,
@@ -115,13 +122,14 @@ export async function collectCbpArchive({
     .sort((left, right) => left.sourceObservedAt.localeCompare(right.sourceObservedAt)
       || left.portNumber.localeCompare(right.portNumber)
       || left.lane.localeCompare(right.lane));
-  if (additions.length === 0) return { added: 0, observed: observations.length, partition: null };
+  const freshness = freshnessCounts(observations);
+  if (additions.length === 0) return { added: 0, observed: observations.length, freshness, partition: null };
 
   const partition = `${new Date(now).toISOString().slice(0, 10)}.ndjson`;
   const rows = [...(archive.partitions.get(partition) || []), ...additions];
   await mkdir(archiveRoot, { recursive: true });
   await writeFile(resolve(archiveRoot, partition), `${rows.map((row) => JSON.stringify(row)).join('\n')}\n`, 'utf8');
-  return { added: additions.length, observed: observations.length, partition };
+  return { added: additions.length, observed: observations.length, freshness, partition };
 }
 
 const invokedPath = process.argv[1] ? resolve(process.argv[1]) : null;

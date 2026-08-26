@@ -32,6 +32,7 @@ let rows;
 try {
   const first = await collectCbpArchive({ fetcher: response(fixture()), now, archiveRoot });
   assert.equal(first.added, 1);
+  assert.deepEqual(first.freshness, { fresh: 1, stale: 0, unknown: 0 });
   assert.equal(first.partition, '2026-08-25.ndjson');
 
   const repeated = await collectCbpArchive({ fetcher: response(fixture()), now: now + 60_000, archiveRoot });

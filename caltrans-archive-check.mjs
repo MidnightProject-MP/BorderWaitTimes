@@ -22,6 +22,7 @@ const archiveRoot = await mkdtemp(join(tmpdir(), 'celestan-caltrans-'));
 try {
   const first = await collectCaltransArchive({ fetcher: fetcher(fixture(), closureFixture()), now, archiveRoot });
   assert.equal(first.added, 2);
+  assert.deepEqual(first.freshness, { fresh: 2, stale: 0, unknown: 0 });
   assert.equal(first.partition, '2026-08-26.ndjson');
   const repeated = await collectCaltransArchive({ fetcher: fetcher(fixture(), closureFixture()), now: now + 60_000, archiveRoot });
   assert.equal(repeated.added, 0);

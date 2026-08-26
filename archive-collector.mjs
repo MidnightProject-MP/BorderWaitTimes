@@ -29,7 +29,10 @@ const invokedPath = process.argv[1] ? resolve(process.argv[1]) : null;
 if (invokedPath === fileURLToPath(import.meta.url)) {
   const outcome = await collectArchives();
   for (const [source, result] of Object.entries(outcome.sources)) {
-    if (result.status === 'collected') console.log(`${source} collection complete: ${result.result.added} added from ${result.result.observed} observations`);
+    if (result.status === 'collected') {
+      const freshness = result.result.freshness || {};
+      console.log(`${source} collection complete: ${result.result.added} added from ${result.result.observed} observations (fresh ${freshness.fresh || 0}, stale ${freshness.stale || 0}, unknown ${freshness.unknown || 0})`);
+    }
     else console.error(`${source} collection failed: ${result.error.code}: ${result.error.message}`);
   }
   if (!outcome.ok) process.exitCode = 1;

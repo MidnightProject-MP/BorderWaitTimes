@@ -15,14 +15,15 @@ Completed Story: As a maintainer, I can read validated CBP and Caltrans history 
 Completed Story: As a maintainer, I can summarize historical observations by source and subject without turning descriptive archive statistics into forecasts.
 Completed Story: As a maintainer, I can assess whether an observation summary meets declared descriptive coverage requirements without presenting sparse history as a forecast.
 Completed Story: As a maintainer, I can run both source collectors in one command and see independent collection outcomes without masking a partial source failure.
+Completed Story: As a maintainer, I can distinguish source collection success from observation freshness in one collection result.
 
-Why now: CBP and Caltrans now have independent validated collectors, but scheduled operation has no shared entry point or partial-health result. Collection orchestration should attempt both sources and preserve each outcome before timing analysis consumes history.
+Why now: The first live multi-source run succeeded technically, but Caltrans returned one stale 2022 travel-time observation alongside one fresh closure observation. Collection success alone must not be treated as current usable data.
 
-1. Attempt CBP and Caltrans collection independently. Complete.
-2. Return per-source added/observed/error outcomes. Complete.
-3. Preserve successful source results when the other source fails. Complete.
-4. Verify all-success, partial-failure, and total-failure behavior. Complete.
-5. Update durable state, commit, push, and provide the testable build. Complete.
+1. Return fresh, stale, and unknown observation counts per source. Complete.
+2. Preserve collection success separately from freshness quality. Complete.
+3. Surface freshness breakdown in the orchestration result and CLI. Complete.
+4. Verify live stale-source behavior plus all-success, partial-failure, and total-failure cases. Complete.
+5. Update durable state, commit, push, and provide the testable build. In progress.
 
 Constraints:
 
@@ -40,8 +41,9 @@ Constraints:
 - Treat summaries as descriptive archive statistics, not forecasts or guarantees.
 - Require explicit coverage thresholds before using a summary for a declared comparison.
 - Do not treat a partial collection run as a complete multi-source snapshot.
+- Do not treat transport success as freshness success.
 - Arrival-by and departure-window design remain discovery hypotheses.
 
-Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract, source archive checks, unified history checks, summary/coverage checks, and collection orchestration checks pass legacy CBP mapping, canonical Caltrans mapping, deterministic ordering, domain separation, corruption rejection, null preservation, descriptive min/max/median, freshness counts, coverage windows, declared sample/day/span/value thresholds, invalid-input handling, all-success, partial-failure, and total-failure cases. Caltrans archive verification detects tampering, duplicate IDs, invalid partitions, and invalid timestamps. `npm run verify:cbp-archive` passes with 99 rows across 2 partitions after the latest scheduled collection.
+Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract, source archive checks, unified history checks, summary/coverage checks, collection orchestration checks, and live collection run pass legacy CBP mapping, canonical Caltrans mapping, deterministic ordering, domain separation, corruption rejection, null preservation, descriptive min/max/median, freshness counts, coverage windows, declared sample/day/span/value thresholds, invalid-input handling, all-success, partial-failure, total-failure, and stale-source cases. Current archives contain 101 CBP rows across 2 partitions and 2 Caltrans rows across 1 partition.
 
-Next step: Select the next timing/data Story from remaining source gaps.
+Next step: Deliver freshness-aware collection health, then select the next timing/data Story from remaining source gaps.
