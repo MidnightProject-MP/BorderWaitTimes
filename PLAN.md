@@ -19,7 +19,7 @@ Why now: Caltrans observations can now be archived, but they lacked the integrit
 3. Fail closed when a poll produces no timestamped roadway observations. Complete.
 4. Verify archive rows against the shared contract without changing traveler-facing UI. Complete.
 5. Detect tampering, duplicate IDs, invalid partitions, and invalid timestamps. Complete.
-6. Update durable state, commit, push, and provide the testable build. In progress.
+6. Update durable state, commit, push, and provide the testable build. Complete.
 
 Constraints:
 
@@ -37,4 +37,4 @@ Constraints:
 
 Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract and Caltrans archive checks pass fresh, stale, unknown, malformed, corrected, repeated, timestamp, unit, and collection-time cases. Caltrans archive verification detects tampering, duplicate IDs, invalid partitions, and invalid timestamps. `npm run verify:cbp-archive` passes with 89 rows across 2 partitions.
 
-Next step: Deliver the completed Caltrans archive integrity Story, then select the next timing/data Story from remaining source gaps.
+Next step: Select the next timing/data Story from remaining source gaps.
