@@ -77,6 +77,7 @@ npm run check:browser
 - `STATE.md` records durable project, epic, story, verification, and delivery state.
 - `PLAN.md` is the temporary execution plan for the current work cycle.
 - `PRODUCT-VISION.md` records the Plan/Watch/Go/Commit/Cross/Learn journey model, current proof, future hypotheses, and evidence sequence.
+- `PLAN-EXPERIMENT.md` defines the next bounded Plan discovery experiment without presenting synthetic scenarios as live forecasts.
 - `OPPORTUNITY.md` records competing product framings and evidence tests without turning discovery into a feature backlog.
 
 ## Privacy Boundary
