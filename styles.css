@@ -443,6 +443,32 @@ main {
   margin-top: 32px;
 }
 
+.lane-control {
+  display: grid;
+  grid-template-columns: auto minmax(150px, 220px);
+  align-items: center;
+  gap: 7px 20px;
+  margin-top: 14px;
+  color: #8ca1b1;
+}
+
+.lane-control select {
+  padding: 9px 11px;
+  border: 1px solid rgba(139, 169, 184, 0.3);
+  border-radius: 5px;
+  background: rgba(6, 12, 21, 0.65);
+  color: var(--paper-bright);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+}
+
+.lane-control > span {
+  grid-column: 2;
+  color: #718695;
+  font-family: var(--mono);
+  font-size: 0.52rem;
+}
+
 .control-label {
   color: #8ca1b1;
   white-space: nowrap;
@@ -2563,6 +2589,16 @@ main {
     flex-direction: row;
     gap: 12px;
     margin-top: 0;
+  }
+
+  .lane-control {
+    grid-template-columns: auto 1fr;
+    gap: 6px 10px;
+    margin-top: 9px;
+  }
+
+  .lane-control select {
+    width: 100%;
   }
 
   .direction-switch {

@@ -14,7 +14,13 @@
       heroTitleOne: "Know before",
       heroTitleTwo: "you cross.",
       heroSummary: "One clear read on the border: what is moving, what changed, and the least-friction way through.",
-      directionLabel: "I am going",
+       directionLabel: "I am going",
+       planningLaneLabel: "My lane",
+       planningLaneHint: "Show choices for this lane",
+       laneGeneral: "General",
+       laneReady: "Ready Lane",
+       laneSentri: "SENTRI",
+       lanePedestrian: "Pedestrian",
       northbound: "Northbound",
       southbound: "Southbound",
       corridorPulse: "Corridor pulse",
@@ -190,7 +196,13 @@
       heroTitleOne: "Cruza con",
       heroTitleTwo: "claridad.",
       heroSummary: "Una lectura clara de la frontera: qué avanza, qué cambió y cuál es el camino con menos fricción.",
-      directionLabel: "Voy hacia",
+       directionLabel: "Voy hacia",
+       planningLaneLabel: "Mi carril",
+       planningLaneHint: "Mostrar opciones para este carril",
+       laneGeneral: "General",
+       laneReady: "Ready Lane",
+       laneSentri: "SENTRI",
+       lanePedestrian: "Peatonal",
       northbound: "Hacia el norte",
       southbound: "Hacia el sur",
       corridorPulse: "Pulso del corredor",
@@ -481,9 +493,33 @@
     }
   };
 
+  const planningLaneProfiles = {
+    north: {
+      passengerStandard: { "san-ysidro": 42, "otay-mesa": 29, tecate: 34 },
+      passengerReady: { "san-ysidro": 31, "otay-mesa": 24, tecate: 29 },
+      passengerSentri: { "san-ysidro": 12, "otay-mesa": 9, tecate: 16 },
+      pedestrianStandard: { "san-ysidro": 42, "otay-mesa": 35, tecate: 18 }
+    },
+    south: {
+      passengerStandard: { "san-ysidro": 31, "otay-mesa": 24, tecate: 11 },
+      passengerReady: { "san-ysidro": 25, "otay-mesa": 19, tecate: 10 },
+      passengerSentri: { "san-ysidro": 14, "otay-mesa": 11, tecate: 12 },
+      pedestrianStandard: { "san-ysidro": 36, "otay-mesa": 28, tecate: 15 }
+    }
+  };
+
+  function applyPlanningLane() {
+    const profile = planningLaneProfiles[state.direction][state.lane];
+    corridorData[state.direction].cards.forEach(function (card) {
+      card.wait = profile[card.id];
+      card.modeKey = state.lane === "pedestrianStandard" ? "pedestrian" : "vehicle";
+    });
+  }
+
   const state = {
     language: "en",
     direction: "north",
+    lane: "passengerStandard",
     selectedId: "san-ysidro",
     recommendationId: "otay-mesa",
     live: false,
@@ -520,6 +556,7 @@
     recommendationDelta: document.getElementById("recommendationDelta"),
     recommendationAction: document.getElementById("recommendationAction"),
      crossingCards: document.getElementById("crossingCards"),
+     planningLane: document.getElementById("planningLane"),
      researchPrompt: document.getElementById("researchPrompt"),
      researchStatus: document.getElementById("researchStatus"),
     historyDelta: document.getElementById("historyDelta"),
@@ -577,6 +614,16 @@
       });
     }
     return value;
+  }
+
+  function planningLaneText() {
+    const labels = {
+      passengerStandard: "laneGeneral",
+      passengerReady: "laneReady",
+      passengerSentri: "laneSentri",
+      pedestrianStandard: "lanePedestrian"
+    };
+    return text(labels[state.lane]);
   }
 
   function currentData() {
@@ -801,6 +848,7 @@
   }
 
   function renderCurrentData() {
+    applyPlanningLane();
     const data = currentData();
     const crossing = selectedCrossing();
     const recommendation = data.cards.find(function (card) {
@@ -821,7 +869,7 @@
     elements.freshnessText.textContent = text("updated", { minutes: crossing.updated });
     elements.mainWait.textContent = crossing.wait;
     elements.estimateCrossing.textContent = crossing.name;
-    elements.estimateRoute.textContent = text(crossing.modeKey) + " · " + crossing.place;
+    elements.estimateRoute.textContent = planningLaneText() + " · " + crossing.place;
     elements.estimateStatus.textContent = text(crossing.flowKey) + " " + text("flowSuffix");
     elements.meterFill.style.width = Math.min(94, Math.max(18, crossing.wait * 1.55)) + "%";
     elements.confidenceValue.textContent = confidenceLabel(crossing.confidence) + " · " + crossing.confidence + "%";
@@ -833,7 +881,7 @@
       return card.id === recommendation.id;
     }) + 1).padStart(2, "0") + " / 03";
     elements.recommendationTitle.textContent = recommendationIsSelected ? text("keepSelected", { crossing: crossing.name }) : text("takeCrossing", { crossing: recommendation.name });
-    elements.recommendationRoute.textContent = text(recommendation.modeKey) + " · " + recommendation.place;
+    elements.recommendationRoute.textContent = planningLaneText() + " · " + recommendation.place;
     elements.recommendationFreshness.textContent = text("updated", { minutes: recommendation.updated });
     elements.recommendationCopy.textContent = state.language === "es" ? recommendation.recommendationEs : recommendation.recommendation;
     elements.recommendationWait.innerHTML = recommendation.wait + "<span> " + text("minutes") + "</span>";
@@ -884,7 +932,7 @@
         '<span class="crossing-place">' + card.place + '</span>' +
         '<span class="crossing-metric"><strong>' + card.wait + '</strong><span>' + text("minutes") + '</span></span>' +
         '<span class="crossing-meter" aria-hidden="true"><span style="width:' + meterWidth + '%"></span></span>' +
-        '<span class="crossing-card-bottom"><span class="crossing-mode">' + modeIcon(card.modeKey) + '<span>' + text(card.modeKey) + '</span></span><span class="selected-check">✓ ' + text("selected") + '</span></span>' +
+        '<span class="crossing-card-bottom"><span class="crossing-mode">' + modeIcon(card.modeKey) + '<span>' + planningLaneText() + '</span></span><span class="selected-check">✓ ' + text("selected") + '</span></span>' +
         '</button>';
     }).join("");
 
@@ -964,6 +1012,7 @@
     }
     endLiveForContextChange();
     state.direction = direction;
+    applyPlanningLane();
     state.selectedId = corridorData[direction].primaryId;
     state.recommendationId = corridorData[direction].cards.reduce(function (best, card) {
       return card.wait < best.wait ? card : best;
@@ -1118,6 +1167,17 @@
     button.addEventListener("click", function () {
       setDirection(button.dataset.direction);
     });
+  });
+  elements.planningLane.addEventListener("change", function () {
+    endLiveForContextChange();
+    state.lane = elements.planningLane.value;
+    applyPlanningLane();
+    state.selectedId = corridorData[state.direction].primaryId;
+    state.recommendationId = corridorData[state.direction].cards.reduce(function (best, card) {
+      return card.wait < best.wait ? card : best;
+    }, corridorData[state.direction].cards[0]).id;
+    renderCurrentData();
+    renderLiveState();
   });
   elements.startCrossingButton.addEventListener("click", openConsent);
   elements.closeDialog.addEventListener("click", closeConsent);

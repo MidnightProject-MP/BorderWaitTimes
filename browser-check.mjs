@@ -296,6 +296,10 @@ try {
   assert.match(await mobilePage.locator("#recommendation-title").innerText(), /Take Otay Mesa/);
   assert.match(await mobilePage.locator("#recommendationDelta").innerText(), /faster than San Ysidro/);
   assert.equal(await mobilePage.locator("#crossingCards [data-crossing]").count(), 3);
+  await mobilePage.locator("#planningLane").selectOption("passengerSentri");
+  assert.match(await mobilePage.locator("#recommendationRoute").innerText(), /SENTRI/);
+  assert.equal(await mobilePage.locator("#recommendationWait").innerText(), "9 min");
+  await mobilePage.locator("#planningLane").selectOption("passengerStandard");
   assert.equal(await mobilePage.locator(".evidence-disclosure").getAttribute("open"), null);
   assert.equal(await mobilePage.locator("#researchPrompt").isVisible(), false);
   assert.equal(await mobilePage.locator(".pulse-panel").isVisible(), false);
