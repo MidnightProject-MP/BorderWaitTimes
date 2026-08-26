@@ -4,7 +4,7 @@ Project: Celestan border intelligence network
 
 Epic: Phase 1, become the best place to see the San Diego/Tijuana border
 
-Active Story: As a product owner, I can explore materially different border-product framings before narrowing implementation around the current dashboard.
+Completed Story: As a product owner, I can explore materially different border-product framings before narrowing implementation around the current dashboard.
 
 Why now: The current decision wedge is delivered and operational, but the product opportunity remains materially open. The next high-value work is strategic discovery, not another polish or data-panel Story.
 
@@ -12,7 +12,7 @@ Why now: The current decision wedge is delivered and operational, but the produc
 2. Generate a small set of materially different product framings grounded in border-specific realities. Complete.
 3. State the strongest disconfirming risk and smallest evidence test for each framing. Complete.
 4. Record a working direction without converting hypotheses into a feature backlog. Complete.
-5. Update durable state and deliver the discovery artifact. In progress.
+5. Update durable state and deliver the discovery artifact. Complete.
 
 Constraints:
 
