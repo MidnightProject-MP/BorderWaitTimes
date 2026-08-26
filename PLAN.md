@@ -4,23 +4,22 @@ Project: Celestan border intelligence network
 
 Epic: Phase 1, become the best place to see the San Diego/Tijuana border
 
-Completed Story: As a product owner, I can explore materially different border-product framings before narrowing implementation around the current dashboard.
+Active Story: As a maintainer, I can distinguish a safely skipped ambiguous CBP poll from a broken scheduled collector.
 
-Why now: The current decision wedge is delivered and operational, but the product opportunity remains materially open. The next high-value work is strategic discovery, not another polish or data-panel Story.
+Why now: Two scheduled runs failed because the live CBP feed advanced its feed-level date while target ports still reported the prior date. The adapter correctly rejected the ambiguous timestamps, but the collector treated an expected fail-closed source condition as a collector failure.
 
-1. Inspect current product, source, archive, and privacy boundaries. Complete.
-2. Generate a small set of materially different product framings grounded in border-specific realities. Complete.
-3. State the strongest disconfirming risk and smallest evidence test for each framing. Complete.
-4. Record a working direction without converting hypotheses into a feature backlog. Complete.
-5. Update durable state and deliver the discovery artifact. Complete.
+1. Confirm the live failure is source ambiguity and that the committed archive remains valid. Complete.
+2. Keep the data path fail-closed while classifying no-observation polls as safe skips at the scheduled CLI boundary. In progress.
+3. Add regression coverage and documentation for ambiguous/unavailable source skips. Pending.
+4. Update durable state, commit, push, and verify a scheduled workflow recovery. Pending.
 
 Constraints:
 
-- Explore broadly; implement narrowly.
-- Treat each framing as a hypothesis, not a roadmap commitment.
-- Do not claim forecast quality from 36 observations across two partitions.
-- Do not change the traveler-facing product until an evidence test selects a direction.
+- Never archive rows with unknown or semantically ambiguous timestamps.
+- A safe skip must not mutate the archive or look like a successful collection.
+- Unexpected program errors must still fail the workflow.
+- Do not change the traveler-facing product.
 
-Verification: `OPPORTUNITY.md` contains four competing framings, risks, and smallest evidence tests. `npm run verify:cbp-archive` accepts the live archive (36 rows across 2 partitions). Existing adapter, archive, browser, syntax, and whitespace checks remain the implementation baseline.
+Verification: the live feed currently reports `last_updated_date=2026-8-26` while target ports report `8/25/2026`; normalization returns no timestamped observations and the archive remains valid with 36 rows across 2 partitions. Tests must prove safe skips preserve the archive and unexpected errors remain failures.
 
-Next step: Run the smallest evidence test for the current decision wedge with frequent crossers before selecting a larger product direction.
+Next step: Verify the scheduled workflow completes with a visible warning and no archive mutation when the source is ambiguous.

@@ -51,7 +51,7 @@ try {
 
   await assert.rejects(
     collectCbpArchive({ fetcher: async () => ({ ok: false }), now, archiveRoot }),
-    /no timestamped observations/,
+    (error) => error.code === 'CBP_NO_OBSERVATIONS' && /no timestamped observations/.test(error.message),
   );
   assert.equal((await readFile(join(archiveRoot, '2026-08-25.ndjson'), 'utf8')).trim().split('\n').length, 3);
 } finally {

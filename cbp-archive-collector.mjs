@@ -86,7 +86,11 @@ export async function collectCbpArchive({
   if (!Number.isFinite(now)) throw new TypeError('now must be a finite epoch');
   const result = await loadCbpWaitTimes({ fetcher, now });
   const observations = projectCbpObservations(result, { collectedAt: new Date(now).toISOString() });
-  if (observations.length === 0) throw new Error(`CBP collection produced no timestamped observations (${result.reason || result.status})`);
+  if (observations.length === 0) {
+    const error = new Error(`CBP collection produced no timestamped observations (${result.reason || result.status})`);
+    error.code = 'CBP_NO_OBSERVATIONS';
+    throw error;
+  }
 
   const archive = await readArchive(archiveRoot);
   const additions = observations
@@ -109,7 +113,11 @@ if (invokedPath === fileURLToPath(import.meta.url)) {
     const outcome = await collectCbpArchive();
     console.log(`CBP archive collection complete: ${outcome.added} added from ${outcome.observed} observations${outcome.partition ? ` in ${outcome.partition}` : ''}`);
   } catch (error) {
-    console.error(`CBP archive collection failed: ${error.message}`);
-    process.exitCode = 1;
+    if (error.code === 'CBP_NO_OBSERVATIONS') {
+      console.warn(`::warning::CBP archive collection skipped without mutation: ${error.message}`);
+    } else {
+      console.error(`CBP archive collection failed: ${error.message}`);
+      process.exitCode = 1;
+    }
   }
 }

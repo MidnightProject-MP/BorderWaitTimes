@@ -69,6 +69,7 @@ npm run check:browser
 - `cbp-archive-check.mjs` verifies source/collection timestamp separation, source corrections, stale observations, and fail-closed collection.
 - `cbp-archive-verify.mjs` validates the committed archive's schema, timestamps, partition boundaries, identity hashes, and cross-partition uniqueness before scheduled collection.
 - `.github/workflows/collect-cbp-history.yml` runs bounded collection four times per hour and commits only newly observed source records.
+- Ambiguous or unavailable CBP polls are visibly skipped without mutating the archive; unexpected collector errors still fail scheduled collection.
 - The CBP presentation surface is northbound-only and explicitly labels lane estimates as separate from total crossing time.
 - The superseded BorderWaitTimes implementation was assessed and removed; its useful lane-selection concept was reimplemented against Celestan's verified adapter rather than preserving unsafe legacy parsing.
 - `SOURCES.md` records confirmed official feed boundaries, stale-data evidence, and the next adapter contract.
