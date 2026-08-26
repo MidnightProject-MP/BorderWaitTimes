@@ -1,6 +1,7 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
+import { CBP_XML_URL } from './cbp-adapter.mjs';
 import { createObservation, observationId, validateObservation } from './observation-contract.mjs';
 
 const DEFAULT_CBP_ROOT = fileURLToPath(new URL('./data/cbp', import.meta.url));
@@ -36,6 +37,7 @@ async function rowsFromRoot(root) {
 }
 
 function canonicalCbp(row) {
+  if (row.source !== 'cbp-border-wait-times-xml' || row.sourceUrl !== CBP_XML_URL) throw new ObservationHistoryError('Invalid CBP source identity');
   return createObservation({
     source: row.source,
     sourceUrl: row.sourceUrl,

@@ -49,7 +49,7 @@ export function createObservation(input) {
 export function observationId(observation) {
   const errors = validateObservation(observation);
   if (errors.length) throw new TypeError(`Invalid observation: ${errors.join(', ')}`);
-  const { metadata: ignoredMetadata, observationId: ignoredId, collectedAt: ignoredCollectedAt, status: ignoredStatus, ...identity } = observation;
+  const { metadata: ignoredMetadata, observationId: ignoredId, domain: ignoredDomain, collectedAt: ignoredCollectedAt, status: ignoredStatus, ...identity } = observation;
   return `sha256:${createHash('sha256').update(JSON.stringify(identity)).digest('hex')}`;
 }
 

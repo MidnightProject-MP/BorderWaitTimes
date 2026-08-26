@@ -14,6 +14,8 @@
     "check:history": "node observation-history-check.mjs",
     "check:summaries": "node observation-summary-check.mjs",
     "check:coverage": "node observation-coverage-check.mjs",
+    "generate:illustrative": "node illustrative-dataset.mjs",
+    "check:illustrative": "node illustrative-dataset-check.mjs",
     "check:collection": "node archive-collection-check.mjs",
     "collect:caltrans-archive": "node caltrans-archive-collector.mjs",
     "collect:archives": "node archive-collector.mjs",

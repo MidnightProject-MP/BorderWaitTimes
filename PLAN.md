@@ -17,14 +17,15 @@ Completed Story: As a maintainer, I can assess whether an observation summary me
 Completed Story: As a maintainer, I can run both source collectors in one command and see independent collection outcomes without masking a partial source failure.
 Completed Story: As a maintainer, I can distinguish source collection success from observation freshness in one collection result.
 Completed Story: As a maintainer, I can distinguish fresh, degraded, and unusable source quality from transport success in the collection result.
+Completed Story: As a maintainer, I can exercise the timing layer with clearly labeled synthetic history without mixing it into official source archives.
 
-Why now: Freshness counts now expose the evidence, but the first live run still requires manual interpretation: Caltrans returned one stale 2022 travel-time observation alongside one fresh closure observation. A source quality classification makes that distinction explicit without hiding the raw counts.
+Why now: Official history is still thin for timing analysis, while the next data layer needs realistic temporal shape to be exercised. A segregated synthetic fixture can provide that development surface without pretending to be official history.
 
-1. Classify successful sources as fresh, degraded, or unusable from freshness counts. Complete.
-2. Preserve transport status, raw freshness counts, and quality as separate fields. Complete.
-3. Surface quality in the orchestration result and CLI. Complete.
-4. Verify live stale-source behavior plus all-success, partial-failure, and total-failure cases. Complete.
-5. Update durable state, commit, push, and provide the testable build. Complete.
+1. Generate four weeks of deterministic synthetic border observations across ports, lanes, and time buckets. Complete.
+2. Mark every synthetic row with explicit source and scenario provenance. Complete.
+3. Build descriptive time-bucket bands from synthetic history without forecast semantics. Complete.
+4. Verify synthetic coverage and official/synthetic archive separation. Complete.
+5. Update durable state, commit, push, and provide the testable build. In progress.
 
 Constraints:
 
@@ -44,8 +45,10 @@ Constraints:
 - Do not treat a partial collection run as a complete multi-source snapshot.
 - Do not treat transport success as freshness success.
 - Do not collapse mixed observations into a fresh source claim.
+- Keep synthetic fixtures in a separate archive and never include them in official history readers.
+- Label synthetic values as illustrative development data at the row and dataset level.
 - Arrival-by and departure-window design remain discovery hypotheses.
 
 Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract, source archive checks, unified history checks, summary/coverage checks, collection orchestration checks, and live collection run pass legacy CBP mapping, canonical Caltrans mapping, deterministic ordering, domain separation, corruption rejection, null preservation, descriptive min/max/median, freshness counts, coverage windows, declared sample/day/span/value thresholds, invalid-input handling, all-success, partial-failure, total-failure, and stale-source cases. Current archives contain 101 CBP rows across 2 partitions and 3 Caltrans rows across 1 partition. Live quality reports CBP as fresh and Caltrans as degraded.
 
-Next step: Select the next timing/data Story from remaining source gaps.
+Next step: Replace synthetic inputs with sufficient official history when available, then select the next timing/data Story.
