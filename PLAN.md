@@ -20,7 +20,7 @@ Why now: The unified reader now provides validated, ordered observations, but th
 2. Calculate sample counts, value counts, min/max/median, freshness counts, and coverage windows. Complete.
 3. Preserve missing values and avoid forecast, arrival, or eligibility claims. Complete.
 4. Verify deterministic summaries and invalid-input handling. Complete.
-5. Update durable state, commit, push, and provide the testable build. In progress.
+5. Update durable state, commit, push, and provide the testable build. Complete.
 
 Constraints:
 
@@ -40,4 +40,4 @@ Constraints:
 
 Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract, source archive checks, unified history checks, and summary checks pass legacy CBP mapping, canonical Caltrans mapping, deterministic ordering, domain separation, corruption rejection, null preservation, descriptive min/max/median, freshness counts, coverage windows, and invalid-input handling. Caltrans archive verification detects tampering, duplicate IDs, invalid partitions, and invalid timestamps. `npm run verify:cbp-archive` passes with 99 rows across 2 partitions after the latest scheduled collection.
 
-Next step: Deliver the descriptive summary Story, then select the next timing/data Story from remaining source gaps.
+Next step: Select the next timing/data Story from remaining source gaps.
