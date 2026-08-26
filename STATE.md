@@ -57,3 +57,7 @@
 - Current Readiness Reality: The unified official archive contains 12 subject groups from 111 CBP and 3 Caltrans observations; CBP subjects cover only 1-2 observed days, and Caltrans travel-time history is stale, so official timing migration remains unsupported.
 - Current Verification Update: `npm run check:official-readiness` and the complete timing, archive, adapter, collection, syntax, whitespace, and browser suite pass.
 - Next Story: Continue official history collection and migrate only subjects that meet declared per-subject timing coverage thresholds.
+- Completed Story: As a maintainer, I can record an independent official collection snapshot and reassess timing coverage without treating deduplicated polls as new history.
+- Current Collection Update: The latest multi-source run observed 10 CBP rows and added 0 because all were duplicates; it observed 2 Caltrans rows and added 1 fresh roadway-closure observation. CBP quality was fresh; Caltrans quality remained degraded because travel-time history is stale.
+- Current Readiness Update: The official archive now contains 115 unified observations, including 111 CBP rows and 4 Caltrans rows across 12 subject groups; no subject meets the declared migration thresholds.
+- Next Story: Continue scheduled official collection and reassess per-subject timing coverage after new source-observed days accumulate.
