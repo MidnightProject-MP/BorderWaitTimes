@@ -22,7 +22,7 @@ Why now: CBP and Caltrans now have independent validated collectors, but schedul
 2. Return per-source added/observed/error outcomes. Complete.
 3. Preserve successful source results when the other source fails. Complete.
 4. Verify all-success, partial-failure, and total-failure behavior. Complete.
-5. Update durable state, commit, push, and provide the testable build. In progress.
+5. Update durable state, commit, push, and provide the testable build. Complete.
 
 Constraints:
 
