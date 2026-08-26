@@ -49,7 +49,7 @@ export function createObservation(input) {
 export function observationId(observation) {
   const errors = validateObservation(observation);
   if (errors.length) throw new TypeError(`Invalid observation: ${errors.join(', ')}`);
-  const identity = { ...observation, metadata: undefined };
+  const { metadata: ignoredMetadata, observationId: ignoredId, collectedAt: ignoredCollectedAt, status: ignoredStatus, ...identity } = observation;
   return `sha256:${createHash('sha256').update(JSON.stringify(identity)).digest('hex')}`;
 }
 
@@ -66,7 +66,7 @@ export function projectCaltransObservations(result, { collectedAt }) {
     source: 'caltrans-d11', sourceUrl: TRAVEL_TIME_URL, observationType: 'roadway_travel_time',
     subject: travel.segment || 'I-5 BORDER southbound', direction: 'southbound',
     sourceObservedAt: travelObservedAt, collectedAt, status: travel.status,
-    value: travel.minutes, unit: travel.minutes === null ? null : 'minutes',
+    value: travel.reportedMinutes ?? travel.minutes, unit: (travel.reportedMinutes ?? travel.minutes) === null ? null : 'minutes',
     metadata: { accuracy: travel.accuracy },
   }));
 

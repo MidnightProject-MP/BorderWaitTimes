@@ -74,9 +74,10 @@ export function normalizeTravelTime(payload, options = {}) {
     roadwayContext: true,
     segment: 'I-5 BORDER southbound',
     sourceTimestamp: record.recordTimestamp,
+    reportedMinutes: numeric(record.traveltime?.calculatedTraveltime, true),
   };
   if (status === 'fresh') {
-    const minutes = numeric(record.traveltime?.calculatedTraveltime, true);
+    const minutes = result.reportedMinutes;
     const accuracy = numeric(record.traveltime?.traveltimeAccuracy);
     if (minutes === null || accuracy === null) return { status: UNKNOWN, reason: 'malformed-selected-segment' };
     result.minutes = minutes;

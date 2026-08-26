@@ -9,6 +9,7 @@
     "check:cbp": "node cbp-adapter-check.mjs",
     "check:cbp-archive": "node cbp-archive-check.mjs",
     "check:observations": "node observation-contract-check.mjs",
+    "check:caltrans-archive": "node caltrans-archive-check.mjs",
     "verify:cbp-archive": "node cbp-archive-verify.mjs",
     "collect:cbp-archive": "node cbp-archive-collector.mjs"
   },

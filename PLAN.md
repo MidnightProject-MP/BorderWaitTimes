@@ -9,14 +9,15 @@ Completed Story: As a product owner, I can preserve the full Cruce journey model
 Completed Story: As a traveler, I can set my lane or program before comparing crossing options.
 Completed Story: As a traveler, I can compare all relevant ports and lane programs for my starting area without seeing unrelated crossings as equal alternatives.
 Completed Story: As a maintainer, I can validate roadway and border observations through one canonical contract without conflating source time, collection time, freshness, or traveler-facing estimates.
+Completed Story: As a maintainer, I can archive validated Caltrans roadway observations with distinct source and collection timestamps without duplicating repeated polls.
 
-Why now: The source-specific adapters now preserve trustworthy CBP and Caltrans semantics, but they cannot yet be composed safely into a historical decision data model. A shared observation contract is the smallest useful foundation for later timing and arrival intelligence.
+Why now: The shared observation contract now validates Caltrans output, but only CBP observations have an auditable history. Roadway approach conditions need the same durable, deduplicated record before timing analysis can combine them safely.
 
-1. Define a source-neutral observation shape with explicit source and time semantics. Complete.
-2. Validate CBP archive rows through the shared contract without changing their public shape. Complete.
-3. Project Caltrans roadway travel-time and closure results through the same contract. Complete.
-4. Verify fail-closed handling for malformed, stale, unknown, and synthetic observations. Complete.
-5. Update durable state, commit, push, and provide the testable build. Complete.
+1. Archive projected Caltrans observations by collection date. Complete.
+2. Deduplicate identical source observations while retaining corrected and later readings. Complete.
+3. Fail closed when a poll produces no timestamped roadway observations. Complete.
+4. Verify archive rows against the shared contract without changing traveler-facing UI. Complete.
+5. Update durable state, commit, push, and provide the testable build. In progress.
 
 Constraints:
 
@@ -32,6 +33,6 @@ Constraints:
 - Preserve source-observed time and collection time as distinct fields.
 - Arrival-by and departure-window design remain discovery hypotheses.
 
-Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract passes CBP and Caltrans fixtures, including stale, unknown, malformed, timestamp, unit, and collection-time cases. `npm run verify:cbp-archive` passes with 89 rows across 2 partitions.
+Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract and Caltrans archive checks pass fresh, stale, unknown, malformed, corrected, repeated, timestamp, unit, and collection-time cases. `npm run verify:cbp-archive` passes with 89 rows across 2 partitions.
 
-Next step: Select the next timing/data Story from the remaining source gaps.
+Next step: Deliver the completed Caltrans archive Story, then select the next timing/data Story from remaining source gaps.
