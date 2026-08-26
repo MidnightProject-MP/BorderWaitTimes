@@ -25,7 +25,7 @@ Why now: Official history is still thin for timing analysis, while the next data
 2. Mark every synthetic row with explicit source and scenario provenance. Complete.
 3. Build descriptive time-bucket bands from synthetic history without forecast semantics. Complete.
 4. Verify synthetic coverage and official/synthetic archive separation. Complete.
-5. Update durable state, commit, push, and provide the testable build. In progress.
+5. Update durable state, commit, push, and provide the testable build. Complete.
 
 Constraints:
 

@@ -7,6 +7,9 @@
 - Current Delivery: Freshness-aware collection health and the live cross-source snapshot are delivered in `a197e2d`; durable state is finalized in the current pushed `0a9977c` lineage.
 - Current Delivery Update: Source-quality classification and the updated Caltrans snapshot are delivered in `292086a`; local `main` tracks `origin/main` at this commit.
 - Completed Story: As a maintainer, I can exercise the timing layer with clearly labeled synthetic history without mixing it into official source archives.
+- Current Synthetic Dataset: `data/illustrative` contains 1,008 deterministic observations across 28 daily partitions and 36 descriptive timing bands. Every row is marked `illustrative-synthetic`, carries scenario `illustrative-four-week-border-pattern-v1`, and is excluded from official history readers.
+- Current Delivery Update: Synthetic timing data and descriptive time-bucket bands are delivered in `25d0293`; durable state is finalized in the current pushed lineage.
+- Completed Story: As a maintainer, I can exercise the timing layer with clearly labeled synthetic history without mixing it into official source archives.
 - Current Synthetic Dataset: `data/illustrative` contains 1,008 deterministic observations across 28 daily partitions and 36 descriptive timing bands. Synthetic rows are explicitly marked with source `illustrative-synthetic`, scenario `illustrative-four-week-border-pattern-v1`, and `metadata.synthetic: true`; official history readers reject them.
 - Current Delivery Correction: The source-quality plan closure is recorded in `f6b6d12`; local `main` tracks `origin/main` at this commit.
 - Completed Story: As a traveler, I can compare illustrative crossing conditions, choose a recommended port, and start an explicit privacy-preserving crossing session.
