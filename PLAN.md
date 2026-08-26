@@ -11,15 +11,15 @@ Completed Story: As a traveler, I can compare all relevant ports and lane progra
 Completed Story: As a maintainer, I can validate roadway and border observations through one canonical contract without conflating source time, collection time, freshness, or traveler-facing estimates.
 Completed Story: As a maintainer, I can archive validated Caltrans roadway observations with distinct source and collection timestamps without duplicating repeated polls.
 Completed Story: As a maintainer, I can verify the integrity of archived Caltrans roadway observations before timing analysis consumes them.
+Completed Story: As a maintainer, I can read validated CBP and Caltrans history as one time-ordered observation stream without conflating roadway context with border wait.
 
-Why now: Caltrans observations can now be archived, but they lacked the integrity boundary already established for CBP. Roadway history must detect malformed rows, wrong source identity, partition errors, duplicate IDs, and tampered values before timing analysis consumes it.
+Why now: Both source histories now have integrity boundaries, but their archived row shapes are still source-specific. Timing analysis needs one validated read path that preserves observation type and provenance while keeping roadway context distinct from border processing.
 
-1. Archive projected Caltrans observations by collection date. Complete.
-2. Deduplicate identical source observations while retaining corrected and later readings. Complete.
-3. Fail closed when a poll produces no timestamped roadway observations. Complete.
-4. Verify archive rows against the shared contract without changing traveler-facing UI. Complete.
-5. Detect tampering, duplicate IDs, invalid partitions, and invalid timestamps. Complete.
-6. Update durable state, commit, push, and provide the testable build. Complete.
+1. Map legacy CBP archive rows and canonical Caltrans rows into one read shape. Complete.
+2. Read all archive partitions in deterministic source-time order. Complete.
+3. Preserve source, observation type, lane, and roadway/border distinction. Complete.
+4. Fail closed on invalid or corrupted rows instead of returning partial history. Complete.
+5. Update durable state, commit, push, and provide the testable build. In progress.
 
 Constraints:
 
@@ -33,8 +33,9 @@ Constraints:
 - Show the relevant lane choice set before asking the traveler to focus on one program.
 - Keep source observations separate from illustrative traveler estimates.
 - Preserve source-observed time and collection time as distinct fields.
+- Never aggregate roadway context into border-processing wait without an explicit future model.
 - Arrival-by and departure-window design remain discovery hypotheses.
 
-Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract and Caltrans archive checks pass fresh, stale, unknown, malformed, corrected, repeated, timestamp, unit, and collection-time cases. Caltrans archive verification detects tampering, duplicate IDs, invalid partitions, and invalid timestamps. `npm run verify:cbp-archive` passes with 89 rows across 2 partitions.
+Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract, source archive checks, and unified history checks pass legacy CBP mapping, canonical Caltrans mapping, deterministic ordering, domain separation, corruption rejection, fresh, stale, unknown, malformed, corrected, repeated, timestamp, unit, and collection-time cases. Caltrans archive verification detects tampering, duplicate IDs, invalid partitions, and invalid timestamps. `npm run verify:cbp-archive` passes with 89 rows across 2 partitions.
 
 Next step: Select the next timing/data Story from remaining source gaps.
