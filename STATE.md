@@ -61,6 +61,11 @@
 - Current Collection Update: The latest multi-source run observed 10 CBP rows and added 0 because all were duplicates; it observed 2 Caltrans rows and added 1 fresh roadway-closure observation. CBP quality was fresh; Caltrans quality remained degraded because travel-time history is stale.
 - Current Readiness Update: The official archive now contains 115 unified observations, including 111 CBP rows and 4 Caltrans rows across 12 subject groups; no subject meets the declared migration thresholds.
 - Next Story: Continue scheduled official collection and reassess per-subject timing coverage after new source-observed days accumulate.
+- Completed Story: As a maintainer, I can record the next scheduled official snapshot and reassess timing coverage without overstating stale or deduplicated observations.
+- Current Collection Update: The latest multi-source run observed 10 CBP rows and added 4 new Otay Mesa lane observations; 8 were fresh and 2 were stale. It observed 2 Caltrans rows and added 1 fresh roadway-closure observation; Caltrans remains degraded because travel-time history is stale.
+- Current Readiness Update: The official archive now contains 121 unified observations, including 115 CBP rows and 6 Caltrans rows across 12 subject groups; 0 subjects meet the declared migration thresholds.
+- Current Verification Update: Archive verification, official-readiness, timing, adapter, collection, syntax, whitespace, and browser checks pass.
+- Next Story: Continue scheduled official collection and reassess per-subject timing coverage after new source-observed days accumulate.
 - Completed Story: As a maintainer, I can record another independently collected official snapshot and reassess whether any timing subject meets its declared coverage boundary.
 - Current Collection Update: The latest multi-source run observed 10 CBP rows and added 0 because all were duplicates; 4 were fresh and 6 were stale. It observed 2 Caltrans rows and added 1 fresh roadway-closure observation; Caltrans remains degraded because travel-time history is stale.
 - Current Readiness Update: The official archive now contains 116 unified observations, including 111 CBP rows and 5 Caltrans rows across 12 subject groups; 0 subjects meet the declared migration thresholds.
