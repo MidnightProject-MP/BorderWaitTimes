@@ -24,7 +24,7 @@ Why now: Freshness counts now expose the evidence, but the first live run still 
 2. Preserve transport status, raw freshness counts, and quality as separate fields. Complete.
 3. Surface quality in the orchestration result and CLI. Complete.
 4. Verify live stale-source behavior plus all-success, partial-failure, and total-failure cases. Complete.
-5. Update durable state, commit, push, and provide the testable build. In progress.
+5. Update durable state, commit, push, and provide the testable build. Complete.
 
 Constraints:
 
@@ -48,4 +48,4 @@ Constraints:
 
 Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract, source archive checks, unified history checks, summary/coverage checks, collection orchestration checks, and live collection run pass legacy CBP mapping, canonical Caltrans mapping, deterministic ordering, domain separation, corruption rejection, null preservation, descriptive min/max/median, freshness counts, coverage windows, declared sample/day/span/value thresholds, invalid-input handling, all-success, partial-failure, total-failure, and stale-source cases. Current archives contain 101 CBP rows across 2 partitions and 3 Caltrans rows across 1 partition. Live quality reports CBP as fresh and Caltrans as degraded.
 
-Next step: Deliver explicit source-quality classification, then select the next timing/data Story from remaining source gaps.
+Next step: Select the next timing/data Story from remaining source gaps.
