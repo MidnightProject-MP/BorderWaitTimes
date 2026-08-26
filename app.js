@@ -17,6 +17,9 @@
        directionLabel: "I am going",
        planningLaneLabel: "My lane",
        planningLaneHint: "Show choices for this lane",
+       startingAreaLabel: "I am near",
+       areaTijuana: "Tijuana",
+       areaTecate: "Tecate",
        laneGeneral: "General",
        laneReady: "Ready Lane",
        laneSentri: "SENTRI",
@@ -199,6 +202,9 @@
        directionLabel: "Voy hacia",
        planningLaneLabel: "Mi carril",
        planningLaneHint: "Mostrar opciones para este carril",
+       startingAreaLabel: "Estoy cerca de",
+       areaTijuana: "Tijuana",
+       areaTecate: "Tecate",
        laneGeneral: "General",
        laneReady: "Ready Lane",
        laneSentri: "SENTRI",
@@ -520,6 +526,7 @@
     language: "en",
     direction: "north",
     lane: "passengerStandard",
+    startingArea: "tijuana",
     selectedId: "san-ysidro",
     recommendationId: "otay-mesa",
     live: false,
@@ -557,6 +564,7 @@
     recommendationAction: document.getElementById("recommendationAction"),
      crossingCards: document.getElementById("crossingCards"),
      planningLane: document.getElementById("planningLane"),
+     startingArea: document.getElementById("startingArea"),
      researchPrompt: document.getElementById("researchPrompt"),
      researchStatus: document.getElementById("researchStatus"),
     historyDelta: document.getElementById("historyDelta"),
@@ -626,14 +634,29 @@
     return text(labels[state.lane]);
   }
 
+  function planningLaneTextFor(lane) {
+    const labels = {
+      passengerStandard: "laneGeneral",
+      passengerReady: "laneReady",
+      passengerSentri: "laneSentri",
+      pedestrianStandard: "lanePedestrian"
+    };
+    return text(labels[lane]);
+  }
+
+  function relevantCards() {
+    const ids = state.startingArea === "tecate" ? ["tecate"] : ["san-ysidro", "otay-mesa"];
+    return currentData().cards.filter(function (card) { return ids.includes(card.id); });
+  }
+
   function currentData() {
     return corridorData[state.direction];
   }
 
   function selectedCrossing() {
-    return currentData().cards.find(function (card) {
+    return relevantCards().find(function (card) {
       return card.id === state.selectedId;
-    }) || currentData().cards[0];
+    }) || relevantCards()[0];
   }
 
   function setTextContent(selector, key) {
@@ -850,12 +873,13 @@
   function renderCurrentData() {
     applyPlanningLane();
     const data = currentData();
+    const choices = relevantCards();
     const crossing = selectedCrossing();
-    const recommendation = data.cards.find(function (card) {
+    const recommendation = choices.find(function (card) {
       return card.id === state.recommendationId;
-    }) || data.cards.reduce(function (best, card) {
+    }) || choices.reduce(function (best, card) {
       return card.wait < best.wait ? card : best;
-    }, data.cards[0]);
+    }, choices[0]);
     const recommendationIsSelected = recommendation.id === crossing.id;
 
     state.selectedId = crossing.id;
@@ -877,9 +901,9 @@
     elements.confidenceRing.setAttribute("aria-label", text("confidence") + " " + crossing.confidence + "%");
      elements.estimateSource.textContent = (state.language === "es" ? "Ilustrativo · " : "Illustrative · ") + (state.language === "es" ? crossing.sourceEs : crossing.source);
 
-    elements.recommendationIndex.textContent = String(data.cards.findIndex(function (card) {
+    elements.recommendationIndex.textContent = String(choices.findIndex(function (card) {
       return card.id === recommendation.id;
-    }) + 1).padStart(2, "0") + " / 03";
+    }) + 1).padStart(2, "0") + " / " + String(choices.length).padStart(2, "0");
     elements.recommendationTitle.textContent = recommendationIsSelected ? text("keepSelected", { crossing: crossing.name }) : text("takeCrossing", { crossing: recommendation.name });
     elements.recommendationRoute.textContent = planningLaneText() + " · " + recommendation.place;
     elements.recommendationFreshness.textContent = text("updated", { minutes: recommendation.updated });
@@ -922,15 +946,21 @@
   }
 
   function renderCrossingCards() {
-    const data = currentData();
-    elements.crossingCards.innerHTML = data.cards.map(function (card, index) {
+    const cards = relevantCards();
+    const lanes = ["passengerStandard", "passengerReady", "passengerSentri", "pedestrianStandard"];
+    elements.crossingCards.innerHTML = cards.map(function (card, index) {
       const isSelected = card.id === state.selectedId;
       const meterWidth = Math.min(94, Math.max(18, card.wait * 1.55));
+      const laneRows = lanes.map(function (lane) {
+        const value = planningLaneProfiles[state.direction][lane][card.id];
+        return '<span class="lane-row"><span>' + planningLaneTextFor(lane) + '</span><strong>' + value + ' ' + text("minutes") + '</strong></span>';
+      }).join("");
       return '<button class="crossing-card' + (isSelected ? " is-selected" : "") + '" type="button" data-crossing="' + card.id + '" aria-pressed="' + isSelected + '">' +
         '<span class="crossing-card-top"><span class="crossing-index">0' + (index + 1) + '</span><span class="crossing-state">' + text(card.flowKey) + '</span></span>' +
         '<span class="crossing-name">' + card.name + '</span>' +
         '<span class="crossing-place">' + card.place + '</span>' +
         '<span class="crossing-metric"><strong>' + card.wait + '</strong><span>' + text("minutes") + '</span></span>' +
+        '<span class="lane-matrix" aria-label="' + planningLaneText() + '">' + laneRows + '</span>' +
         '<span class="crossing-meter" aria-hidden="true"><span style="width:' + meterWidth + '%"></span></span>' +
         '<span class="crossing-card-bottom"><span class="crossing-mode">' + modeIcon(card.modeKey) + '<span>' + planningLaneText() + '</span></span><span class="selected-check">✓ ' + text("selected") + '</span></span>' +
         '</button>';
@@ -1013,10 +1043,12 @@
     endLiveForContextChange();
     state.direction = direction;
     applyPlanningLane();
-    state.selectedId = corridorData[direction].primaryId;
-    state.recommendationId = corridorData[direction].cards.reduce(function (best, card) {
+    state.selectedId = relevantCards().some(function (card) { return card.id === corridorData[direction].primaryId; })
+      ? corridorData[direction].primaryId
+      : relevantCards()[0].id;
+    state.recommendationId = relevantCards().reduce(function (best, card) {
       return card.wait < best.wait ? card : best;
-    }, corridorData[direction].cards[0]).id;
+    }, relevantCards()[0]).id;
     elements.directionButtons.forEach(function (button) {
       const active = button.dataset.direction === direction;
       button.classList.toggle("is-active", active);
@@ -1172,10 +1204,20 @@
     endLiveForContextChange();
     state.lane = elements.planningLane.value;
     applyPlanningLane();
-    state.selectedId = corridorData[state.direction].primaryId;
-    state.recommendationId = corridorData[state.direction].cards.reduce(function (best, card) {
+    state.selectedId = relevantCards()[0].id;
+    state.recommendationId = relevantCards().reduce(function (best, card) {
       return card.wait < best.wait ? card : best;
-    }, corridorData[state.direction].cards[0]).id;
+    }, relevantCards()[0]).id;
+    renderCurrentData();
+    renderLiveState();
+  });
+  elements.startingArea.addEventListener("change", function () {
+    endLiveForContextChange();
+    state.startingArea = elements.startingArea.value;
+    state.selectedId = relevantCards()[0].id;
+    state.recommendationId = relevantCards().reduce(function (best, card) {
+      return card.wait < best.wait ? card : best;
+    }, relevantCards()[0]).id;
     renderCurrentData();
     renderLiveState();
   });

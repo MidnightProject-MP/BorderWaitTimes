@@ -168,6 +168,7 @@ try {
   await page.locator('[data-crossing="otay-mesa"]').click();
   assert.equal(await page.locator("#cbpLaneSelect").inputValue(), "passengerReady");
   assert.equal(cbpRequests, 1);
+  await page.locator("#startingArea").selectOption("tijuana");
   await page.locator('[data-crossing="san-ysidro"]').click();
   await page.locator("#cbpLaneSelect").selectOption("passengerStandard");
 
@@ -233,6 +234,8 @@ try {
   assert.equal(await page.locator("#cbpLaneSelect").isDisabled(), true);
   assert.equal(await page.locator("#cbpCheckButton").innerText(), "Northbound only");
 
+  await page.locator("#startingArea").selectOption("tecate");
+  assert.equal(await page.locator("#crossingCards [data-crossing]").count(), 1);
   await page.locator('[data-crossing="tecate"]').click();
   assert.equal(await page.locator("#estimateCrossing").textContent(), "Tecate");
 
@@ -265,6 +268,7 @@ try {
   assert.equal(await page.locator("#liveCard").evaluate(node => node.classList.contains("is-live")), true);
   assert.match(await page.locator("#liveForecast").textContent(), /~\d+ min/);
 
+  await page.locator("#startingArea").selectOption("tijuana");
   await page.locator('[data-crossing="san-ysidro"]').click();
   assert.equal(await page.locator("#liveCard").evaluate(node => node.classList.contains("is-live")), false);
   assert.equal(await page.locator("#researchPrompt").isVisible(), true);
@@ -272,13 +276,14 @@ try {
   assert.match(await page.locator("#researchStatus").innerText(), /Saved on this device/);
   assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem("celestan-research-v1"))[0]), {
     direction: "south",
-    recommendation: "tecate",
+    recommendation: "otay-mesa",
     selected: "san-ysidro",
     choice: "changed"
   });
   await page.locator("#languageToggle").click();
   assert.match(await page.locator("#researchPrompt").innerText(), /¿Esto cambió/);
   await page.locator("#languageToggle").click();
+  await page.locator("#startingArea").selectOption("tecate");
 
   await page.locator("#startCrossingButton").click();
   await page.locator("#locationConsent").check();
@@ -295,7 +300,8 @@ try {
   }
   assert.match(await mobilePage.locator("#recommendation-title").innerText(), /Take Otay Mesa/);
   assert.match(await mobilePage.locator("#recommendationDelta").innerText(), /faster than San Ysidro/);
-  assert.equal(await mobilePage.locator("#crossingCards [data-crossing]").count(), 3);
+  assert.equal(await mobilePage.locator("#crossingCards [data-crossing]").count(), 2);
+  assert.equal(await mobilePage.locator(".lane-matrix .lane-row").count(), 8);
   await mobilePage.locator("#planningLane").selectOption("passengerSentri");
   assert.match(await mobilePage.locator("#recommendationRoute").innerText(), /SENTRI/);
   assert.equal(await mobilePage.locator("#recommendationWait").innerText(), "9 min");
