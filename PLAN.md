@@ -24,6 +24,7 @@ Completed Story: As a maintainer, I can measure official history cadence, gaps, 
 Completed Story: As a maintainer, I can record an independent official collection snapshot and reassess timing coverage without treating deduplicated polls as new history.
 Completed Story: As a maintainer, I can record another independently collected official snapshot and reassess whether any timing subject meets its declared coverage boundary.
 Completed Story: As a maintainer, I can record the next scheduled official snapshot and reassess timing coverage without overstating stale or deduplicated observations.
+Completed Story: As a maintainer, I can record the next official snapshot and preserve its independent freshness, deduplication, and coverage outcome.
 
 Why now: The official archive remains below migration thresholds. One further scheduled snapshot is justified to measure source freshness and new source-observed coverage; no migration will occur unless declared thresholds are met.
 
