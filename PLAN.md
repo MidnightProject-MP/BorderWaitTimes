@@ -19,7 +19,7 @@ Why now: Both source histories now have integrity boundaries, but their archived
 2. Read all archive partitions in deterministic source-time order. Complete.
 3. Preserve source, observation type, lane, and roadway/border distinction. Complete.
 4. Fail closed on invalid or corrupted rows instead of returning partial history. Complete.
-5. Update durable state, commit, push, and provide the testable build. In progress.
+5. Update durable state, commit, push, and provide the testable build. Complete.
 
 Constraints:
 
