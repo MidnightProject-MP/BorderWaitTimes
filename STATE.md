@@ -2,6 +2,9 @@
 
 - Project: Celestan border intelligence network
 - Epic: Phase 1, become the best place to see the San Diego/Tijuana border
+- Completed Story: As a maintainer, I can distinguish fresh, degraded, and unusable source quality from transport success in the collection result.
+- Current Verification: The latest live collection produced 101 CBP observations and 3 Caltrans observations; CBP quality was fresh and Caltrans quality was degraded because its travel-time observation was stale while its closure observation was fresh.
+- Current Delivery: Freshness-aware collection health and the live cross-source snapshot are delivered in `a197e2d`; durable state is finalized in the current pushed `0a9977c` lineage.
 - Completed Story: As a traveler, I can compare illustrative crossing conditions, choose a recommended port, and start an explicit privacy-preserving crossing session.
 - Completed Story: As a maintainer, I can distinguish confirmed official roadway feeds from unverified customs estimates and know when roadway data is stale before integrating it into Celestan.
 - Completed Story: As a maintainer, I can run a fail-closed Caltrans adapter that exposes roadway context separately from border-processing wait time.
