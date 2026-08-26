@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { TRAVEL_TIME_URL, LANE_CLOSURES_URL } from './caltrans-adapter.mjs';
 import { collectCaltransArchive } from './caltrans-archive-collector.mjs';
 import { validateObservation } from './observation-contract.mjs';
+import { verifyCaltransArchive, verifyCaltransArchivePartition } from './caltrans-archive-verify.mjs';
 
 const collectedAt = '2026-08-26T10:15:00.000Z';
 const now = Date.parse(collectedAt);
@@ -33,6 +34,10 @@ try {
   assert.equal(rows.length, 5);
   assert.ok(rows.every((row) => validateObservation(row).length === 0));
   assert.ok(rows.every((row) => row.sourceObservedAt <= row.collectedAt));
+  const verified = await verifyCaltransArchive(archiveRoot);
+  assert.deepEqual(verified.violations, []);
+  assert.equal(verified.rows, 5);
+  assert.equal(verifyCaltransArchivePartition('2026-08-26.ndjson', [{ ...rows[0], observationId: 'sha256:bad' }]).length, 1);
   await assert.rejects(collectCaltransArchive({ fetcher: async () => ({ ok: false }), now: now + 600_000, archiveRoot }), (error) => error.code === 'CALTRANS_NO_OBSERVATIONS');
   assert.equal((await readFile(join(archiveRoot, '2026-08-26.ndjson'), 'utf8')).trim().split('\n').length, 5);
 } finally {

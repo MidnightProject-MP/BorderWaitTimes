@@ -10,14 +10,16 @@ Completed Story: As a traveler, I can set my lane or program before comparing cr
 Completed Story: As a traveler, I can compare all relevant ports and lane programs for my starting area without seeing unrelated crossings as equal alternatives.
 Completed Story: As a maintainer, I can validate roadway and border observations through one canonical contract without conflating source time, collection time, freshness, or traveler-facing estimates.
 Completed Story: As a maintainer, I can archive validated Caltrans roadway observations with distinct source and collection timestamps without duplicating repeated polls.
+Completed Story: As a maintainer, I can verify the integrity of archived Caltrans roadway observations before timing analysis consumes them.
 
-Why now: The shared observation contract now validates Caltrans output, but only CBP observations have an auditable history. Roadway approach conditions need the same durable, deduplicated record before timing analysis can combine them safely.
+Why now: Caltrans observations can now be archived, but they lacked the integrity boundary already established for CBP. Roadway history must detect malformed rows, wrong source identity, partition errors, duplicate IDs, and tampered values before timing analysis consumes it.
 
 1. Archive projected Caltrans observations by collection date. Complete.
 2. Deduplicate identical source observations while retaining corrected and later readings. Complete.
 3. Fail closed when a poll produces no timestamped roadway observations. Complete.
 4. Verify archive rows against the shared contract without changing traveler-facing UI. Complete.
-5. Update durable state, commit, push, and provide the testable build. In progress.
+5. Detect tampering, duplicate IDs, invalid partitions, and invalid timestamps. Complete.
+6. Update durable state, commit, push, and provide the testable build. In progress.
 
 Constraints:
 
@@ -33,6 +35,6 @@ Constraints:
 - Preserve source-observed time and collection time as distinct fields.
 - Arrival-by and departure-window design remain discovery hypotheses.
 
-Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract and Caltrans archive checks pass fresh, stale, unknown, malformed, corrected, repeated, timestamp, unit, and collection-time cases. `npm run verify:cbp-archive` passes with 89 rows across 2 partitions.
+Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract and Caltrans archive checks pass fresh, stale, unknown, malformed, corrected, repeated, timestamp, unit, and collection-time cases. Caltrans archive verification detects tampering, duplicate IDs, invalid partitions, and invalid timestamps. `npm run verify:cbp-archive` passes with 89 rows across 2 partitions.
 
-Next step: Deliver the completed Caltrans archive Story, then select the next timing/data Story from remaining source gaps.
+Next step: Deliver the completed Caltrans archive integrity Story, then select the next timing/data Story from remaining source gaps.
