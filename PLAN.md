@@ -12,7 +12,7 @@ Why now: Scheduled collection is operating independently and the archive now spa
 2. Add a deterministic verifier for the committed archive: schema, enums, timestamps, partition agreement, identity recomputation, and cross-partition uniqueness. Complete.
 3. Verify the verifier against valid and deliberately corrupted archives, and confirm it accepts the real archive. Complete.
 4. Gate scheduled collection on verification and record the boundary. Complete.
-5. Update durable state, commit, push, and verify the workflow. In progress.
+5. Update durable state, commit, push, and verify the workflow. Complete.
 
 Constraints:
 
@@ -23,4 +23,4 @@ Constraints:
 
 Verification: `npm run verify:cbp-archive` accepts the live committed archive (30 rows across 2 partitions). Fixture coverage confirms detection of tampered values, duplicate identities, invalid partitions, out-of-partition collection, observed-after-collected rows, unsupported enums, schema drift, and mismatched identity hashes. `npm run check:cbp`, `npm run check:cbp-archive`, `npm run check:adapter`, `npm run check:browser`, all JavaScript syntax checks, and `git diff --check` pass.
 
-Next step: Commit, push, and verify the scheduled workflow runs verification before collection.
+Next step: Wait for traveler feedback on the simplified first-viewport decision journey; do not start another UX Story without evidence.
