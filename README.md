@@ -76,6 +76,7 @@ npm run check:browser
 - `LEGACY-ASSESSMENT.md` records which BorderWaitTimes ideas were adopted, deferred, or rejected before the old runtime tree was removed.
 - `STATE.md` records durable project, epic, story, verification, and delivery state.
 - `PLAN.md` is the temporary execution plan for the current work cycle.
+- `PRODUCT-VISION.md` records the Plan/Watch/Go/Commit/Cross/Learn journey model, current proof, future hypotheses, and evidence sequence.
 - `OPPORTUNITY.md` records competing product framings and evidence tests without turning discovery into a feature backlog.
 
 ## Privacy Boundary
