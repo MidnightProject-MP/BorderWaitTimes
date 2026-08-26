@@ -26,6 +26,7 @@ Completed Story: As a maintainer, I can record another independently collected o
 Completed Story: As a maintainer, I can record the next scheduled official snapshot and reassess timing coverage without overstating stale or deduplicated observations.
 Completed Story: As a maintainer, I can record the next official snapshot and preserve its independent freshness, deduplication, and coverage outcome.
 Completed Story: As a maintainer, I can record the next scheduled official snapshot and preserve its independent freshness, deduplication, and coverage outcome.
+Completed Story: As a maintainer, I can record the next official snapshot and distinguish new source history from repeated or stale observations.
 
 Why now: The official archive remains below migration thresholds. One further scheduled snapshot is justified to measure source freshness and new source-observed coverage; no migration will occur unless declared thresholds are met.
 
@@ -62,3 +63,5 @@ Constraints:
 Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract, source archive checks, unified history checks, summary/coverage checks, collection orchestration checks, live collection run, illustrative dataset checks, timing-context checks, timing-data checks, and official-readiness checks pass legacy CBP mapping, canonical Caltrans mapping, deterministic ordering, domain separation, corruption rejection, null preservation, descriptive min/max/median, freshness counts, coverage windows, declared sample/day/span/value thresholds, invalid-input handling, all-success, partial-failure, total-failure, stale-source, synthetic provenance, synthetic coverage, time-bucket ranking, under-covered query cases, explicit dataset provenance, mixed-source rejection, no-fallback official insufficiency, per-subject source-time cadence, largest-gap calculation, provenance, freshness, and domain separation. Current official archives contain 111 CBP rows across 2 partitions and 4 Caltrans rows across 1 partition; the synthetic archive contains 1,008 explicitly illustrative rows across 28 partitions.
 
 Next step: Continue official history collection and advance migration only when declared timing coverage supports it.
+
+Current archive update: 117 CBP rows and 8 Caltrans rows; the latest snapshot added 2 CBP rows and 1 Caltrans row, with no timing subject meeting declared migration thresholds.
