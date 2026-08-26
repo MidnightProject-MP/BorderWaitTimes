@@ -488,7 +488,8 @@
     recommendationId: "otay-mesa",
     live: false,
     autoStopTimer: null,
-    previousFocus: null
+    previousFocus: null,
+    researchContext: null
   };
 
   const elements = {
@@ -890,10 +891,11 @@
     elements.crossingCards.querySelectorAll("[data-crossing]").forEach(function (button) {
       button.addEventListener("click", function () {
         endLiveForContextChange();
+        const recommendationId = state.recommendationId;
         state.selectedId = button.dataset.crossing;
         state.recommendationId = button.dataset.crossing;
         renderCurrentData();
-        showResearchPrompt();
+        showResearchPrompt(recommendationId);
         showToast(text("selectedToast", { crossing: selectedCrossing().name }));
       });
     });
@@ -1071,14 +1073,19 @@
     }, 4200);
   }
 
-  function showResearchPrompt() {
+  function showResearchPrompt(recommendationId) {
+    state.researchContext = {
+      direction: state.direction,
+      recommendation: recommendationId
+    };
     elements.researchPrompt.hidden = false;
   }
 
   function recordResearchChoice(choice) {
+    const context = state.researchContext || { direction: state.direction, recommendation: state.recommendationId };
     const record = {
-      direction: state.direction,
-      recommendation: state.recommendationId,
+      direction: context.direction,
+      recommendation: context.recommendation,
       selected: state.selectedId,
       choice: choice
     };
@@ -1135,7 +1142,7 @@
       state.selectedId = target;
       state.recommendationId = target;
       renderCurrentData();
-      showResearchPrompt();
+      showResearchPrompt(target);
       showToast(text("selectedToast", { crossing: selectedCrossing().name }));
     } else {
       scrollToSection("crossings");

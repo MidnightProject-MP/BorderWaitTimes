@@ -268,9 +268,17 @@ try {
   await page.locator('[data-crossing="san-ysidro"]').click();
   assert.equal(await page.locator("#liveCard").evaluate(node => node.classList.contains("is-live")), false);
   assert.equal(await page.locator("#researchPrompt").isVisible(), true);
-  await page.locator('[data-research-choice="followed"]').click();
+  await page.locator('[data-research-choice="changed"]').click();
   assert.match(await page.locator("#researchStatus").innerText(), /Saved on this device/);
-  assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("celestan-research-v1")).length), 1);
+  assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem("celestan-research-v1"))[0]), {
+    direction: "south",
+    recommendation: "tecate",
+    selected: "san-ysidro",
+    choice: "changed"
+  });
+  await page.locator("#languageToggle").click();
+  assert.match(await page.locator("#researchPrompt").innerText(), /¿Esto cambió/);
+  await page.locator("#languageToggle").click();
 
   await page.locator("#startCrossingButton").click();
   await page.locator("#locationConsent").check();
