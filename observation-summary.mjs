@@ -34,6 +34,7 @@ export function summarizeObservations(observations) {
         lastObservedAt: null,
         firstCollectedAt: null,
         lastCollectedAt: null,
+        observedDays: new Set(),
       };
       groups.set(key, group);
     }
@@ -47,6 +48,7 @@ export function summarizeObservations(observations) {
     }
     group.firstObservedAt = group.firstObservedAt === null || observation.sourceObservedAt < group.firstObservedAt ? observation.sourceObservedAt : group.firstObservedAt;
     group.lastObservedAt = group.lastObservedAt === null || observation.sourceObservedAt > group.lastObservedAt ? observation.sourceObservedAt : group.lastObservedAt;
+    group.observedDays.add(observation.sourceObservedAt.slice(0, 10));
     group.firstCollectedAt = group.firstCollectedAt === null || observation.collectedAt < group.firstCollectedAt ? observation.collectedAt : group.firstCollectedAt;
     group.lastCollectedAt = group.lastCollectedAt === null || observation.collectedAt > group.lastCollectedAt ? observation.collectedAt : group.lastCollectedAt;
   }
@@ -71,7 +73,23 @@ export function summarizeObservations(observations) {
       lastObservedAt: group.lastObservedAt,
       firstCollectedAt: group.firstCollectedAt,
       lastCollectedAt: group.lastCollectedAt,
+      observedDays: [...group.observedDays].sort(),
+      observedDayCount: group.observedDays.size,
+      observedSpanMs: group.firstObservedAt && group.lastObservedAt ? Date.parse(group.lastObservedAt) - Date.parse(group.firstObservedAt) : 0,
     };
     return summary;
   }).sort((left, right) => left.key.localeCompare(right.key));
+}
+
+export function assessCoverage(summary, { minSamples = 1, minDays = 1, minSpanMs = 0, minValues = 0 } = {}) {
+  if (!summary || typeof summary !== 'object') throw new TypeError('summary must be an object');
+  for (const [name, value] of Object.entries({ minSamples, minDays, minSpanMs, minValues })) {
+    if (!Number.isFinite(value) || value < 0 || (name !== 'minSpanMs' && !Number.isInteger(value))) throw new RangeError(`${name} must be a non-negative ${name === 'minSpanMs' ? 'number' : 'integer'}`);
+  }
+  const reasons = [];
+  if (summary.sampleCount < minSamples) reasons.push(`sampleCount ${summary.sampleCount} is below ${minSamples}`);
+  if (summary.observedDayCount < minDays) reasons.push(`observedDayCount ${summary.observedDayCount} is below ${minDays}`);
+  if (summary.observedSpanMs < minSpanMs) reasons.push(`observedSpanMs ${summary.observedSpanMs} is below ${minSpanMs}`);
+  if (summary.valueCount < minValues) reasons.push(`valueCount ${summary.valueCount} is below ${minValues}`);
+  return { status: reasons.length ? 'insufficient' : 'sufficient', reasons, thresholds: { minSamples, minDays, minSpanMs, minValues } };
 }

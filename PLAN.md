@@ -13,14 +13,15 @@ Completed Story: As a maintainer, I can archive validated Caltrans roadway obser
 Completed Story: As a maintainer, I can verify the integrity of archived Caltrans roadway observations before timing analysis consumes them.
 Completed Story: As a maintainer, I can read validated CBP and Caltrans history as one time-ordered observation stream without conflating roadway context with border wait.
 Completed Story: As a maintainer, I can summarize historical observations by source and subject without turning descriptive archive statistics into forecasts.
+Completed Story: As a maintainer, I can assess whether an observation summary meets declared descriptive coverage requirements without presenting sparse history as a forecast.
 
-Why now: The unified reader now provides validated, ordered observations, but there is no descriptive layer for sample coverage and observed ranges. Timing work needs these summaries while keeping source, subject, domain, and uncertainty visible.
+Why now: Historical summaries now expose counts and ranges, but sparse or single-day history could still be mistaken for a basis for comparison. A declared-threshold coverage assessment can fail closed before timing work consumes an under-supported summary.
 
-1. Group validated observations without combining sources, subjects, or domains. Complete.
-2. Calculate sample counts, value counts, min/max/median, freshness counts, and coverage windows. Complete.
-3. Preserve missing values and avoid forecast, arrival, or eligibility claims. Complete.
-4. Verify deterministic summaries and invalid-input handling. Complete.
-5. Update durable state, commit, push, and provide the testable build. Complete.
+1. Preserve observed-day count and source-time span in each summary. Complete.
+2. Assess sample, day, span, and value thresholds supplied by the caller. Complete.
+3. Return explicit insufficiency reasons without forecasting or imputing values. Complete.
+4. Verify deterministic coverage decisions and invalid-threshold handling. Complete.
+5. Update durable state, commit, push, and provide the testable build. In progress.
 
 Constraints:
 
@@ -36,8 +37,9 @@ Constraints:
 - Preserve source-observed time and collection time as distinct fields.
 - Never aggregate roadway context into border-processing wait without an explicit future model.
 - Treat summaries as descriptive archive statistics, not forecasts or guarantees.
+- Require explicit coverage thresholds before using a summary for a declared comparison.
 - Arrival-by and departure-window design remain discovery hypotheses.
 
-Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract, source archive checks, unified history checks, and summary checks pass legacy CBP mapping, canonical Caltrans mapping, deterministic ordering, domain separation, corruption rejection, null preservation, descriptive min/max/median, freshness counts, coverage windows, and invalid-input handling. Caltrans archive verification detects tampering, duplicate IDs, invalid partitions, and invalid timestamps. `npm run verify:cbp-archive` passes with 99 rows across 2 partitions after the latest scheduled collection.
+Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract, source archive checks, unified history checks, summary checks, and coverage checks pass legacy CBP mapping, canonical Caltrans mapping, deterministic ordering, domain separation, corruption rejection, null preservation, descriptive min/max/median, freshness counts, coverage windows, declared sample/day/span/value thresholds, and invalid-input handling. Caltrans archive verification detects tampering, duplicate IDs, invalid partitions, and invalid timestamps. `npm run verify:cbp-archive` passes with 99 rows across 2 partitions after the latest scheduled collection.
 
 Next step: Select the next timing/data Story from remaining source gaps.

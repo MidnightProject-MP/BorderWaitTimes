@@ -13,6 +13,7 @@
     "verify:caltrans-archive": "node caltrans-archive-verify.mjs",
     "check:history": "node observation-history-check.mjs",
     "check:summaries": "node observation-summary-check.mjs",
+    "check:coverage": "node observation-coverage-check.mjs",
     "verify:cbp-archive": "node cbp-archive-verify.mjs",
     "collect:cbp-archive": "node cbp-archive-collector.mjs"
   },
