@@ -222,6 +222,19 @@
             <p data-i18n="chooseCrossingHint">Tap an alternative to make it your choice.</p>
           </div>
           <div class="crossing-grid" id="crossingCards"></div>
+          <aside class="research-prompt" id="researchPrompt" hidden aria-labelledby="researchPromptTitle">
+            <div>
+              <p class="card-kicker cyan-kicker" data-i18n="researchKicker">Quick research check</p>
+              <h3 id="researchPromptTitle" data-i18n="researchTitle">Did this change what you planned to do?</h3>
+              <p data-i18n="researchPrivacy">One tap helps test the recommendation. It stays on this device and is never sent anywhere.</p>
+            </div>
+            <div class="research-actions" role="group" aria-label="Research response">
+              <button type="button" data-research-choice="followed" data-i18n="researchFollowed">I followed it</button>
+              <button type="button" data-research-choice="changed" data-i18n="researchChanged">I chose another</button>
+              <button type="button" data-research-choice="decided" data-i18n="researchDecided">I was already decided</button>
+            </div>
+            <p class="research-status" id="researchStatus" aria-live="polite"></p>
+          </aside>
         </section>
 
         <details class="evidence-disclosure" id="evidenceDetails">

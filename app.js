@@ -36,8 +36,15 @@
       takeCrossing: "Take {crossing}",
       useThisCrossing: "Use this crossing",
       recommendationBased: "Recommendation uses wait, confidence, and approach stability.",
-      chooseCrossing: "Compare crossings",
-      chooseCrossingHint: "Tap an alternative to make it your choice.",
+       chooseCrossing: "Compare crossings",
+       chooseCrossingHint: "Tap an alternative to make it your choice.",
+       researchKicker: "Quick research check",
+       researchTitle: "Did this change what you planned to do?",
+       researchPrivacy: "One tap helps test the recommendation. It stays on this device and is never sent anywhere.",
+       researchFollowed: "I followed it",
+       researchChanged: "I chose another",
+       researchDecided: "I was already decided",
+       researchSaved: "Saved on this device. Thank you.",
       evidenceTitle: "Evidence & context",
       evidenceHint: "Official lane and roadway reads, history, and border notes",
       historicalContext: "Historical context",
@@ -205,8 +212,15 @@
       takeCrossing: "Toma {crossing}",
       useThisCrossing: "Usar este cruce",
       recommendationBased: "La recomendación usa espera, confianza y estabilidad del acceso.",
-      chooseCrossing: "Compara cruces",
-      chooseCrossingHint: "Toca una alternativa para elegirla.",
+       chooseCrossing: "Compara cruces",
+       chooseCrossingHint: "Toca una alternativa para elegirla.",
+       researchKicker: "Pregunta de investigación",
+       researchTitle: "¿Esto cambió lo que pensabas hacer?",
+       researchPrivacy: "Un toque ayuda a probar la recomendación. Se guarda en este dispositivo y nunca se envía.",
+       researchFollowed: "La seguí",
+       researchChanged: "Elegí otra",
+       researchDecided: "Ya había decidido",
+       researchSaved: "Guardado en este dispositivo. Gracias.",
       evidenceTitle: "Evidencia y contexto",
       evidenceHint: "Lecturas oficiales de carril y acceso, historial y notas fronterizas",
       historicalContext: "Contexto histórico",
@@ -504,7 +518,9 @@
     recommendationWait: document.getElementById("recommendationWait"),
     recommendationDelta: document.getElementById("recommendationDelta"),
     recommendationAction: document.getElementById("recommendationAction"),
-    crossingCards: document.getElementById("crossingCards"),
+     crossingCards: document.getElementById("crossingCards"),
+     researchPrompt: document.getElementById("researchPrompt"),
+     researchStatus: document.getElementById("researchStatus"),
     historyDelta: document.getElementById("historyDelta"),
     historyDeltaCopy: document.getElementById("historyDeltaCopy"),
     historyChart: document.getElementById("historyChart"),
@@ -877,6 +893,7 @@
         state.selectedId = button.dataset.crossing;
         state.recommendationId = button.dataset.crossing;
         renderCurrentData();
+        showResearchPrompt();
         showToast(text("selectedToast", { crossing: selectedCrossing().name }));
       });
     });
@@ -1054,6 +1071,30 @@
     }, 4200);
   }
 
+  function showResearchPrompt() {
+    elements.researchPrompt.hidden = false;
+  }
+
+  function recordResearchChoice(choice) {
+    const record = {
+      direction: state.direction,
+      recommendation: state.recommendationId,
+      selected: state.selectedId,
+      choice: choice
+    };
+    try {
+      const saved = JSON.parse(window.localStorage.getItem("celestan-research-v1") || "[]");
+      saved.push(record);
+      window.localStorage.setItem("celestan-research-v1", JSON.stringify(saved));
+    } catch (_) {
+      // Blocked storage must not interrupt the decision flow.
+    }
+    elements.researchStatus.textContent = text("researchSaved");
+    elements.researchPrompt.querySelectorAll("[data-research-choice]").forEach(function (button) {
+      button.disabled = true;
+    });
+  }
+
   function scrollToSection(id) {
     const section = document.getElementById(id);
     if (!section) {
@@ -1078,6 +1119,11 @@
     elements.confirmConsent.disabled = !elements.locationConsent.checked;
   });
   elements.confirmConsent.addEventListener("click", confirmCrossing);
+  elements.researchPrompt.querySelectorAll("[data-research-choice]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      recordResearchChoice(button.dataset.researchChoice);
+    });
+  });
   elements.consentDialog.addEventListener("cancel", function (event) {
     event.preventDefault();
     closeConsent();
@@ -1089,6 +1135,7 @@
       state.selectedId = target;
       state.recommendationId = target;
       renderCurrentData();
+      showResearchPrompt();
       showToast(text("selectedToast", { crossing: selectedCrossing().name }));
     } else {
       scrollToSection("crossings");

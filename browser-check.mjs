@@ -267,6 +267,10 @@ try {
 
   await page.locator('[data-crossing="san-ysidro"]').click();
   assert.equal(await page.locator("#liveCard").evaluate(node => node.classList.contains("is-live")), false);
+  assert.equal(await page.locator("#researchPrompt").isVisible(), true);
+  await page.locator('[data-research-choice="followed"]').click();
+  assert.match(await page.locator("#researchStatus").innerText(), /Saved on this device/);
+  assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("celestan-research-v1")).length), 1);
 
   await page.locator("#startCrossingButton").click();
   await page.locator("#locationConsent").check();
@@ -285,6 +289,7 @@ try {
   assert.match(await mobilePage.locator("#recommendationDelta").innerText(), /faster than San Ysidro/);
   assert.equal(await mobilePage.locator("#crossingCards [data-crossing]").count(), 3);
   assert.equal(await mobilePage.locator(".evidence-disclosure").getAttribute("open"), null);
+  assert.equal(await mobilePage.locator("#researchPrompt").isVisible(), false);
   assert.equal(await mobilePage.locator(".pulse-panel").isVisible(), false);
   assert.equal(await mobilePage.locator(".estimate-card").isVisible(), false);
   assert.match(await mobilePage.locator(".recommendation-top").innerText(), /illustrative/i);

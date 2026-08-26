@@ -4,22 +4,22 @@ Project: Celestan border intelligence network
 
 Epic: Phase 1, become the best place to see the San Diego/Tijuana border
 
-Completed Story: As a maintainer, I can distinguish a safely skipped ambiguous CBP poll from a broken scheduled collector.
+Active Story: As a traveler, I can report whether Celestan's recommendation changed my plan without sharing personal data.
 
-Why now: Two scheduled runs failed because the live CBP feed advanced its feed-level date while target ports still reported the prior date. The adapter correctly rejected the ambiguous timestamps, but the collector treated an expected fail-closed source condition as a collector failure.
+Why now: Product direction has been explored but not selected. The smallest evidence test is to measure whether the current decision wedge changes a frequent crosser's choice, without adding a backend, account, location collection, or speculative forecasting.
 
-1. Confirm the live failure is source ambiguity and that the committed archive remains valid. Complete.
-2. Keep the data path fail-closed while classifying no-observation polls as safe skips at the scheduled CLI boundary. Complete.
-3. Add regression coverage and documentation for ambiguous/unavailable source skips. Complete.
-4. Update durable state, commit, push, and verify a scheduled workflow recovery. Complete.
+1. Add a post-choice, three-answer research prompt that does not affect the first viewport. Complete.
+2. Store only anonymous choice context locally, with no network or location access. Complete.
+3. Verify choice capture, bilingual rendering, mobile initial concealment, and failure-safe storage behavior. In progress.
+4. Update durable state, commit, push, and provide the evidence-test build. Pending.
 
 Constraints:
 
-- Never archive rows with unknown or semantically ambiguous timestamps.
-- A safe skip must not mutate the archive or look like a successful collection.
-- Unexpected program errors must still fail the workflow.
-- Do not change the traveler-facing product.
+- Do not collect names, accounts, precise location, device identifiers, or network telemetry.
+- The prompt must not enter the initial decision viewport or interrupt the crossing decision.
+- Storage failure must not interrupt the traveler flow.
+- Treat responses as research evidence, not as product validation or forecast training data.
 
-Verification: the live feed previously reported `last_updated_date=2026-8-26` while target ports reported `8/25/2026`; normalization returned no timestamped observations and the archive remained unchanged. After the safe-skip fix, recent scheduled runs passed and the archive is valid with 69 rows across 2 partitions. Tests prove safe skips preserve the archive and unexpected errors remain failures.
+Verification: browser coverage proves the prompt is initially hidden, appears after a choice, records one local response, renders in English and Spanish, and does not alter the initial 390 x 844 viewport. Adapter/archive checks remain the implementation baseline.
 
-Next step: Wait for the next product evidence boundary: frequent-crosser observation of the decision wedge.
+Next step: Put this build in front of frequent crossers and compare followed, changed, and already-decided responses.
