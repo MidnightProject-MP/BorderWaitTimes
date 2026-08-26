@@ -27,7 +27,7 @@ Why now: Synthetic timing context is now queryable, while official history remai
 2. Preserve dataset provenance in the timing response. Complete.
 3. Prevent mixed-source input and silent fallback. Complete.
 4. Report official insufficiency without substituting synthetic values. Complete.
-5. Update durable state, commit, push, and provide the testable build. In progress.
+5. Update durable state, commit, push, and provide the testable build. Complete.
 
 Constraints:
 
@@ -52,6 +52,6 @@ Constraints:
 - Never fall back from official timing data to synthetic timing data silently.
 - Arrival-by and departure-window design remain discovery hypotheses.
 
-Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract, source archive checks, unified history checks, summary/coverage checks, collection orchestration checks, live collection run, illustrative dataset checks, timing-context checks, and timing-data checks pass legacy CBP mapping, canonical Caltrans mapping, deterministic ordering, domain separation, corruption rejection, null preservation, descriptive min/max/median, freshness counts, coverage windows, declared sample/day/span/value thresholds, invalid-input handling, all-success, partial-failure, total-failure, stale-source, synthetic provenance, synthetic coverage, time-bucket ranking, under-covered query cases, explicit dataset provenance, mixed-source rejection, and no-fallback official insufficiency. Current official archives contain 101 CBP rows across 2 partitions and 3 Caltrans rows across 1 partition; the synthetic archive contains 1,008 explicitly illustrative rows across 28 partitions.
+Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract, source archive checks, unified history checks, summary/coverage checks, collection orchestration checks, live collection run, illustrative dataset checks, timing-context checks, and timing-data checks pass legacy CBP mapping, canonical Caltrans mapping, deterministic ordering, domain separation, corruption rejection, null preservation, descriptive min/max/median, freshness counts, coverage windows, declared sample/day/span/value thresholds, invalid-input handling, all-success, partial-failure, total-failure, stale-source, synthetic provenance, synthetic coverage, time-bucket ranking, under-covered query cases, explicit dataset provenance, mixed-source rejection, and no-fallback official insufficiency. Current official archives contain 111 CBP rows across 2 partitions and 3 Caltrans rows across 1 partition; the synthetic archive contains 1,008 explicitly illustrative rows across 28 partitions.
 
-Next step: Commit the explicit timing dataset gate, then advance official history only when coverage supports it.
+Next step: Continue official history collection and advance migration only when declared coverage supports it.
