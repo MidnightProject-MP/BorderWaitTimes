@@ -25,6 +25,7 @@ jobs:
           node-version: 22
       - run: npm run check:cbp
       - run: npm run check:cbp-archive
+      - run: npm run verify:cbp-archive
       - run: npm run collect:cbp-archive
       - name: Commit new observations
         run: |

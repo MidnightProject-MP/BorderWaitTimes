@@ -8,7 +8,7 @@ const SOURCE = 'cbp-border-wait-times-xml';
 const LANE_KEYS = ['passengerStandard', 'passengerSentri', 'passengerReady', 'pedestrianStandard'];
 const DEFAULT_ARCHIVE_ROOT = fileURLToPath(new URL('./data/cbp', import.meta.url));
 
-function observationId(observation) {
+export function observationId(observation) {
   const identity = {
     schemaVersion: observation.schemaVersion,
     source: observation.source,

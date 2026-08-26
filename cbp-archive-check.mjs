@@ -2,7 +2,9 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { collectCbpArchive, projectCbpObservations } from './cbp-archive-collector.mjs';
+import { verifyArchivePartition, verifyCbpArchive } from './cbp-archive-verify.mjs';
 import { normalizeCbpXml } from './cbp-adapter.mjs';
 
 const collectedAt = '2026-08-25T10:15:00.000Z';
@@ -26,6 +28,7 @@ const future = normalizeCbpXml(fixture(60, 'At 11:00 pm PDT'), { now });
 assert.equal(projectCbpObservations(future, { collectedAt }).length, 0);
 
 const archiveRoot = await mkdtemp(join(tmpdir(), 'celestan-cbp-'));
+let rows;
 try {
   const first = await collectCbpArchive({ fetcher: response(fixture()), now, archiveRoot });
   assert.equal(first.added, 1);
@@ -40,7 +43,7 @@ try {
   const later = await collectCbpArchive({ fetcher: response(fixture(45, 'At 2:15 am PDT')), now: now + 180_000, archiveRoot });
   assert.equal(later.added, 1);
 
-  const rows = (await readFile(join(archiveRoot, '2026-08-25.ndjson'), 'utf8')).trim().split('\n').map(JSON.parse);
+  rows = (await readFile(join(archiveRoot, '2026-08-25.ndjson'), 'utf8')).trim().split('\n').map(JSON.parse);
   assert.equal(rows.length, 3);
   assert.equal(new Set(rows.map(({ observationId }) => observationId)).size, 3);
   assert.equal(rows[0].collectedAt, collectedAt);
@@ -54,5 +57,26 @@ try {
 } finally {
   await rm(archiveRoot, { recursive: true, force: true });
 }
+
+const validRow = rows[0];
+assert.deepEqual(verifyArchivePartition('2026-08-25.ndjson', [validRow]), []);
+
+const seenIds = new Set();
+assert.deepEqual(verifyArchivePartition('2026-08-25.ndjson', [validRow], { seenIds }), []);
+const corrupted = (changes) => verifyArchivePartition('2026-08-25.ndjson', [{ ...validRow, ...changes }]);
+assert.equal(corrupted({ delayMinutes: 999 }).length, 1);
+assert.equal(verifyArchivePartition('2026-08-25.ndjson', [validRow, validRow]).length, 1);
+assert.equal(verifyArchivePartition('not-a-date.ndjson', [validRow]).length, 1);
+assert.equal(verifyArchivePartition('2026-08-24.ndjson', [validRow]).length, 1);
+assert.ok(corrupted({ sourceObservedAt: '2026-08-25T23:59:59.000Z', collectedAt: '2026-08-25T10:15:00.000Z' }).length >= 1);
+assert.equal(corrupted({ collectedFreshness: 'unknown' }).length, 1);
+assert.ok(corrupted({ lane: 'commercialStandard' }).length >= 1);
+assert.ok(corrupted({ schemaVersion: 2 }).length >= 1);
+assert.equal(corrupted({ observationId: 'sha256:deadbeef' }).length, 1);
+
+const verified = await verifyCbpArchive(fileURLToPath(new URL('./data/cbp', import.meta.url)));
+assert.equal(verified.violations.length, 0, verified.violations.join('; '));
+assert.ok(verified.rows >= 3);
+assert.ok(verified.partitions >= 1);
 
 console.log('CBP archive checks passed');

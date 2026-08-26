@@ -56,4 +56,6 @@ The smallest safe implementation slice is a read-only CBP adapter that:
 
 `cbp-archive-collector.mjs` projects timestamped lane observations into a deterministic append-only archive. `cbp-archive-check.mjs` verifies source/collection time separation, deduplication, corrections, stale retention, future exclusion, and unavailable-source behavior. `.github/workflows/collect-cbp-history.yml` requests the feed four times per hour and commits only new observations.
 
+`cbp-archive-verify.mjs` validates the committed archive before each scheduled collection. It checks the schema, supported ports and lanes, source provenance, ISO timestamps, source-before-collection ordering, UTC partition agreement, recomputed observation identities, and uniqueness across all partitions. A violation fails the workflow before new data is appended.
+
 Neither adapter changes the traveler-facing customs estimates. The UI remains explicitly illustrative until a separate product story establishes how official customs data can be presented without confusing lane estimates with total crossing time.

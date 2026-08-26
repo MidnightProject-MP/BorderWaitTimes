@@ -67,6 +67,7 @@ npm run check:browser
 - `cbp-adapter-check.mjs` verifies freshness, pending lanes, malformed input, target-port selection, and unavailable sources.
 - `cbp-archive-collector.mjs` preserves deduplicated, timestamped observations of validated CBP lane reports in date-partitioned NDJSON.
 - `cbp-archive-check.mjs` verifies source/collection timestamp separation, source corrections, stale observations, and fail-closed collection.
+- `cbp-archive-verify.mjs` validates the committed archive's schema, timestamps, partition boundaries, identity hashes, and cross-partition uniqueness before scheduled collection.
 - `.github/workflows/collect-cbp-history.yml` runs bounded collection four times per hour and commits only newly observed source records.
 - The CBP presentation surface is northbound-only and explicitly labels lane estimates as separate from total crossing time.
 - The superseded BorderWaitTimes implementation was assessed and removed; its useful lane-selection concept was reimplemented against Celestan's verified adapter rather than preserving unsafe legacy parsing.
