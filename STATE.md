@@ -11,6 +11,8 @@
 - Current Delivery Update: Synthetic timing data and descriptive time-bucket bands are delivered in `25d0293`; durable state is finalized in the current pushed lineage.
 - Completed Story: As a maintainer, I can query descriptive timing context by port, lane, and time bucket with explicit coverage status.
 - Current Timing Layer: `timing-context.mjs` queries and compares only coverage-qualified descriptive bands; missing or under-covered buckets are unavailable/insufficient and never become forecasts.
+- Current Roadmap: `ROADMAP.md` defines the sequence from trustworthy data foundation, through descriptive timing, official-history migration, timing discovery, and later UI reconciliation.
+- Current Delivery Update: The roadmap and descriptive timing-context service are delivered in `1c067d8`; local `main` tracks `origin/main` at this commit.
 - Completed Story: As a maintainer, I can exercise the timing layer with clearly labeled synthetic history without mixing it into official source archives.
 - Current Synthetic Dataset: `data/illustrative` contains 1,008 deterministic observations across 28 daily partitions and 36 descriptive timing bands. Synthetic rows are explicitly marked with source `illustrative-synthetic`, scenario `illustrative-four-week-border-pattern-v1`, and `metadata.synthetic: true`; official history readers reject them.
 - Current Delivery Correction: The source-quality plan closure is recorded in `f6b6d12`; local `main` tracks `origin/main` at this commit.

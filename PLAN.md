@@ -26,7 +26,7 @@ Why now: The synthetic timing fixture now provides realistic temporal shape, but
 2. Return descriptive median/range and coverage metadata. Complete.
 3. Compare relevant ports without mixing domains or unsupported data. Complete.
 4. Fail closed or report insufficiency for invalid and under-covered queries. Complete.
-5. Update durable state, commit, push, and provide the testable build. In progress.
+5. Update durable state, commit, push, and provide the testable build. Complete.
 
 Constraints:
 
