@@ -25,6 +25,6 @@ Constraints:
 - Keep the primary decision compact; do not turn lane context into another evidence dashboard.
 - Arrival-by and departure-window design remain discovery hypotheses.
 
-Verification: browser coverage proves lane context changes the illustrative primary comparison, remains within the mobile first viewport, and keeps the evidence disclosure closed. Existing adapter, archive, syntax, and whitespace checks remain the implementation baseline.
+Verification: browser coverage proves lane context changes the illustrative primary comparison, remains within the mobile first viewport, and keeps the evidence disclosure closed. `npm run verify:cbp-archive` passes with 89 rows across 2 partitions. Existing adapter, archive, syntax, and whitespace checks remain the implementation baseline.
 
 Next step: Put lane-specific comparisons in front of travelers, then use the Plan experiment to select whether timing or eligibility should deepen next.
