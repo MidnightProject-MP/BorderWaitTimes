@@ -254,6 +254,29 @@
           </aside>
         </section>
 
+        <section class="arrival-lab" id="arrival-planning" aria-labelledby="arrival-lab-title">
+          <div class="arrival-lab-heading">
+            <div>
+              <p class="section-number">03</p>
+              <p class="card-kicker orange-kicker" data-i18n="arrivalLabKicker">Illustrative planning exercise</p>
+              <h2 id="arrival-lab-title" data-i18n="arrivalLabTitle">Need to be across by a certain time?</h2>
+            </div>
+            <span class="arrival-lab-badge" data-i18n="arrivalLabBadge">Research prototype</span>
+          </div>
+          <p class="arrival-lab-intro" data-i18n="arrivalLabIntro">Try the question without turning it into a promise: which plan would you choose for this arrival deadline?</p>
+          <div class="arrival-lab-control">
+            <label for="arrivalDeadline" data-i18n="arrivalDeadlineLabel">I need to be across by</label>
+            <select id="arrivalDeadline" aria-describedby="arrivalLabBoundary">
+              <option value="09:00">9:00 AM</option>
+              <option value="10:00">10:00 AM</option>
+              <option value="11:00">11:00 AM</option>
+            </select>
+          </div>
+          <div class="arrival-options" id="arrivalOptions" role="group" aria-label="Illustrative arrival plans"></div>
+          <p class="arrival-lab-boundary" id="arrivalLabBoundary" data-i18n="arrivalLabBoundary">Illustrative values only. This exercise does not forecast arrival time, validate lane eligibility, or use live conditions.</p>
+          <p class="arrival-lab-status" id="arrivalLabStatus" aria-live="polite"></p>
+        </section>
+
         <details class="evidence-disclosure" id="evidenceDetails">
           <summary>
             <span data-i18n="evidenceTitle">Evidence &amp; context</span>

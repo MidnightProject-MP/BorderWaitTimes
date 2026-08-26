@@ -54,6 +54,17 @@
        researchChanged: "I chose another",
        researchDecided: "I was already decided",
        researchSaved: "Saved on this device. Thank you.",
+       arrivalLabKicker: "Illustrative planning exercise",
+       arrivalLabTitle: "Need to be across by a certain time?",
+       arrivalLabBadge: "Research prototype",
+       arrivalLabIntro: "Try the question without turning it into a promise: which plan would you choose for this arrival deadline?",
+       arrivalDeadlineLabel: "I need to be across by",
+       arrivalLabBoundary: "Illustrative values only. This exercise does not forecast arrival time, validate lane eligibility, or use live conditions.",
+       arrivalPlanTitle: "{crossing} plan",
+       arrivalPlanDetail: "Leave around {departure} · {buffer} min illustrative buffer",
+       arrivalChoose: "Choose this plan",
+       arrivalChosen: "Chosen for this exercise",
+       arrivalSaved: "Saved on this device for research. No data was sent.",
       evidenceTitle: "Evidence & context",
       evidenceHint: "Official lane and roadway reads, history, and border notes",
       historicalContext: "Historical context",
@@ -239,6 +250,17 @@
        researchChanged: "Elegí otra",
        researchDecided: "Ya había decidido",
        researchSaved: "Guardado en este dispositivo. Gracias.",
+       arrivalLabKicker: "Ejercicio de planificación ilustrativo",
+       arrivalLabTitle: "¿Necesitas estar del otro lado a cierta hora?",
+       arrivalLabBadge: "Prototipo de investigación",
+       arrivalLabIntro: "Prueba la pregunta sin convertirla en una promesa: ¿qué plan elegirías para esta hora de llegada?",
+       arrivalDeadlineLabel: "Necesito estar del otro lado a las",
+       arrivalLabBoundary: "Solo valores ilustrativos. Este ejercicio no pronostica la llegada, valida elegibilidad de carril ni usa condiciones en vivo.",
+       arrivalPlanTitle: "Plan por {crossing}",
+       arrivalPlanDetail: "Sal alrededor de las {departure} · margen ilustrativo de {buffer} min",
+       arrivalChoose: "Elegir este plan",
+       arrivalChosen: "Elegido para este ejercicio",
+       arrivalSaved: "Guardado en este dispositivo para investigación. No se envió ningún dato.",
       evidenceTitle: "Evidencia y contexto",
       evidenceHint: "Lecturas oficiales de carril y acceso, historial y notas fronterizas",
       historicalContext: "Contexto histórico",
@@ -514,6 +536,19 @@
     }
   };
 
+  const arrivalPlans = {
+    north: {
+      "09:00": { "san-ysidro": { departure: "7:15", buffer: 30 }, "otay-mesa": { departure: "7:30", buffer: 35 }, tecate: { departure: "6:45", buffer: 40 } },
+      "10:00": { "san-ysidro": { departure: "8:10", buffer: 30 }, "otay-mesa": { departure: "8:25", buffer: 35 }, tecate: { departure: "7:40", buffer: 40 } },
+      "11:00": { "san-ysidro": { departure: "9:10", buffer: 30 }, "otay-mesa": { departure: "9:25", buffer: 35 }, tecate: { departure: "8:40", buffer: 40 } }
+    },
+    south: {
+      "09:00": { "san-ysidro": { departure: "7:35", buffer: 25 }, "otay-mesa": { departure: "7:50", buffer: 30 }, tecate: { departure: "7:05", buffer: 35 } },
+      "10:00": { "san-ysidro": { departure: "8:35", buffer: 25 }, "otay-mesa": { departure: "8:50", buffer: 30 }, tecate: { departure: "8:05", buffer: 35 } },
+      "11:00": { "san-ysidro": { departure: "9:35", buffer: 25 }, "otay-mesa": { departure: "9:50", buffer: 30 }, tecate: { departure: "9:05", buffer: 35 } }
+    }
+  };
+
   function applyPlanningLane() {
     const profile = planningLaneProfiles[state.direction][state.lane];
     corridorData[state.direction].cards.forEach(function (card) {
@@ -562,10 +597,13 @@
     recommendationWait: document.getElementById("recommendationWait"),
     recommendationDelta: document.getElementById("recommendationDelta"),
     recommendationAction: document.getElementById("recommendationAction"),
-     crossingCards: document.getElementById("crossingCards"),
-     planningLane: document.getElementById("planningLane"),
-     startingArea: document.getElementById("startingArea"),
-     researchPrompt: document.getElementById("researchPrompt"),
+      crossingCards: document.getElementById("crossingCards"),
+      planningLane: document.getElementById("planningLane"),
+      startingArea: document.getElementById("startingArea"),
+      arrivalDeadline: document.getElementById("arrivalDeadline"),
+      arrivalOptions: document.getElementById("arrivalOptions"),
+      arrivalLabStatus: document.getElementById("arrivalLabStatus"),
+      researchPrompt: document.getElementById("researchPrompt"),
      researchStatus: document.getElementById("researchStatus"),
     historyDelta: document.getElementById("historyDelta"),
     historyDeltaCopy: document.getElementById("historyDeltaCopy"),
@@ -653,6 +691,42 @@
     return corridorData[state.direction];
   }
 
+  function renderArrivalPlans() {
+    const deadline = elements.arrivalDeadline.value;
+    const plans = arrivalPlans[state.direction][deadline];
+    elements.arrivalOptions.innerHTML = relevantCards().map(function (card) {
+      const plan = plans[card.id];
+      return '<article class="arrival-option" data-arrival-option="' + card.id + '">' +
+        '<div><span class="arrival-option-label">' + text("arrivalPlanTitle", { crossing: card.name }) + '</span>' +
+        '<strong>' + plan.departure + '</strong>' +
+        '<span>' + text("arrivalPlanDetail", { departure: plan.departure, buffer: plan.buffer }) + '</span></div>' +
+        '<button type="button" data-arrival-choice="' + card.id + '">' + text("arrivalChoose") + '</button>' +
+        '</article>';
+    }).join("");
+    elements.arrivalOptions.querySelectorAll("[data-arrival-choice]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        recordArrivalChoice(button.dataset.arrivalChoice, deadline);
+      });
+    });
+  }
+
+  function recordArrivalChoice(crossing, deadline) {
+    const record = { direction: state.direction, startingArea: state.startingArea, lane: state.lane, deadline: deadline, choice: crossing };
+    try {
+      const saved = JSON.parse(window.localStorage.getItem("celestan-arrival-window-v1") || "[]");
+      saved.push(record);
+      window.localStorage.setItem("celestan-arrival-window-v1", JSON.stringify(saved));
+    } catch (_) {
+      // The exercise remains usable when local storage is unavailable.
+    }
+    elements.arrivalOptions.querySelectorAll("[data-arrival-choice]").forEach(function (button) {
+      const chosen = button.dataset.arrivalChoice === crossing;
+      button.disabled = true;
+      button.textContent = chosen ? text("arrivalChosen") : text("arrivalChoose");
+    });
+    elements.arrivalLabStatus.textContent = text("arrivalSaved");
+  }
+
   function selectedCrossing() {
     return relevantCards().find(function (card) {
       return card.id === state.selectedId;
@@ -683,8 +757,9 @@
     document.querySelectorAll(".language-option").forEach(function (option) {
       option.classList.toggle("is-active", option.textContent.trim().toLowerCase() === state.language);
     });
-    renderCurrentData();
-    renderLiveState();
+     renderCurrentData();
+     renderArrivalPlans();
+     renderLiveState();
     renderRoadwayContext();
     renderCbpLaneEstimate();
   }
@@ -1055,6 +1130,7 @@
       button.setAttribute("aria-pressed", String(active));
     });
     renderCurrentData();
+    renderArrivalPlans();
     renderLiveState();
   }
 
@@ -1209,6 +1285,7 @@
       return card.wait < best.wait ? card : best;
     }, relevantCards()[0]).id;
     renderCurrentData();
+    renderArrivalPlans();
     renderLiveState();
   });
   elements.startingArea.addEventListener("change", function () {
@@ -1219,7 +1296,12 @@
       return card.wait < best.wait ? card : best;
     }, relevantCards()[0]).id;
     renderCurrentData();
+    renderArrivalPlans();
     renderLiveState();
+  });
+  elements.arrivalDeadline.addEventListener("change", function () {
+    elements.arrivalLabStatus.textContent = "";
+    renderArrivalPlans();
   });
   elements.startCrossingButton.addEventListener("click", openConsent);
   elements.closeDialog.addEventListener("click", closeConsent);

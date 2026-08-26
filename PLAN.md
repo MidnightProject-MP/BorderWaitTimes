@@ -27,13 +27,14 @@ Completed Story: As a maintainer, I can record the next scheduled official snaps
 Completed Story: As a maintainer, I can record the next official snapshot and preserve its independent freshness, deduplication, and coverage outcome.
 Completed Story: As a maintainer, I can record the next scheduled official snapshot and preserve its independent freshness, deduplication, and coverage outcome.
 Completed Story: As a maintainer, I can record the next official snapshot and distinguish new source history from repeated or stale observations.
+Completed Story: As a traveler, I can try an arrival-by planning interaction with clearly labeled illustrative choices and local-only research capture.
 
-Why now: The official archive remains below migration thresholds. One further scheduled snapshot is justified to measure source freshness and new source-observed coverage; no migration will occur unless declared thresholds are met.
+Why now: Official history is still maturing, so arrival-window interaction discovery can proceed in parallel using clearly labeled illustrative scenarios without making forecast claims.
 
-1. Report per-subject official summary and provenance. Complete.
-2. Measure source-time cadence and largest observed gaps. Complete.
-3. Preserve freshness and declared coverage status without forecast claims. Complete.
-4. Keep CBP border processing separate from Caltrans roadway context. Complete.
+1. Offer explicit arrival deadlines and relevant crossing choices. Complete.
+2. Label all scenario values as illustrative and non-predictive. Complete.
+3. Capture a selected plan locally without remote analytics. Complete.
+4. Preserve the existing mobile first-viewport crossing action. Complete.
 5. Update durable state, commit, push, and provide the testable build. Complete.
 
 Constraints:
@@ -58,6 +59,7 @@ Constraints:
 - Label synthetic values as illustrative development data at the row and dataset level.
 - Never fall back from official timing data to synthetic timing data silently.
 - Treat readiness metrics as descriptive archive diagnostics, not forecasts or migration approval by themselves.
+- Treat arrival-window interaction output as discovery material, not a forecast or guarantee.
 - Arrival-by and departure-window design remain discovery hypotheses.
 
 Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract, source archive checks, unified history checks, summary/coverage checks, collection orchestration checks, live collection run, illustrative dataset checks, timing-context checks, timing-data checks, and official-readiness checks pass legacy CBP mapping, canonical Caltrans mapping, deterministic ordering, domain separation, corruption rejection, null preservation, descriptive min/max/median, freshness counts, coverage windows, declared sample/day/span/value thresholds, invalid-input handling, all-success, partial-failure, total-failure, stale-source, synthetic provenance, synthetic coverage, time-bucket ranking, under-covered query cases, explicit dataset provenance, mixed-source rejection, no-fallback official insufficiency, per-subject source-time cadence, largest-gap calculation, provenance, freshness, and domain separation. Current official archives contain 111 CBP rows across 2 partitions and 4 Caltrans rows across 1 partition; the synthetic archive contains 1,008 explicitly illustrative rows across 28 partitions.

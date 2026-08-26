@@ -322,8 +322,9 @@ main {
 .dashboard-grid { order: 2; }
 .crossings-section { order: 3; }
 .live-section { order: 4; }
-.evidence-disclosure { order: 5; }
-.site-footer { order: 6; }
+.arrival-lab { order: 5; }
+.evidence-disclosure { order: 6; }
+.site-footer { order: 7; }
 
 .evidence-disclosure {
   margin-top: 16px;
@@ -1697,6 +1698,91 @@ main {
   margin-top: 21px;
 }
 
+.arrival-lab {
+  margin-top: 47px;
+  padding: 22px 24px 20px;
+  border: 1px solid rgba(255, 169, 90, 0.28);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(115deg, rgba(31, 44, 52, 0.96), rgba(14, 31, 49, 0.9));
+}
+
+.arrival-lab-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.arrival-lab h2 {
+  margin: 6px 0 0;
+  color: var(--paper-bright);
+  font-size: 1.35rem;
+  letter-spacing: -0.04em;
+}
+
+.arrival-lab-badge {
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 169, 90, 0.4);
+  color: var(--orange);
+  font-family: var(--mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.arrival-lab-intro,
+.arrival-lab-boundary,
+.arrival-lab-status {
+  color: #91a9b8;
+  font-family: var(--mono);
+  font-size: 0.59rem;
+  line-height: 1.55;
+}
+
+.arrival-lab-intro { max-width: 650px; margin: 8px 0 17px; }
+.arrival-lab-control { display: flex; align-items: center; gap: 10px; margin-bottom: 13px; }
+.arrival-lab-control label { color: var(--paper-bright); font-size: 0.75rem; font-weight: 800; }
+.arrival-lab-control select {
+  padding: 8px 28px 8px 9px;
+  border: 1px solid rgba(117, 226, 218, 0.36);
+  border-radius: 3px;
+  background: #10283c;
+  color: var(--paper-bright);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+}
+
+.arrival-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.arrival-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 13px 14px;
+  border: 1px solid rgba(117, 226, 218, 0.18);
+  border-radius: var(--radius-md);
+  background: rgba(10, 26, 42, 0.52);
+}
+.arrival-option > div { display: grid; gap: 4px; }
+.arrival-option-label { color: var(--cyan); font-family: var(--mono); font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.arrival-option strong { color: var(--white); font-size: 1.2rem; }
+.arrival-option span:last-child { color: #91a9b8; font-family: var(--mono); font-size: 0.55rem; }
+.arrival-option button {
+  flex: 0 0 auto;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 169, 90, 0.5);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--orange);
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  cursor: pointer;
+}
+.arrival-option button:hover:not(:disabled) { background: rgba(255, 169, 90, 0.12); }
+.arrival-option button:disabled { border-color: rgba(117, 226, 218, 0.28); color: var(--cyan); cursor: default; }
+.arrival-lab-boundary { margin: 13px 0 0; color: #7892a5; font-size: 0.54rem; }
+.arrival-lab-status { min-height: 0.9em; margin: 4px 0 0; color: var(--cyan); font-size: 0.55rem; }
+
 .lane-matrix {
   display: grid;
   gap: 3px;
@@ -2779,6 +2865,24 @@ main {
   .research-actions button {
     flex: 1 1 30%;
   }
+
+  .arrival-lab {
+    margin-top: 20px;
+    padding: 15px 14px 14px;
+  }
+
+  .arrival-lab h2 { font-size: 0.92rem; }
+  .arrival-lab-badge { font-size: 0.43rem; }
+  .arrival-lab-intro { margin: 7px 0 12px; font-size: 0.53rem; }
+  .arrival-lab-control { align-items: flex-start; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .arrival-lab-control label { font-size: 0.65rem; }
+  .arrival-lab-control select { width: 100%; }
+  .arrival-options { grid-template-columns: 1fr; gap: 7px; }
+  .arrival-option { padding: 10px; }
+  .arrival-option strong { font-size: 1rem; }
+  .arrival-option span:last-child { font-size: 0.5rem; }
+  .arrival-option button { font-size: 0.5rem; }
+  .arrival-lab-boundary { margin-top: 10px; font-size: 0.48rem; }
 
   .crossing-card {
     min-height: 210px;
