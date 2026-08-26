@@ -20,6 +20,6 @@ Constraints:
 - Unexpected program errors must still fail the workflow.
 - Do not change the traveler-facing product.
 
-Verification: the live feed currently reports `last_updated_date=2026-8-26` while target ports report `8/25/2026`; normalization returns no timestamped observations and the archive remains valid with 36 rows across 2 partitions. Tests must prove safe skips preserve the archive and unexpected errors remain failures.
+Verification: the live feed previously reported `last_updated_date=2026-8-26` while target ports reported `8/25/2026`; normalization returned no timestamped observations and the archive remained unchanged. After the safe-skip fix, scheduled runs `32935016402` and `32937676973` passed, and the archive is valid with 42 rows across 2 partitions. Tests prove safe skips preserve the archive and unexpected errors remain failures.
 
 Next step: Wait for the next product evidence boundary: frequent-crosser observation of the decision wedge.
