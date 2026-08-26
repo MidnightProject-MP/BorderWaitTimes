@@ -52,3 +52,8 @@
 - Current Timing Data Gate: `timing-data.mjs` requires an explicit `official` or `illustrative` mode, preserves dataset provenance, filters official timing to border-processing observations, rejects mixed or unexpected sources, and reports official insufficiency or unavailability without synthetic fallback.
 - Current Verification Update: `timing-data-check.mjs` and all existing timing, archive, adapter, collection, syntax, whitespace, and browser checks pass. Current official archives contain 111 CBP rows and 3 Caltrans rows; the illustrative archive contains 1,008 synthetic rows.
 - Next Story: Continue official history collection and advance migration only for port/lane/time subjects that meet declared descriptive coverage thresholds.
+- Completed Story: As a maintainer, I can measure official history cadence, gaps, freshness, and subject coverage before migrating timing inputs.
+- Current Official Readiness: `official-readiness.mjs` reports per-subject official provenance, descriptive coverage status, freshness counts, source-time windows, median cadence, and largest gaps while keeping CBP border processing separate from Caltrans roadway context.
+- Current Readiness Reality: The unified official archive contains 12 subject groups from 111 CBP and 3 Caltrans observations; CBP subjects cover only 1-2 observed days, and Caltrans travel-time history is stale, so official timing migration remains unsupported.
+- Current Verification Update: `npm run check:official-readiness` and the complete timing, archive, adapter, collection, syntax, whitespace, and browser suite pass.
+- Next Story: Continue official history collection and migrate only subjects that meet declared per-subject timing coverage thresholds.

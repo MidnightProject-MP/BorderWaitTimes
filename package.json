@@ -18,6 +18,7 @@
     "check:illustrative": "node illustrative-dataset-check.mjs",
     "check:timing-context": "node timing-context-check.mjs",
     "check:timing-data": "node timing-data-check.mjs",
+    "check:official-readiness": "node official-readiness-check.mjs",
     "check:collection": "node archive-collection-check.mjs",
     "collect:caltrans-archive": "node caltrans-archive-collector.mjs",
     "collect:archives": "node archive-collector.mjs",
