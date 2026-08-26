@@ -15,7 +15,7 @@ Why now: Traveler feedback identifies a geography error in the choice set: San Y
 2. Show all lane/program values for each relevant port in the primary comparison. Complete.
 3. Keep official CBP reads separate and label illustrative values without hiding the choice set. Complete.
 4. Verify mobile fit, bilingual behavior, selection, and unrelated-port exclusion. Complete.
-5. Update durable state, commit, push, and provide the testable build. In progress.
+5. Update durable state, commit, push, and provide the testable build. Complete.
 
 Constraints:
 
@@ -31,4 +31,4 @@ Constraints:
 
 Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. `npm run verify:cbp-archive` passes with 89 rows across 2 partitions. Existing adapter, archive, syntax, and whitespace checks remain passing.
 
-Next step: Deliver the completed geography/lane comparison Story, then select the next data-foundation Story from the remaining source and timing gaps rather than extending presentation work by default.
+Next step: Select the next data-foundation Story from the remaining source and timing gaps rather than extending presentation work by default.
