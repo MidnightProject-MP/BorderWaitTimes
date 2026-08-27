@@ -106,4 +106,6 @@
 
 - Product Direction Update: Cruce's long-term ambition is to develop an empirical understanding of the border, treating upstream feeds as sensors and evidence rather than the end product. This direction is recorded in `PRODUCT-VISION.md` without committing architecture or a feature roadmap.
 - Current Signal Reality: CBP provides narrow northbound lane estimates, operating state, and `lanesOpen`; Caltrans provides limited official approach travel-time and closure context. The current system has no physical queue extent, throughput, movement, queue-topology, or completed-crossing ground truth.
-- Active Story: Identify which border signals and ground-truth outcomes are measurable enough to justify the empirical direction. Do not build forecasting or treat illustrative/local choice data as crossing outcomes.
+- Completed Story: As a product owner, I can identify which border signals and ground-truth outcomes are measurable enough to justify Cruce's empirical border-understanding direction.
+- Current Audit Outcome: CBP lane estimates, operating state, and `lanesOpen` are measurable; Caltrans provides limited U.S.-side approach and closure context. Physical queue extent, throughput, movement, queue topology, and completed-crossing duration remain absent or consent-dependent.
+- Next Story: Run moderated discovery to determine which traveler outcome and ground-truth signal is valuable enough to collect first. Do not build forecasting or treat illustrative/local choice data as crossing outcomes.

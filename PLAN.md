@@ -74,14 +74,9 @@ Current synchronized archive: 127 CBP rows and 8 Caltrans rows after the remote 
 Current synchronized archive update: 147 CBP rows across 3 partitions and 9 Caltrans rows across 2 partitions; no timing subject meets declared migration thresholds.
 Completed Story: As a maintainer, I can record the next scheduled official snapshot and reassess timing coverage without overstating stale or deduplicated observations.
 
-Execution:
+Completed Story: As a product owner, I can identify which border signals and ground-truth outcomes are measurable enough to justify Cruce's empirical border-understanding direction.
 
-1. Run the CBP and Caltrans collectors independently through the combined archive collector.
-2. Verify archive integrity and official-readiness metrics from the resulting files.
-3. Update durable state only if the source-observed archive changes.
-4. Commit and push the completed collection outcome.
-
-Next Story: As a product owner, I can identify which border signals and ground-truth outcomes are measurable enough to justify Cruce's empirical border-understanding direction.
+Audit outcome: CBP lane estimates, operating state, and `lanesOpen` are measurable; Caltrans provides limited U.S.-side approach and closure context. Physical queue extent, throughput, movement, queue topology, and completed-crossing duration remain absent or consent-dependent.
 
 Execution:
 
@@ -91,4 +86,6 @@ Execution:
 4. Record unsupported claims, decision gates, and the next bounded research action.
 5. Verify documentation consistency, commit, and push the durable direction update.
 
-Boundary: Do not build a forecast, infer queue geography from synthetic values, or treat local choice capture as completed-crossing ground truth. Keep scheduled official collection separate from this discovery Story.
+Next Story: Run moderated discovery to determine which traveler outcome and ground-truth signal is valuable enough to collect first.
+
+Boundary: Do not build a forecast, infer queue geography from synthetic values, or treat local choice capture as completed-crossing ground truth. The next Story requires real participant evidence and consented outcome data.
