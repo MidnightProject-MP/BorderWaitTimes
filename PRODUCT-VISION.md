@@ -10,6 +10,12 @@ Cruce helps a traveler make the best border decision while they still have the p
 
 The interface should reconcile complicated sources into one actionable answer. More intelligence underneath should usually produce less complexity above.
 
+## Strategic Direction
+
+Cruce's long-term opportunity is to develop its own empirical understanding of the Tijuana-San Diego border rather than merely republish upstream sources. Existing feeds are sensors and evidence, not the complete truth. Useful future signals may include queue extent, queue movement, lane/program, effective capacity, throughput, approach conditions, official estimates, calendar effects, and consented completed-crossing outcomes.
+
+The intended learning loop is observe, learn, model, measure, predict, improve decisions, observe outcomes, and learn again. This is direction, not an architecture or feature commitment. Each step must earn its way through measurable signals, explicit provenance, consent where needed, and calibration against ground truth. The product should remain simple even as the intelligence underneath becomes more sophisticated.
+
 ## Journey States
 
 | State | Decision flexibility | Product job |
@@ -42,8 +48,12 @@ The useful segmentation is journey state and decision flexibility, not demograph
 - Consented crossing traces can eventually support personal estimates and queue-topology intelligence.
 - A functional queue geography can outperform generic map traffic inside border approaches.
 - Premium value should come from personal planning and intervention, not withholding basic public intelligence or requiring contribution to the network.
+- A completed crossing can provide calibration evidence for prior official estimates and Cruce observations.
+- Independent queue and capacity signals can produce knowledge that no single upstream source contains.
 
 These are hypotheses, not commitments. They must earn implementation through evidence and calibrated forecast performance. Do not claim total crossing accuracy, queue inference, or personal prediction from the current prototype and archive.
+
+The current evidence gap is material: official archives provide narrow lane estimates and limited approach context, but not physical queue extent, throughput, movement, or completed-crossing duration. Those gaps require discovery and consented evidence collection before modeling claims are justified.
 
 ## Evidence Sequence
 

@@ -81,4 +81,14 @@ Execution:
 3. Update durable state only if the source-observed archive changes.
 4. Commit and push the completed collection outcome.
 
-Boundary: Do not promote timing data to traveler-facing forecasting unless declared coverage thresholds are met. The next actionable Story remains moderated arrival-window discovery using the existing illustrative interaction.
+Next Story: As a product owner, I can identify which border signals and ground-truth outcomes are measurable enough to justify Cruce's empirical border-understanding direction.
+
+Execution:
+
+1. Inventory current official signals, archive fields, and existing local research evidence.
+2. Separate observable signals from missing or consent-dependent evidence.
+3. Define the smallest discovery evidence slice without specifying an implementation or claiming participant results.
+4. Record unsupported claims, decision gates, and the next bounded research action.
+5. Verify documentation consistency, commit, and push the durable direction update.
+
+Boundary: Do not build a forecast, infer queue geography from synthetic values, or treat local choice capture as completed-crossing ground truth. Keep scheduled official collection separate from this discovery Story.
