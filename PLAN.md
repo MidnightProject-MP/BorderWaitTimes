@@ -114,6 +114,10 @@ Completed Story: As a maintainer, I can add confirmed scope metadata through a n
 
 Implementation: `scoped-observation-check.mjs` validates `scoped-observation-v1` overlays keyed to source observation IDs, including source-confirmed vocabulary, timestamp order, explicit exclusions, and rejection of prediction/location fields.
 
-Next Story: Define a mechanical overlay reader that joins confirmed scope records to source observations without changing source semantics.
+Completed Story: As a maintainer, I can mechanically join confirmed scope overlays to source observations without changing source semantics.
+
+Implementation: `scoped-observation.mjs` validates overlays, rejects unknown or mismatched references, and returns source observations paired with scope records without mutating either input.
+
+Next Story: Define an explicit source-scope fixture set for each confirmed CBP and Caltrans mapping before any archive integration.
 
 Boundary: Do not present forecasting, queue inference, location-derived observations, simulation, or machine-learning output as validated traveler capabilities. External participant research is a future opportunity, not a dependency for autonomous investigation.
