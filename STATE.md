@@ -120,3 +120,6 @@
 - Completed Story: As a maintainer, I can define consented crossing-session event labels and privacy boundaries before implementing movement or location capture.
 - Research Artifact: `CROSSING-SESSION.md` defines timestamp-only, opt-in session events with explicit capture method, precision, confidence, label status, deletion, and non-location boundaries.
 - Next Story: Define leakage-safe evaluation records and simple descriptive baselines for future crossing outcomes. External research remains a future opportunity, not a blocker.
+- Completed Story: As a maintainer, I can define leakage-safe evaluation records and simple descriptive baselines for future crossing outcomes.
+- Research Artifact: `MODEL-EVALUATION.md` defines target scope, input cutoffs, chronological splits, simple baselines, outcome eligibility, and error/calibration metrics without implementing a forecast.
+- Next Story: Implement a small validation harness for research records without connecting it to traveler-facing timing or synthetic performance claims. External research remains a future opportunity, not a blocker.

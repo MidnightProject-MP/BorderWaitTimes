@@ -98,6 +98,10 @@ Completed Story: As a maintainer, I can define consented crossing-session event 
 
 Research artifacts: `BORDER-TOPOLOGY.md` and `CROSSING-SESSION.md` define versioned vocabulary, event semantics, provenance, privacy, and validation boundaries without collecting or exposing traveler traces.
 
-Next Story: Define leakage-safe evaluation records and simple descriptive baselines for future crossing outcomes.
+Completed Story: As a maintainer, I can define leakage-safe evaluation records and simple descriptive baselines for future crossing outcomes.
+
+Research artifact: `MODEL-EVALUATION.md` defines prediction scope, input cutoffs, chronological splits, baseline comparisons, outcome eligibility, and error/calibration metrics without implementing a forecast.
+
+Next Story: Implement a small validation harness for research records without connecting it to traveler-facing timing or synthetic performance claims.
 
 Boundary: Do not present forecasting, queue inference, location-derived observations, simulation, or machine-learning output as validated traveler capabilities. External participant research is a future opportunity, not a dependency for autonomous investigation.
