@@ -9,7 +9,10 @@
       navCrossings: "Crossings",
       navNotes: "Border notes",
       prototypeBadge: "Prototype / demo data",
-      noAds: "No ads",
+       noAds: "No ads",
+       connectionReady: "Ready for optional checks",
+       connectionOffline: "Offline · saved app shell available",
+       connectionLimited: "Low data mode · checks stay manual",
       pulseEyebrow: "Border pulse / illustrative 08:30 PT",
       heroTitleOne: "Know before",
       heroTitleTwo: "you cross.",
@@ -205,7 +208,10 @@
       navCrossings: "Cruces",
       navNotes: "Notas fronterizas",
       prototypeBadge: "Prototipo / datos demo",
-      noAds: "Sin anuncios",
+       noAds: "Sin anuncios",
+       connectionReady: "Listo para consultas opcionales",
+       connectionOffline: "Sin conexión · la app guardada está disponible",
+       connectionLimited: "Modo de pocos datos · consultas manuales",
       pulseEyebrow: "Pulso fronterizo / ilustrativo 08:30 PT",
       heroTitleOne: "Cruza con",
       heroTitleTwo: "claridad.",
@@ -571,7 +577,8 @@
   };
 
   const elements = {
-    languageToggle: document.getElementById("languageToggle"),
+     languageToggle: document.getElementById("languageToggle"),
+     connectionStatus: document.getElementById("connectionStatus"),
     directionButtons: Array.from(document.querySelectorAll("[data-direction]")),
      pulseRouteLabel: document.getElementById("pulseRouteLabel"),
      pulseStartLabel: document.getElementById("pulseStartLabel"),
@@ -670,6 +677,18 @@
       pedestrianStandard: "lanePedestrian"
     };
     return text(labels[state.lane]);
+  }
+
+  function constrainedConnection() {
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    return !navigator.onLine || Boolean(connection && (connection.saveData || /(^|-)2g$/.test(connection.effectiveType || "")));
+  }
+
+  function renderConnectionStatus() {
+    const stateKey = navigator.onLine ? (constrainedConnection() ? "connectionLimited" : "connectionReady") : "connectionOffline";
+    elements.connectionStatus.textContent = text(stateKey);
+    elements.connectionStatus.classList.toggle("is-offline", !navigator.onLine);
+    elements.connectionStatus.classList.toggle("is-limited", navigator.onLine && constrainedConnection());
   }
 
   function planningLaneTextFor(lane) {
@@ -800,6 +819,11 @@
 
   async function checkRoadwayContext() {
     if (roadwayState.loading) return;
+    if (!navigator.onLine) {
+      roadwayState.result = { roadwayContext: { travelTime: { status: "unknown" }, laneClosures: { status: "unknown", closures: [] } } };
+      renderRoadwayContext();
+      return;
+    }
     roadwayState.loading = true;
     elements.roadwayCheckButton.disabled = true;
     elements.roadwayCheckButton.textContent = text("roadwayChecking");
@@ -928,6 +952,11 @@
 
   async function checkCbpLanes() {
     if (cbpState.loading || state.direction !== "north") return;
+    if (!navigator.onLine) {
+      cbpState.result = { ports: [] };
+      renderCbpLaneEstimate();
+      return;
+    }
     cbpState.loading = true;
     elements.cbpCheckButton.disabled = true;
     elements.cbpCheckButton.textContent = text("cbpChecking");
@@ -1271,6 +1300,10 @@
   }
 
   elements.languageToggle.addEventListener("click", setLanguage);
+  window.addEventListener("online", renderConnectionStatus);
+  window.addEventListener("offline", renderConnectionStatus);
+  const networkConnection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (networkConnection && typeof networkConnection.addEventListener === "function") networkConnection.addEventListener("change", renderConnectionStatus);
   elements.directionButtons.forEach(function (button) {
     button.addEventListener("click", function () {
       setDirection(button.dataset.direction);
@@ -1348,4 +1381,6 @@
   });
 
   applyTranslations();
+  renderConnectionStatus();
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(function () {});
 })();

@@ -470,6 +470,18 @@ main {
   font-size: 0.52rem;
 }
 
+.connection-status {
+  max-width: 150px;
+  color: #8fa6b6;
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  line-height: 1.25;
+  text-align: right;
+}
+
+.connection-status.is-offline { color: var(--orange); }
+.connection-status.is-limited { color: var(--cyan); }
+
 .area-control {
   display: flex;
   align-items: center;
@@ -2870,6 +2882,8 @@ main {
     margin-top: 20px;
     padding: 15px 14px 14px;
   }
+
+  .connection-status { display: none; }
 
   .arrival-lab h2 { font-size: 0.92rem; }
   .arrival-lab-badge { font-size: 0.43rem; }

@@ -104,14 +104,22 @@ try {
   assert.match(await page.title(), /Celestan/);
   assert.equal(await page.locator("#pulseWait").textContent(), "42");
   assert.equal(roadwayRequests, 0);
+  assert.match(await page.locator("#connectionStatus").innerText(), /Ready for optional checks/i);
   assert.equal(await page.locator(".evidence-disclosure").getAttribute("open"), null);
+  await page.locator(".evidence-disclosure").evaluate(node => { node.open = true; });
+  await page.context().setOffline(true);
+  await page.waitForFunction(() => navigator.onLine === false);
+  assert.match(await page.locator("#connectionStatus").innerText(), /Offline/i);
+  await page.locator("#roadwayCheckButton").click();
+  assert.equal(roadwayRequests, 0);
+  await page.context().setOffline(false);
+  await page.waitForFunction(() => navigator.onLine === true);
   assert.equal(await page.locator("#arrivalOptions [data-arrival-choice]").count(), 2);
   assert.match(await page.locator("#arrivalLabBoundary").innerText(), /Illustrative values only/i);
   await page.locator("#arrivalDeadline").selectOption("10:00");
   await page.locator('#arrivalOptions [data-arrival-choice="otay-mesa"]').click();
   assert.match(await page.locator("#arrivalLabStatus").innerText(), /Saved on this device/i);
   assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("celestan-arrival-window-v1")).length), 1);
-  await page.locator(".evidence-disclosure").evaluate(node => { node.open = true; });
   assert.match(await page.locator("#roadwayContextCard").innerText(), /Roadway context/i);
   assert.match(await page.locator("#roadwayMinutes").innerText(), /No current value/);
 

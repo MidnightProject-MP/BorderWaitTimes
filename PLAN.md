@@ -28,13 +28,14 @@ Completed Story: As a maintainer, I can record the next official snapshot and pr
 Completed Story: As a maintainer, I can record the next scheduled official snapshot and preserve its independent freshness, deduplication, and coverage outcome.
 Completed Story: As a maintainer, I can record the next official snapshot and distinguish new source history from repeated or stale observations.
 Completed Story: As a traveler, I can try an arrival-by planning interaction with clearly labeled illustrative choices and local-only research capture.
+Completed Story: As a traveler, I can use the core decision surface on a poor or offline connection without unnecessary source requests.
 
-Why now: Official history is still maturing, so arrival-window interaction discovery can proceed in parallel using clearly labeled illustrative scenarios without making forecast claims.
+Why now: Border travelers may have poor connectivity. The static decision shell must remain available, optional source checks must stay manual, and offline state must be visible without caching potentially stale live data.
 
-1. Offer explicit arrival deadlines and relevant crossing choices. Complete.
-2. Label all scenario values as illustrative and non-predictive. Complete.
-3. Capture a selected plan locally without remote analytics. Complete.
-4. Preserve the existing mobile first-viewport crossing action. Complete.
+1. Cache the same-origin app shell for repeat/offline loading. Complete.
+2. Show compact online, offline, and low-data status. Complete.
+3. Block optional source requests while offline. Complete.
+4. Keep live source responses out of the app-shell cache. Complete.
 5. Update durable state, commit, push, and provide the testable build. Complete.
 
 Constraints:
@@ -60,6 +61,7 @@ Constraints:
 - Never fall back from official timing data to synthetic timing data silently.
 - Treat readiness metrics as descriptive archive diagnostics, not forecasts or migration approval by themselves.
 - Treat arrival-window interaction output as discovery material, not a forecast or guarantee.
+- Prefer resilient static shell data over a broken live request when connectivity is constrained.
 - Arrival-by and departure-window design remain discovery hypotheses.
 
 Verification: browser coverage proves lane context changes the illustrative primary comparison, keeps San Ysidro and Otay together for Tijuana, excludes Tecate from that choice set, selects Tecate when the starting area changes, remains within the mobile first viewport, and keeps the evidence disclosure closed. The shared observation contract, source archive checks, unified history checks, summary/coverage checks, collection orchestration checks, live collection run, illustrative dataset checks, timing-context checks, timing-data checks, and official-readiness checks pass legacy CBP mapping, canonical Caltrans mapping, deterministic ordering, domain separation, corruption rejection, null preservation, descriptive min/max/median, freshness counts, coverage windows, declared sample/day/span/value thresholds, invalid-input handling, all-success, partial-failure, total-failure, stale-source, synthetic provenance, synthetic coverage, time-bucket ranking, under-covered query cases, explicit dataset provenance, mixed-source rejection, no-fallback official insufficiency, per-subject source-time cadence, largest-gap calculation, provenance, freshness, and domain separation. Current official archives contain 111 CBP rows across 2 partitions and 4 Caltrans rows across 1 partition; the synthetic archive contains 1,008 explicitly illustrative rows across 28 partitions.
