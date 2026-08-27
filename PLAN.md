@@ -71,5 +71,14 @@ Next step: Continue official history collection and advance migration only when 
 Current archive update: 117 CBP rows and 8 Caltrans rows; the latest snapshot added 2 CBP rows and 1 Caltrans row, with no timing subject meeting declared migration thresholds.
 
 Current synchronized archive: 127 CBP rows and 8 Caltrans rows after the remote CBP collection update; no timing subject meets declared migration thresholds.
-Current synchronized archive update: 137 CBP rows across 3 partitions and 8 Caltrans rows; no timing subject meets declared migration thresholds.
-Next actionable Story: run moderated arrival-window discovery using the existing illustrative interaction rather than creating another mechanical collection Story.
+Current synchronized archive update: 147 CBP rows across 3 partitions and 9 Caltrans rows across 2 partitions; no timing subject meets declared migration thresholds.
+Completed Story: As a maintainer, I can record the next scheduled official snapshot and reassess timing coverage without overstating stale or deduplicated observations.
+
+Execution:
+
+1. Run the CBP and Caltrans collectors independently through the combined archive collector.
+2. Verify archive integrity and official-readiness metrics from the resulting files.
+3. Update durable state only if the source-observed archive changes.
+4. Commit and push the completed collection outcome.
+
+Boundary: Do not promote timing data to traveler-facing forecasting unless declared coverage thresholds are met. The next actionable Story remains moderated arrival-window discovery using the existing illustrative interaction.

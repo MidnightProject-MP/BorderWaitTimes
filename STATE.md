@@ -78,6 +78,11 @@
 - Current Readiness Update: The official archive now contains 125 unified observations, including 117 CBP rows and 8 Caltrans rows across 12 subject groups; 0 subjects meet the declared migration thresholds.
 - Current Verification Update: Archive verification, official-readiness, timing, adapter, collection, syntax, whitespace, and browser checks pass.
 - Next Story: Continue scheduled official collection and reassess per-subject timing coverage after new source-observed days accumulate.
+- Completed Story: As a maintainer, I can record the next scheduled official snapshot and reassess timing coverage without overstating stale or deduplicated observations.
+- Current Collection Update: The latest multi-source run observed 10 CBP rows and added 10 fresh observations. It observed 2 Caltrans rows and added 1 fresh roadway-closure observation; 1 was stale, so Caltrans remains degraded.
+- Current Readiness Update: The official archive now contains 156 unified observations, including 147 CBP rows across 3 partitions and 9 Caltrans rows across 2 partitions; 0 subjects meet the declared migration thresholds.
+- Current Verification Update: CBP archive, Caltrans archive, official-readiness, and collection checks pass.
+- Next Story: Use moderated discovery to test whether arrival deadlines, departure windows, flexibility, or eligibility are the recurring traveler constraint; do not promote either illustrative timing or connectivity state into a forecast claim.
 - Completed Story: As a maintainer, I can record the next scheduled official snapshot and preserve its independent freshness, deduplication, and coverage outcome.
 - Current Collection Update: The latest multi-source run observed 10 CBP rows and added 0 because all were duplicates; 8 were fresh and 2 were stale. It observed 2 Caltrans rows and added 1 fresh roadway-closure observation; 1 was stale, so Caltrans remains degraded.
 - Current Readiness Update: The official archive now contains 122 unified observations, including 115 CBP rows and 7 Caltrans rows across 12 subject groups; 0 subjects meet the declared migration thresholds.
