@@ -90,6 +90,14 @@ Completed Story: As a maintainer, I can document the autonomous research space f
 
 Research artifact: `BORDER-SYSTEM-RESEARCH.md` separates single-expert domain evidence, confirmed source signals, missing ground truth, future research contracts, evidence gates, and reversible research tracks.
 
-Next Story: Define a versioned physical-topology vocabulary and measurement-boundary questions without asserting unmeasured queue geometry.
+Completed Story: As a maintainer, I can define a versioned physical-topology vocabulary and measurement-boundary questions without asserting unmeasured queue geometry.
+
+Research artifact: `BORDER-TOPOLOGY.md` names domain-informed and unknown segments for San Ysidro, Otay Mesa, and Tecate while preserving evidence status and scope boundaries.
+
+Completed Story: As a maintainer, I can define consented crossing-session event labels and privacy boundaries before implementing movement or location capture.
+
+Research artifacts: `BORDER-TOPOLOGY.md` and `CROSSING-SESSION.md` define versioned vocabulary, event semantics, provenance, privacy, and validation boundaries without collecting or exposing traveler traces.
+
+Next Story: Define leakage-safe evaluation records and simple descriptive baselines for future crossing outcomes.
 
 Boundary: Do not present forecasting, queue inference, location-derived observations, simulation, or machine-learning output as validated traveler capabilities. External participant research is a future opportunity, not a dependency for autonomous investigation.

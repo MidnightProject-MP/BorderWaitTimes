@@ -114,3 +114,9 @@
 - Completed Story: As a maintainer, I can document the autonomous research space for Cruce's empirical border-understanding direction without turning hypotheses into product claims.
 - Research Artifact: `BORDER-SYSTEM-RESEARCH.md` separates confirmed signals, domain evidence, missing ground truth, topology/session/evaluation research contracts, evidence gates, and reversible research tracks.
 - Next Story: Define a versioned physical-topology vocabulary and measurement-boundary questions without asserting unmeasured queue geometry. External research remains a future opportunity, not a blocker.
+- Completed Story: As a maintainer, I can define a versioned physical-topology vocabulary and measurement-boundary questions without asserting unmeasured queue geometry.
+- Research Artifact: `BORDER-TOPOLOGY.md` names domain-informed and unknown segments for San Ysidro, Otay Mesa, and Tecate while preserving evidence status and source-scope boundaries.
+- Next Story: Define consented crossing-session event labels and privacy boundaries before implementing movement or location capture. External research remains a future opportunity, not a blocker.
+- Completed Story: As a maintainer, I can define consented crossing-session event labels and privacy boundaries before implementing movement or location capture.
+- Research Artifact: `CROSSING-SESSION.md` defines timestamp-only, opt-in session events with explicit capture method, precision, confidence, label status, deletion, and non-location boundaries.
+- Next Story: Define leakage-safe evaluation records and simple descriptive baselines for future crossing outcomes. External research remains a future opportunity, not a blocker.
