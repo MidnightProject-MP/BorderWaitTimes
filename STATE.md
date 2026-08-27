@@ -61,7 +61,6 @@
 - Current Collection Update: The latest multi-source run observed 10 CBP rows and added 0 because all were duplicates; it observed 2 Caltrans rows and added 1 fresh roadway-closure observation. CBP quality was fresh; Caltrans quality remained degraded because travel-time history is stale.
 - Current Readiness Update: The official archive now contains 115 unified observations, including 111 CBP rows and 4 Caltrans rows across 12 subject groups; no subject meets the declared migration thresholds.
 - Next Story: Continue scheduled official collection and reassess per-subject timing coverage after new source-observed days accumulate.
-
 - Current Synchronized Reality: Remote collection commit `6e7cfe9` added 10 CBP observations; the verified CBP archive now contains 127 rows across 2 partitions, while Caltrans remains at 8 rows. No timing subject meets declared migration thresholds.
 - Autonomy Boundary: The next highest-value Story is moderated arrival-window discovery using the existing illustrative interaction. It requires participant evidence and should not be simulated as completed by autonomous code changes.
 - Current Synchronized Reality Update: Remote collection commit `809d24a` added 10 CBP observations; the verified official archive now contains 145 unified observations, including 137 CBP rows across 3 partitions and 8 Caltrans rows. Readiness remains unsupported for migration.
