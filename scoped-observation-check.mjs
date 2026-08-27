@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { readObservationHistory } from './observation-history.mjs';
 import { joinScopedObservations, validateScopedObservation } from './scoped-observation.mjs';
 
 const cbpScope = {
@@ -72,5 +74,13 @@ assert.throws(() => validateScopedObservation({ ...record, scope: { ...cbpScope,
 assert.throws(() => joinScopedObservations({ observations: [], scopes: [record] }), /unknown source observation/);
 assert.throws(() => joinScopedObservations({ observations: [{ ...observation, source: 'caltrans' }], scopes: [record] }), /scope source mismatch/);
 assert.throws(() => joinScopedObservations({ observations: [observation], scopes: [record, { ...record, recordId: 'scope-overlay-2' }] }), /duplicate scope overlay/);
+
+const archive = await readObservationHistory();
+const archiveScopes = (await readFile(new URL('./scope-overlay-fixtures.ndjson', import.meta.url), 'utf8'))
+  .split('\n').filter(Boolean).map((line) => JSON.parse(line));
+const archiveJoined = joinScopedObservations({ observations: archive, scopes: archiveScopes });
+assert.equal(archiveJoined.filter(({ scopeRecord }) => scopeRecord).length, 2);
+assert.equal(archiveJoined.find(({ scopeRecord }) => scopeRecord?.scope.domain === 'border-processing').observation.subject, 'otay-mesa:passengerStandard');
+assert.equal(archiveJoined.find(({ scopeRecord }) => scopeRecord?.scope.domain === 'roadway-approach').observation.observationType, 'roadway_lane_closure');
 
 console.log('scoped observation checks passed');

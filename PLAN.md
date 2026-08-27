@@ -122,6 +122,10 @@ Completed Story: As a maintainer, I can define an explicit source-scope fixture 
 
 Implementation: `scoped-observation-check.mjs` covers a CBP border-processing overlay and a Caltrans roadway-approach overlay, verifying that their domains and exclusions remain distinct.
 
-Next Story: Create research-only scope overlays for selected verified archive observations and validate end-to-end joins without changing the official archives.
+Completed Story: As a maintainer, I can create research-only scope overlays for selected verified archive observations and validate end-to-end joins without changing the official archives.
+
+Implementation: `scope-overlay-fixtures.ndjson` contains one canonical CBP overlay and one canonical Caltrans overlay; `scoped-observation-check.mjs` joins both to the verified history while leaving source rows unchanged.
+
+Next Story: Define a source-scope overlay reader that can load a research-only overlay file independently from official archive collection.
 
 Boundary: Do not present forecasting, queue inference, location-derived observations, simulation, or machine-learning output as validated traveler capabilities. External participant research is a future opportunity, not a dependency for autonomous investigation.

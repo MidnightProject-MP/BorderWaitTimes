@@ -129,6 +129,9 @@
 - Completed Story: As a maintainer, I can define a source measurement-scope vocabulary and confirmed CBP/Caltrans mappings without expanding source semantics.
 - Research Artifact: `SOURCE-SCOPE.md` defines scope fields, confirmed source mappings, comparison rules, and unknowns while leaving version-1 archive rows immutable.
 - Next Story: Create research-only scope overlays for selected verified archive observations and validate end-to-end joins without changing the official archives. External research remains a future opportunity, not a blocker.
+- Completed Story: As a maintainer, I can create research-only scope overlays for selected verified archive observations and validate end-to-end joins without changing the official archives.
+- Implementation: `scope-overlay-fixtures.ndjson` contains one canonical CBP overlay and one canonical Caltrans overlay; `scoped-observation-check.mjs` joins both to verified history while leaving source rows unchanged.
+- Next Story: Define a source-scope overlay reader that can load a research-only overlay file independently from official archive collection. External research remains a future opportunity, not a blocker.
 - Completed Story: As a maintainer, I can add confirmed scope metadata through a new versioned research record without mutating committed official observations.
 - Implementation: `scoped-observation-check.mjs` validates `scoped-observation-v1` overlays keyed to source observation IDs, including source-confirmed vocabulary, timestamp order, explicit exclusions, and rejection of prediction/location fields.
 - Next Story: Define a mechanical overlay reader that joins confirmed scope records to source observations without changing source semantics. External research remains a future opportunity, not a blocker.
