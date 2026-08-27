@@ -20,6 +20,7 @@
     "check:timing-data": "node timing-data-check.mjs",
     "check:official-readiness": "node official-readiness-check.mjs",
     "check:collection": "node archive-collection-check.mjs",
+    "check:research-contracts": "node research-contract-check.mjs",
     "collect:caltrans-archive": "node caltrans-archive-collector.mjs",
     "collect:archives": "node archive-collector.mjs",
     "verify:cbp-archive": "node cbp-archive-verify.mjs",

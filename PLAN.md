@@ -102,6 +102,10 @@ Completed Story: As a maintainer, I can define leakage-safe evaluation records a
 
 Research artifact: `MODEL-EVALUATION.md` defines prediction scope, input cutoffs, chronological splits, baseline comparisons, outcome eligibility, and error/calibration metrics without implementing a forecast.
 
-Next Story: Implement a small validation harness for research records without connecting it to traveler-facing timing or synthetic performance claims.
+Completed Story: As a maintainer, I can validate research session and evaluation records without connecting them to traveler-facing timing or synthetic performance claims.
+
+Implementation: `research-contract-check.mjs` validates consent, timestamp precision, event order, no-location boundaries, prediction cutoff order, interval order, and evaluation eligibility.
+
+Next Story: Define a source measurement-scope vocabulary and attach it only where official source semantics are confirmed.
 
 Boundary: Do not present forecasting, queue inference, location-derived observations, simulation, or machine-learning output as validated traveler capabilities. External participant research is a future opportunity, not a dependency for autonomous investigation.

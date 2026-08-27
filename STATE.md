@@ -123,3 +123,6 @@
 - Completed Story: As a maintainer, I can define leakage-safe evaluation records and simple descriptive baselines for future crossing outcomes.
 - Research Artifact: `MODEL-EVALUATION.md` defines target scope, input cutoffs, chronological splits, simple baselines, outcome eligibility, and error/calibration metrics without implementing a forecast.
 - Next Story: Implement a small validation harness for research records without connecting it to traveler-facing timing or synthetic performance claims. External research remains a future opportunity, not a blocker.
+- Completed Story: As a maintainer, I can validate research session and evaluation records without connecting them to traveler-facing timing or synthetic performance claims.
+- Implementation: `research-contract-check.mjs` validates consent, timestamp precision, event order, no-location boundaries, prediction cutoff order, interval order, and evaluation eligibility.
+- Next Story: Define a source measurement-scope vocabulary and attach it only where official source semantics are confirmed. External research remains a future opportunity, not a blocker.
