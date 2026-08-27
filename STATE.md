@@ -126,3 +126,6 @@
 - Completed Story: As a maintainer, I can validate research session and evaluation records without connecting them to traveler-facing timing or synthetic performance claims.
 - Implementation: `research-contract-check.mjs` validates consent, timestamp precision, event order, no-location boundaries, prediction cutoff order, interval order, and evaluation eligibility.
 - Next Story: Define a source measurement-scope vocabulary and attach it only where official source semantics are confirmed. External research remains a future opportunity, not a blocker.
+- Completed Story: As a maintainer, I can define a source measurement-scope vocabulary and confirmed CBP/Caltrans mappings without expanding source semantics.
+- Research Artifact: `SOURCE-SCOPE.md` defines scope fields, confirmed source mappings, comparison rules, and unknowns while leaving version-1 archive rows immutable.
+- Next Story: Add scope metadata to a new versioned research record without mutating committed official observations. External research remains a future opportunity, not a blocker.
