@@ -71,7 +71,7 @@ Next step: Continue official history collection and advance migration only when 
 Current archive update: 117 CBP rows and 8 Caltrans rows; the latest snapshot added 2 CBP rows and 1 Caltrans row, with no timing subject meeting declared migration thresholds.
 
 Current synchronized archive: 127 CBP rows and 8 Caltrans rows after the remote CBP collection update; no timing subject meets declared migration thresholds.
-Current synchronized archive update: 147 CBP rows across 3 partitions and 9 Caltrans rows across 2 partitions; no timing subject meets declared migration thresholds.
+Current synchronized archive update: 157 CBP rows across 3 partitions and 9 Caltrans rows across 2 partitions; no timing subject meets declared migration thresholds.
 Completed Story: As a maintainer, I can record the next scheduled official snapshot and reassess timing coverage without overstating stale or deduplicated observations.
 
 Completed Story: As a product owner, I can identify which border signals and ground-truth outcomes are measurable enough to justify Cruce's empirical border-understanding direction.

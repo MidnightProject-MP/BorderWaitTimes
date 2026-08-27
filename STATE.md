@@ -109,3 +109,4 @@
 - Completed Story: As a product owner, I can identify which border signals and ground-truth outcomes are measurable enough to justify Cruce's empirical border-understanding direction.
 - Current Audit Outcome: CBP lane estimates, operating state, and `lanesOpen` are measurable; Caltrans provides limited U.S.-side approach and closure context. Physical queue extent, throughput, movement, queue topology, and completed-crossing duration remain absent or consent-dependent.
 - Next Story: Run moderated discovery to determine which traveler outcome and ground-truth signal is valuable enough to collect first. Do not build forecasting or treat illustrative/local choice data as crossing outcomes.
+- Current Archive Reality: Remote collection commit `2b2115c` added 10 fresh CBP observations; verified official archives now contain 157 CBP rows across 3 partitions and 9 Caltrans rows across 2 partitions. No timing subject meets declared migration thresholds.
