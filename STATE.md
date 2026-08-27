@@ -129,3 +129,6 @@
 - Completed Story: As a maintainer, I can define a source measurement-scope vocabulary and confirmed CBP/Caltrans mappings without expanding source semantics.
 - Research Artifact: `SOURCE-SCOPE.md` defines scope fields, confirmed source mappings, comparison rules, and unknowns while leaving version-1 archive rows immutable.
 - Next Story: Add scope metadata to a new versioned research record without mutating committed official observations. External research remains a future opportunity, not a blocker.
+- Completed Story: As a maintainer, I can add confirmed scope metadata through a new versioned research record without mutating committed official observations.
+- Implementation: `scoped-observation-check.mjs` validates `scoped-observation-v1` overlays keyed to source observation IDs, including source-confirmed vocabulary, timestamp order, explicit exclusions, and rejection of prediction/location fields.
+- Next Story: Define a mechanical overlay reader that joins confirmed scope records to source observations without changing source semantics. External research remains a future opportunity, not a blocker.

@@ -16,7 +16,7 @@ Status: Research and provenance contract. These labels describe what a source re
 | `coverage` | Plain-language boundary of what is included. |
 | `exclusions` | Explicitly excluded journey portions or meanings. |
 
-Every future scope object should state included and excluded portions instead of relying on a source name or field name to imply semantics.
+Every future scope object should state included and excluded portions instead of relying on a source name or field name to imply semantics. Attach confirmed scope through a separate `scoped-observation-v1` overlay keyed by `sourceObservationId`; do not rewrite version-1 archive rows.
 
 ## Confirmed Mappings
 
