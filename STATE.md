@@ -128,10 +128,13 @@
 - Next Story: Define a source measurement-scope vocabulary and attach it only where official source semantics are confirmed. External research remains a future opportunity, not a blocker.
 - Completed Story: As a maintainer, I can define a source measurement-scope vocabulary and confirmed CBP/Caltrans mappings without expanding source semantics.
 - Research Artifact: `SOURCE-SCOPE.md` defines scope fields, confirmed source mappings, comparison rules, and unknowns while leaving version-1 archive rows immutable.
-- Next Story: Add scope metadata to a new versioned research record without mutating committed official observations. External research remains a future opportunity, not a blocker.
+- Next Story: Create research-only scope overlays for selected verified archive observations and validate end-to-end joins without changing the official archives. External research remains a future opportunity, not a blocker.
 - Completed Story: As a maintainer, I can add confirmed scope metadata through a new versioned research record without mutating committed official observations.
 - Implementation: `scoped-observation-check.mjs` validates `scoped-observation-v1` overlays keyed to source observation IDs, including source-confirmed vocabulary, timestamp order, explicit exclusions, and rejection of prediction/location fields.
 - Next Story: Define a mechanical overlay reader that joins confirmed scope records to source observations without changing source semantics. External research remains a future opportunity, not a blocker.
 - Completed Story: As a maintainer, I can mechanically join confirmed scope overlays to source observations without changing source semantics.
 - Implementation: `scoped-observation.mjs` validates overlays, rejects unknown or mismatched references, and returns source observations paired with scope records without mutating either input.
 - Next Story: Define an explicit source-scope fixture set for each confirmed CBP and Caltrans mapping before any archive integration. External research remains a future opportunity, not a blocker.
+- Completed Story: As a maintainer, I can define an explicit source-scope fixture set for confirmed CBP and Caltrans mappings before any archive integration.
+- Implementation: `scoped-observation-check.mjs` covers a CBP border-processing overlay and a Caltrans roadway-approach overlay, verifying that their domains and exclusions remain distinct.
+- Next Story: Create research-only scope overlays for selected verified archive observations and validate end-to-end joins without changing the official archives. External research remains a future opportunity, not a blocker.
