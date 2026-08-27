@@ -63,6 +63,7 @@
 - Next Story: Continue scheduled official collection and reassess per-subject timing coverage after new source-observed days accumulate.
 - Current Synchronized Reality: Remote collection commit `6e7cfe9` added 10 CBP observations; the verified CBP archive now contains 127 rows across 2 partitions, while Caltrans remains at 8 rows. No timing subject meets declared migration thresholds.
 - Autonomy Boundary: The next highest-value Story is moderated arrival-window discovery using the existing illustrative interaction. It requires participant evidence and should not be simulated as completed by autonomous code changes.
+- Current Synchronized Reality Update: Remote collection commit `809d24a` added 10 CBP observations; the verified official archive now contains 145 unified observations, including 137 CBP rows across 3 partitions and 8 Caltrans rows. Readiness remains unsupported for migration.
 - Completed Story: As a traveler, I can try an arrival-by planning interaction with clearly labeled illustrative choices and local-only research capture.
 - Current Discovery Surface: The arrival planning exercise in `index.html`/`app.js` lets a traveler choose a 9:00, 10:00, or 11:00 illustrative deadline, compare only relevant crossing plans, and record one explicit choice in local storage under `celestan-arrival-window-v1`.
 - Current Boundary: The exercise explicitly does not forecast arrival time, validate lane eligibility, use live conditions, or transmit research data. Its placement preserves the existing live crossing action in the mobile first viewport.

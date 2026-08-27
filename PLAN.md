@@ -71,4 +71,5 @@ Next step: Continue official history collection and advance migration only when 
 Current archive update: 117 CBP rows and 8 Caltrans rows; the latest snapshot added 2 CBP rows and 1 Caltrans row, with no timing subject meeting declared migration thresholds.
 
 Current synchronized archive: 127 CBP rows and 8 Caltrans rows after the remote CBP collection update; no timing subject meets declared migration thresholds.
+Current synchronized archive update: 137 CBP rows across 3 partitions and 8 Caltrans rows; no timing subject meets declared migration thresholds.
 Next actionable Story: run moderated arrival-window discovery using the existing illustrative interaction rather than creating another mechanical collection Story.
