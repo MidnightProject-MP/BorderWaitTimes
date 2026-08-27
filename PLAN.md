@@ -72,6 +72,7 @@ Current archive update: 117 CBP rows and 8 Caltrans rows; the latest snapshot ad
 
 Current synchronized archive: 127 CBP rows and 8 Caltrans rows after the remote CBP collection update; no timing subject meets declared migration thresholds.
 Current synchronized archive update: 157 CBP rows across 3 partitions and 9 Caltrans rows across 2 partitions; no timing subject meets declared migration thresholds.
+Current synchronized archive update: 167 CBP rows across 3 partitions and 13 Caltrans rows across 2 partitions; no timing subject meets declared migration thresholds.
 Completed Story: As a maintainer, I can record the next scheduled official snapshot and reassess timing coverage without overstating stale or deduplicated observations.
 
 Completed Story: As a product owner, I can identify which border signals and ground-truth outcomes are measurable enough to justify Cruce's empirical border-understanding direction.
@@ -137,3 +138,9 @@ Implementation: `scope-overlay-verify.mjs` verifies unique overlay records, cano
 Next Story: Reassess source-scope attachment after additional official history; do not integrate overlays into production readers until the scope vocabulary is stable.
 
 Boundary: Do not present forecasting, queue inference, location-derived observations, simulation, or machine-learning output as validated traveler capabilities. External participant research is a future opportunity, not a dependency for autonomous investigation.
+
+Completed Story: As a maintainer, I can preserve distinct Caltrans closure observations when their source metadata differs but their shared timestamp and subject do not.
+
+Implementation: Roadway closure identity now includes closure metadata, while other observation types retain the existing identity boundary. The archive migration preserves distinct closure records and re-keys the research overlay fixture without mutating source meaning.
+
+Next Story: Reassess official readiness after the new collection and continue mechanical source history accumulation where it adds evidence.

@@ -23,5 +23,7 @@ assert.equal(roadway[0].sourceObservedAt, '2026-08-26T10:00:00.000Z');
 assert.equal(roadway[1].value, null);
 assert.equal(roadway[1].status, 'stale');
 assert.ok(roadway.every((observation) => validateObservation(observation).length === 0));
+const closures = roadway.filter(({ observationType }) => observationType === 'roadway_lane_closure');
+assert.notEqual(observationId(closures[0]), observationId({ ...closures[0], metadata: { ...closures[0].metadata, work: 'Different work' } }));
 
 console.log('observation contract checks passed');
