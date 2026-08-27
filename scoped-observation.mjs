@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises';
+
 const DOMAINS = new Set(['border-processing', 'roadway-approach', 'research-outcome']);
 const MEASUREMENT_KINDS = new Set(['reported-estimate', 'observed-duration', 'status', 'capacity-proxy', 'event']);
 const ISO_WITH_ZONE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
@@ -36,5 +38,24 @@ export function joinScopedObservations({ observations = [], scopes = [] } = {}) 
       || scopeRecord.sourceObservedAt !== observation.sourceObservedAt
       || scopeRecord.collectedAt !== observation.collectedAt)) throw new Error('scope source mismatch');
     return { observation, scopeRecord };
+  });
+}
+
+export async function loadScopeOverlays(filePath) {
+  let content;
+  try {
+    content = await readFile(filePath, 'utf8');
+  } catch (error) {
+    throw new Error(`Unable to read scope overlays: ${error.message}`);
+  }
+  return content.split('\n').filter(Boolean).map((line, index) => {
+    let record;
+    try {
+      record = JSON.parse(line);
+    } catch (error) {
+      throw new Error(`Invalid scope overlay at line ${index + 1}: ${error.message}`);
+    }
+    validateScopedObservation(record);
+    return record;
   });
 }
