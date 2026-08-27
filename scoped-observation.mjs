@@ -41,6 +41,20 @@ export function joinScopedObservations({ observations = [], scopes = [] } = {}) 
   });
 }
 
+export function verifyScopeOverlays({ observations = [], scopes = [] } = {}) {
+  const recordIds = new Set();
+  for (const scopeRecord of scopes) {
+    if (recordIds.has(scopeRecord.recordId)) throw new Error('duplicate scope record');
+    recordIds.add(scopeRecord.recordId);
+  }
+  const joined = joinScopedObservations({ observations, scopes });
+  return {
+    overlayCount: scopes.length,
+    matchedCount: joined.filter(({ scopeRecord }) => scopeRecord).length,
+    sourceObservationCount: observations.length,
+  };
+}
+
 export async function loadScopeOverlays(filePath) {
   let content;
   try {

@@ -130,6 +130,10 @@ Completed Story: As a maintainer, I can load and validate a research-only scope 
 
 Implementation: `loadScopeOverlays()` reads and validates NDJSON overlays with file/line failures; the scoped-observation checks use it for the canonical CBP and Caltrans fixtures.
 
-Next Story: Add archive-integrity checks for research-only scope overlay files without coupling them to official archive collection.
+Completed Story: As a maintainer, I can verify research-only scope overlay integrity without coupling it to official archive collection.
+
+Implementation: `scope-overlay-verify.mjs` verifies unique overlay records, canonical source references, complete fixture matching, and source-history count without mutating official archives.
+
+Next Story: Reassess source-scope attachment after additional official history; do not integrate overlays into production readers until the scope vocabulary is stable.
 
 Boundary: Do not present forecasting, queue inference, location-derived observations, simulation, or machine-learning output as validated traveler capabilities. External participant research is a future opportunity, not a dependency for autonomous investigation.

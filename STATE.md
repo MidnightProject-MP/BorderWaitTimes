@@ -134,6 +134,9 @@
 - Completed Story: As a maintainer, I can load and validate a research-only scope overlay file independently from official archive collection.
 - Implementation: `loadScopeOverlays()` reads and validates NDJSON overlays with file/line failures; scoped-observation checks use it for the canonical CBP and Caltrans fixtures.
 - Next Story: Add archive-integrity checks for research-only scope overlay files without coupling them to official archive collection. External research remains a future opportunity, not a blocker.
+- Completed Story: As a maintainer, I can verify research-only scope overlay integrity without coupling it to official archive collection.
+- Implementation: `scope-overlay-verify.mjs` verifies unique overlay records, canonical source references, complete fixture matching, and source-history count without mutating official archives.
+- Next Story: Define a mechanical overlay reader that can load a research-only overlay file independently from official archive collection. External research remains a future opportunity, not a blocker.
 - Completed Story: As a maintainer, I can add confirmed scope metadata through a new versioned research record without mutating committed official observations.
 - Implementation: `scoped-observation-check.mjs` validates `scoped-observation-v1` overlays keyed to source observation IDs, including source-confirmed vocabulary, timestamp order, explicit exclusions, and rejection of prediction/location fields.
 - Next Story: Define a mechanical overlay reader that joins confirmed scope records to source observations without changing source semantics. External research remains a future opportunity, not a blocker.
@@ -142,4 +145,4 @@
 - Next Story: Define an explicit source-scope fixture set for each confirmed CBP and Caltrans mapping before any archive integration. External research remains a future opportunity, not a blocker.
 - Completed Story: As a maintainer, I can define an explicit source-scope fixture set for confirmed CBP and Caltrans mappings before any archive integration.
 - Implementation: `scoped-observation-check.mjs` covers a CBP border-processing overlay and a Caltrans roadway-approach overlay, verifying that their domains and exclusions remain distinct.
-- Next Story: Create research-only scope overlays for selected verified archive observations and validate end-to-end joins without changing the official archives. External research remains a future opportunity, not a blocker.
+- Next Story: Reassess source-scope attachment after additional official history; do not integrate overlays into production readers until the scope vocabulary is stable. External research remains a future opportunity, not a blocker.
