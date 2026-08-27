@@ -86,6 +86,10 @@ Execution:
 4. Record unsupported claims, decision gates, and the next bounded research action.
 5. Verify documentation consistency, commit, and push the durable direction update.
 
-Next Story: Run moderated discovery to determine which traveler outcome and ground-truth signal is valuable enough to collect first.
+Completed Story: As a maintainer, I can document the autonomous research space for Cruce's empirical border-understanding direction without turning hypotheses into product claims.
 
-Boundary: Do not build a forecast, infer queue geography from synthetic values, or treat local choice capture as completed-crossing ground truth. The next Story requires real participant evidence and consented outcome data.
+Research artifact: `BORDER-SYSTEM-RESEARCH.md` separates single-expert domain evidence, confirmed source signals, missing ground truth, future research contracts, evidence gates, and reversible research tracks.
+
+Next Story: Define a versioned physical-topology vocabulary and measurement-boundary questions without asserting unmeasured queue geometry.
+
+Boundary: Do not present forecasting, queue inference, location-derived observations, simulation, or machine-learning output as validated traveler capabilities. External participant research is a future opportunity, not a dependency for autonomous investigation.
