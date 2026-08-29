@@ -72,7 +72,7 @@ Current archive update: 117 CBP rows and 8 Caltrans rows; the latest snapshot ad
 
 Current synchronized archive: 127 CBP rows and 8 Caltrans rows after the remote CBP collection update; no timing subject meets declared migration thresholds.
 Current synchronized archive update: 157 CBP rows across 3 partitions and 9 Caltrans rows across 2 partitions; no timing subject meets declared migration thresholds.
-Current synchronized archive update: 194 CBP rows across 4 partitions and 13 Caltrans rows across 2 partitions; no timing subject meets declared migration thresholds.
+Current synchronized archive update: 214 CBP rows across 5 partitions and 13 Caltrans rows across 2 partitions; no timing subject meets declared migration thresholds.
 Completed Story: As a maintainer, I can record the next scheduled official snapshot and reassess timing coverage without overstating stale or deduplicated observations.
 
 Completed Story: As a product owner, I can identify which border signals and ground-truth outcomes are measurable enough to justify Cruce's empirical border-understanding direction.
@@ -145,4 +145,4 @@ Implementation: Roadway closure identity now includes closure metadata, while ot
 
 Next Story: Reassess official readiness after the new collection and continue mechanical source history accumulation where it adds evidence.
 
-Current collection outcome: The local cycle added 10 fresh CBP observations and no Caltrans observations because its result was stale. Two concurrent remote collection commits supplied 17 additional CBP observations; all archive partitions now verify.
+Current collection outcome: The local cycle added 10 fresh CBP observations and no Caltrans observations because its result was stale. Concurrent remote collection supplied 37 additional CBP observations across four commits; all archive partitions now verify.
